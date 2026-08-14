@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>RequiAdmin - Employment</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Roboto&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Roboto', sans-serif; margin: 0; background-color: #FFCC00; }
+    h1, h2 { font-family: 'Montserrat', sans-serif; }
+    .banner { background: linear-gradient(135deg, #FFCC00 70%, #001F3F 30%); color: #FFFFFF; text-align: center; padding: 40px 20px; }
+    .banner h1 { font-size: 2.5em; margin: 0; color: #001F3F; }
+    .banner p { font-size: 1.2em; margin: 10px 0 0; color: #FF6600; font-weight: bold; }
+    #loginForm, #adminPanel { margin: 30px auto; background: #FFFFFF; padding: 20px; border-radius: 8px; border: 2px solid #001F3F; width: 90%; max-width: 800px; }
+    input, select, button { margin: 8px; padding: 10px; width: calc(100% - 20px); font-size: 1em; }
+    button { background-color: #FF6600; color: #fff; border: none; cursor: pointer; font-weight: bold; }
+    button:hover { background-color: #001F3F; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #FFFFFF; }
+    th, td { border: 1px solid #001F3F; padding: 10px; text-align: left; }
+    th { background-color: #001F3F; color: #FFCC00; }
+    #adminPanel { display: none; }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <h1>Employment - RequiAdmin</h1>
+    <p>Módulo Administrativo de Roles y Usuarios</p>
+  </div>
+
+  <!-- Login -->
+  <form id="loginForm">
+    <h2>Acceso Administrador</h2>
+    <input type="email" id="adminEmail" placeholder="Correo electrónico" required>
+    <input type="password" id="adminPassword" placeholder="Contraseña" required>
+    <button type="submit">Ingresar</button>
+  </form>
+
+  <!-- Panel administrativo -->
+  <div id="adminPanel">
+    <h2>Gestión de Roles</h2>
+    <form id="roleForm">
+      <input type="text" id="roleName" placeholder="Nombre del rol" required>
+      <input type="number" id="roleLevel" placeholder="Nivel de acceso" required>
+      <input type="text" id="rolePerms" placeholder="Permisos (ej: crear,aprobar)" required>
+      <button type="submit">Crear Rol</button>
+    </form>
+    <table>
+      <thead><tr><th>Nombre</th><th>Nivel</th><th>Permisos</th></tr></thead>
+      <tbody id="rolesTableBody"></tbody>
+    </table>
+
+    <h2>Gestión de Usuarios</h2>
+    <form id="userForm">
+      <input type="email" id="userEmail" placeholder="Correo del usuario" required>
+      <select id="userRole"></select>
+      <button type="submit">Asignar Rol</button>
+    </form>
+    <table>
+      <thead><tr><th>Usuario</th><th>Rol</th></tr></thead>
+      <tbody id="usersTableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Firebase y lógica -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "TU_API_KEY",
+      authDomain: "sistema-de-requisiciones-47df8.firebaseapp.com",
+      databaseURL: "https://sistema-de-requisiciones-47df8-default-rtdb.firebaseio.com",
+      projectId: "sistema-de-requisiciones-47df8",
+      storageBucket: "sistema-de-requisiciones-47df8.appspot.com",
+      messagingSenderId: "TU_SENDER_ID",
+      appId: "TU_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    // Login dinámico
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("adminEmail").value;
+      const password = document.getElementById("adminPassword").value;
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        if (email === "jvalladares@hremploy.com.mx") {
+          document.getElementById("loginForm").style.display = "none";
+          document.getElementById("adminPanel").style.display = "block";
+          cargarRoles();
+          cargarUsuarios();
+        } else {
+          alert("Acceso denegado. Solo el administrador puede entrar.");
+        }
+      } catch (error) {
+        alert("Error en login: " + error.message);
+      }
+    });
+
+    // Crear rol
+    document.getElementById("roleForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const nombre = document.getElementById("roleName").value;
+      const nivel = document.getElementById("roleLevel").value;
+      const permisos = document.getElementById("rolePerms").value.split(",");
+      await push(ref(db, 'roles'), { nombre, nivel, permisos });
+      alert("Rol creado correctamente");
+      e.target.reset();
+    });
+
+    // Asignar rol a usuario
+    document.getElementById("userForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("userEmail").value;
+      const rol = document.getElementById("userRole").value;
+      await set(ref(db, 'usuarios/' + btoa(email)), { email, rol });
+      alert("Rol asignado correctamente");
+      e.target.reset();
+    });
+
+    // Mostrar roles
+    function cargarRoles() {
+      const rolesRef = ref(db, 'roles');
+      onValue(rolesRef, (snapshot) => {
+        const data = snapshot.val();
+        const tbody = document.getElementById("rolesTableBody");
+        const select = document.getElementById("userRole");
+        tbody.innerHTML = "";
+        select.innerHTML = "";
+        for (let id in data) {
+          const rol = data[id];
+          tbody.innerHTML += `<tr><td>${rol.nombre}</td><td>${rol.nivel}</td><td>${rol.permisos.join(", ")}</td></tr>`;
+          select.innerHTML += `<option value="${rol.nombre}">${rol.nombre}</option>`;
+        }
+      });
+    }
+
+    // Mostrar usuarios
+    function cargarUsuarios() {
+      const usuariosRef = ref(db, 'usuarios');
+      onValue(usuariosRef, (snapshot) => {
+        const data = snapshot.val();
+        const tbody = document.getElementById("usersTableBody");
+        tbody.innerHTML = "";
+        for (let id in data) {
+          const usr = data[id];
+          tbody.innerHTML += `<tr><td>${usr.email}</td><td>${usr.rol}</td></tr>`;
+        }
+      });
+    }
+  </script>
+</body>
+</html>
