@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Sistema de Requisiciones</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Fuente moderna -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Roboto&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Roboto', sans-serif; margin: 0; background-color: #FFCC00; }
+    h1, h2 { font-family: 'Montserrat', sans-serif; }
+
+    /* Banner */
+    .banner {
+      background: linear-gradient(135deg, #FFCC00 70%, #001F3F 30%);
+      color: #FFFFFF;
+      text-align: center;
+      padding: 50px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .banner h1 {
+      font-size: 2.8em;
+      margin: 0;
+      color: #001F3F;
+    }
+    .banner p {
+      font-size: 1.3em;
+      margin: 10px 0 0;
+      color: #FF6600;
+      font-weight: bold;
+    }
+    .banner::after {
+      content: "";
+      position: absolute;
+      top: 0; left: -50px;
+      width: 200%; height: 100%;
+      background: rgba(255,102,0,0.2);
+      transform: skewY(-5deg);
+    }
+
+    /* Formulario */
+    form {
+      margin: 20px auto;
+      background: #FFFFFF;
+      padding: 20px;
+      border-radius: 8px;
+      border: 2px solid #001F3F;
+      width: 90%;
+      max-width: 600px;
+    }
+    input, button {
+      margin: 8px;
+      padding: 10px;
+      width: calc(100% - 20px);
+      font-size: 1em;
+    }
+    button {
+      background-color: #FF6600;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #001F3F;
+    }
+
+    /* Tabla */
+    table {
+      width: 90%;
+      max-width: 800px;
+      margin: 20px auto;
+      border-collapse: collapse;
+      background: #FFFFFF;
+    }
+    th, td {
+      border: 1px solid #001F3F;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #001F3F;
+      color: #FFCC00;
+    }
+    .estatus-pendiente { color: #FF6600; font-weight: bold; }
+    .estatus-aprobado { color: #001F3F; font-weight: bold; }
+    .estatus-rechazado { color: #e74c3c; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <!-- Banner -->
+  <div class="banner">
+    <h1>Sistema de Requisiciones</h1>
+    <p>Control Interno Empresarial</p>
+  </div>
+
+  <!-- Formulario -->
+  <form id="reqForm">
+    <input type="text" id="descripcion" placeholder="Descripción" required>
+    <input type="number" id="monto" placeholder="Monto" required>
+    <button type="submit">Enviar requisición</button>
+  </form>
+
+  <!-- Tabla -->
+  <table>
+    <thead>
+      <tr>
+        <th>Descripción</th>
+        <th>Monto</th>
+        <th>Estatus</th>
+        <th>Fecha</th>
+      </tr>
+    </thead>
+    <tbody id="reqTableBody"></tbody>
+  </table>
+
+  <!-- Firebase y lógica -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "TU_API_KEY",
+      authDomain: "sistema-de-requisiciones-47df8.firebaseapp.com",
+      databaseURL: "https://sistema-de-requisiciones-47df8-default-rtdb.firebaseio.com",
+      projectId: "sistema-de-requisiciones-47df8",
+      storageBucket: "sistema-de-requisiciones-47df8.appspot.com",
+      messagingSenderId: "TU_SENDER_ID",
+      appId: "TU_APP_ID"
+    };
+
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Guardar requisición
+    async function guardarRequisicion(descripcion, monto) {
+      const requisicionesRef = ref(db, 'requisiciones');
+      await push(requisicionesRef, {
+        descripcion,
+        monto,
+        estatus: "pendiente",
+        fecha_creacion: new Date().toISOString()
+      });
+    }
+
+    // Mostrar requisiciones en tabla
+    function mostrarRequisiciones() {
+      const requisicionesRef = ref(db, 'requisiciones');
+      onValue(requisicionesRef, (snapshot) => {
+        const data = snapshot.val();
+        const tbody = document.getElementById("reqTableBody");
+        tbody.innerHTML = "";
+        for (let id in data) {
+          const req = data[id];
+          const row = `<tr>
+            <td>${req.descripcion}</td>
+            <td>${req.monto}</td>
+            <td class="estatus-${req.estatus}">${req.estatus}</td>
+            <td>${new Date(req.fecha_creacion).toLocaleString()}</td>
+          </tr>`;
+          tbody.innerHTML += row;
+        }
+      });
+    }
+
+    // Evento del formulario
+    document.getElementById("reqForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const descripcion = document.getElementById("descripcion").value;
+      const monto = document.getElementById("monto").value;
+      guardarRequisicion(descripcion, monto);
+      e.target.reset();
+    });
+
+    // Inicializar tabla
+    mostrarRequisiciones();
+  </script>
+</body>
+</html>
