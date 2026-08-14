@@ -15,14 +15,12 @@
       color: #FFFFFF;
       text-align: center;
       padding: 50px 20px;
-      position: relative;
-      overflow: hidden;
     }
     .banner h1 { font-size: 2.8em; margin: 0; color: #001F3F; }
     .banner p { font-size: 1.3em; margin: 10px 0 0; color: #FF6600; font-weight: bold; }
 
-    /* Login */
-    #loginForm {
+    /* Formularios */
+    form {
       margin: 30px auto;
       background: #FFFFFF;
       padding: 20px;
@@ -108,6 +106,17 @@
     <button type="submit">Ingresar</button>
   </form>
 
+  <!-- Botón Administrador para activar subformulario -->
+  <button id="adminToggle">Administrador</button>
+
+  <!-- Subformulario de registro oculto -->
+  <form id="adminRegisterForm" style="display:none; margin-top:20px;">
+    <h2>Registro Administrador</h2>
+    <input type="email" id="adminRegEmail" placeholder="Correo electrónico" required>
+    <input type="password" id="adminRegPassword" placeholder="Contraseña" required>
+    <button type="submit">Registrar Administrador</button>
+  </form>
+
   <!-- Botón administrativo -->
   <a href="requiadmin.html" class="admin-btn">Acceso Administrativo</a>
 
@@ -120,18 +129,14 @@
   </footer>
 
   <!-- Botón flotante WhatsApp -->
-  <a href="https://wa.me/5219999999999" class="whatsapp-btn" target="_blank" title="Director">
-    📱
-  </a>
-  <a href="https://wa.me/5218888888888" class="whatsapp-btn" style="right:90px;" target="_blank" title="Administrador">
-    📱
-  </a>
+  <a href="https://wa.me/5219999999999" class="whatsapp-btn" target="_blank" title="Director">📱</a>
+  <a href="https://wa.me/5218888888888" class="whatsapp-btn" style="right:90px;" target="_blank" title="Administrador">📱</a>
 
-  <!-- Firebase y lógica de roles -->
+  <!-- Firebase y lógica -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "TU_API_KEY",
@@ -147,32 +152,51 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
+    // Login
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = document.getElementById("userEmail").value;
       const password = document.getElementById("userPassword").value;
-
       try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const snapshot = await get(ref(db, 'usuarios/' + btoa(email)));
         if (snapshot.exists()) {
           const rol = snapshot.val().rol;
-          if (rol === "Solicitante") {
-            window.location.href = "requisiciones.html";
-          } else if (rol === "Jefe de Área") {
-            window.location.href = "aprobaciones.html";
-          } else if (rol === "Finanzas") {
-            window.location.href = "reportes.html";
-          } else if (rol === "Administrador" && email === "jvalladares@hremploy.com.mx") {
-            window.location.href = "requiadmin.html";
-          } else {
-            alert("Rol no autorizado.");
-          }
+          if (rol === "Solicitante") window.location.href = "requisiciones.html";
+          else if (rol === "Jefe de Área") window.location.href = "aprobaciones.html";
+          else if (rol === "Finanzas") window.location.href = "reportes.html";
+          else if (rol === "Administrador" && email === "jvalladares@hremploy.com.mx") window.location.href = "requiadmin.html";
+          else alert("Tu rol aún no ha sido asignado.");
         } else {
           alert("Usuario sin rol asignado.");
         }
       } catch (error) {
         alert("Error en login: " + error.message);
+      }
+    });
+
+    // Mostrar/ocultar subformulario administrador
+    document.getElementById("adminToggle").addEventListener("click", () => {
+      const form = document.getElementById("adminRegisterForm");
+      form.style.display = form.style.display === "none" ? "block" : "none";
+    });
+
+    // Registro exclusivo administrador
+    document.getElementById("adminRegisterForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("adminRegEmail").value;
+      const password = document.getElementById("adminRegPassword").value;
+      if (email !== "jvalladares@hremploy.com.mx") {
+        alert("Solo el administrador autorizado puede registrarse aquí.");
+        return;
+      }
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await set(ref(db, 'usuarios/' + btoa(email)), { email, rol: "Administrador" });
+        alert("Administrador registrado correctamente.");
+        e.target.reset();
+      } catch (error) {
+        alert("Error en registro: " + error.message);
       }
     });
 
