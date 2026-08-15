@@ -127,39 +127,55 @@
   <a href="https://wa.me/5219999999999" class="whatsapp-btn" target="_blank" title="Director">📱</a>
   <a href="https://wa.me/5216461974763" class="whatsapp-btn" style="right:90px;" target="_blank" title="Administrador">📱</a>
 
-  <!-- Firebase y lógica -->
+  <!-- Firebase y lógica integrada -->
   <script type="module">
+    // Módulos Firebase (v10)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    // Configuración real de tu proyecto (copiada de Firebase Console)
-   const firebaseConfig = {
-  apiKey: "AIzaSyCGmcrxJsMy5bVS9SgTGLMgrLui_tA6luY",   // TU API KEY REAL
-  authDomain: "sistema-de-requisiciones-47df8.firebaseapp.com",
-  databaseURL: "https://sistema-de-requisiciones-47df8-default-rtdb.firebaseio.com",
-  projectId: "sistema-de-requisiciones-47df8",
-  storageBucket: "sistema-de-requisiciones-47df8.appspot.com",
-  messagingSenderId: "596189555034",
-  appId: "1:596189555034:web:abcdef1234567890"
-};
-
+    // Configuración de Firebase (usa exactamente lo que está en Firebase Console)
+    const firebaseConfig = {
+      apiKey: "AIzaSyCGmcrxJsMy5bVS9SgTGLMgrLui_tA6luY",
+      authDomain: "sistema-de-requisiciones-47df8.firebaseapp.com",
+      databaseURL: "https://sistema-de-requisiciones-47df8-default-rtdb.firebaseio.com",
+      projectId: "sistema-de-requisiciones-47df8",
+      storageBucket: "sistema-de-requisiciones-47df8.appspot.com",
+      messagingSenderId: "596189555034",
+      appId: "1:596189555034:web:abcdef1234567890"
+    };
 
     // Inicializar Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    // Confirmación visual de conexión
-    document.getElementById("conexion").textContent = "✅ Conexión establecida con Firebase";
+    // Indicador visual (solo indicativo de que initializeApp se ejecutó)
+    document.getElementById("conexion").textContent = "✅ Firebase inicializado (verifica Auth en Console)";
+
+    // Utilidad para mostrar y loggear errores completos
+    function handleError(context, error) {
+      console.error(context, error);
+      // Si Firebase devuelve un objeto de error con code/message, muéstralo
+      if (error && error.code) {
+        alert(`${context}: ${error.code} — ${error.message}`);
+      } else {
+        alert(`${context}: ${error?.message || error}`);
+      }
+    }
+
+    // Helper para inspeccionar la respuesta de la petición signUp en DevTools:
+    // Abre DevTools -> Network -> filtra por "identitytoolkit" y revisa Response.
+    // También puedes ejecutar el curl que se comenta más abajo para ver la respuesta cruda.
 
     // Login
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const email = document.getElementById("userEmail").value;
+      const email = document.getElementById("userEmail").value.trim();
       const password = document.getElementById("userPassword").value;
       try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        // Leer rol desde Realtime Database
         const snapshot = await get(ref(db, 'usuarios/' + btoa(email)));
         if (snapshot.exists()) {
           const rol = snapshot.val().rol;
@@ -172,7 +188,7 @@
           alert("Usuario sin rol asignado.");
         }
       } catch (error) {
-        alert("Error en login: " + error.message);
+        handleError("Error en login", error);
       }
     });
 
@@ -185,24 +201,39 @@
     // Registro exclusivo administrador
     document.getElementById("adminRegisterForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const email = document.getElementById("adminRegEmail").value;
+      const email = document.getElementById("adminRegEmail").value.trim();
       const password = document.getElementById("adminRegPassword").value;
       if (email !== "jvalladares@hremploy.com.mx") {
         alert("Solo el administrador autorizado puede registrarse aquí.");
         return;
       }
+      if (password.length < 6) {
+        alert("La contraseña debe tener al menos 6 caracteres.");
+        return;
+      }
       try {
+        // Intento de crear usuario en Firebase Auth
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                await set(ref(db, 'usuarios/' + btoa(email)), { email, rol: "Administrador" });
+        // Guardar rol en Realtime Database
+        await set(ref(db, 'usuarios/' + btoa(email)), { email, rol: "Administrador" });
         alert("Administrador registrado correctamente.");
         e.target.reset();
       } catch (error) {
-        alert("Error en registro: " + error.message);
+        handleError("Error en registro", error);
+        console.warn("Si el error es CONFIGURATION_NOT_FOUND, revisa Firebase Console → Authentication → Sign-in method y la API key en Google Cloud Console.");
       }
     });
 
     // Fecha dinámica en footer
     document.getElementById("fecha").textContent = new Date().toLocaleDateString();
+
+    // Opcional: función para probar la REST API de signUp (útil para debugging)
+    // Ejecuta en terminal (reemplaza TU_API_KEY) o usa Postman:
+    /*
+    curl -s -X POST "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=TU_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"email":"test@example.com","password":"123456","returnSecureToken":true}'
+    */
   </script>
 </body>
 </html>
