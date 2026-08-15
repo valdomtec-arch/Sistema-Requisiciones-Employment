@@ -16,16 +16,16 @@
       padding: 50px 20px;
     }
     .banner h1 { font-size: 2.8em; margin: 0; color: #001F3F; }
-    .banner p { font-size: 1.3em; margin: 10px 0 0; color: #FF6600; font-weight: bold; }
+    .banner p { font-size: 1.1em; margin: 8px 0 0; color: #FF6600; font-weight: bold; }
 
     form {
-      margin: 30px auto;
+      margin: 20px auto;
       background: #FFFFFF;
-      padding: 20px;
+      padding: 18px;
       border-radius: 8px;
       border: 2px solid #001F3F;
       width: 90%;
-      max-width: 400px;
+      max-width: 420px;
       text-align: center;
     }
     input, button {
@@ -64,6 +64,7 @@
       border-radius: 5px;
       text-decoration: none;
       font-weight: bold;
+      width: fit-content;
     }
     .admin-btn:hover { background-color: #FF6600; color: #fff; }
 
@@ -84,6 +85,30 @@
       box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
     }
     .whatsapp-btn:hover { background-color: #128C7E; }
+
+    .info {
+      max-width: 420px;
+      margin: 10px auto;
+      padding: 10px;
+      background: #fff8e1;
+      border: 1px solid #ffd54f;
+      color: #333;
+      border-radius: 6px;
+      font-size: 0.95em;
+    }
+
+    .error-log {
+      max-width: 420px;
+      margin: 10px auto;
+      padding: 10px;
+      background: #ffe6e6;
+      border: 1px solid #ff8a80;
+      color: #800;
+      border-radius: 6px;
+      font-size: 0.9em;
+      white-space: pre-wrap;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -115,6 +140,12 @@
   <!-- Botón administrativo -->
   <a href="requiadmin.html" class="admin-btn">Acceso Administrativo</a>
 
+  <div class="info" id="tips">
+    <strong>Si ves auth/configuration-not-found:</strong> revisa en Firebase Console → Authentication → Sign-in method que <em>Email/Password</em> esté activado; y en Google Cloud Console revisa restricciones de la API key (referrers/APIs). Si quieres, el sistema intentará mostrar la respuesta cruda del servidor para diagnosticar.
+  </div>
+
+  <div id="errorLog" class="error-log"></div>
+
   <!-- Footer -->
   <footer>
     <p>Todos los derechos reservados por el programador.  
@@ -129,12 +160,11 @@
 
   <!-- Firebase y lógica integrada -->
   <script type="module">
-    // Módulos Firebase (v10)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    // Configuración de Firebase (usa exactamente lo que está en Firebase Console)
+    // --- CONFIG: pega aquí exactamente lo que te da Firebase Console ---
     const firebaseConfig = {
       apiKey: "AIzaSyCGmcrxJsMy5bVS9SgTGLMgrLui_tA6luY",
       authDomain: "sistema-de-requisiciones-47df8.firebaseapp.com",
@@ -146,36 +176,62 @@
     };
 
     // Inicializar Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
+    let app, auth, db;
+    try {
+      app = initializeApp(firebaseConfig);
+      auth = getAuth(app);
+      db = getDatabase(app);
+      document.getElementById("conexion").textContent = "✅ Firebase inicializado (SDK cargado)";
+    } catch (err) {
+      document.getElementById("conexion").textContent = "❌ Error inicializando Firebase";
+      logError("Inicialización Firebase", err);
+    }
 
-    // Indicador visual (solo indicativo de que initializeApp se ejecutó)
-    document.getElementById("conexion").textContent = "✅ Firebase inicializado (verifica Auth en Console)";
+    // Mostrar errores en pantalla y consola
+    function logError(title, err) {
+      console.error(title, err);
+      const el = document.getElementById("errorLog");
+      el.style.display = "block";
+      let text = typeof err === "string" ? err : (err && err.message) ? `${err.message}` : JSON.stringify(err);
+      if (err && err.code) text = `${err.code} — ${text}`;
+      el.textContent = `${title}:\n${text}\n\nRevisa DevTools → Network → identitytoolkit for raw response.`;
+    }
 
-    // Utilidad para mostrar y loggear errores completos
+    // Manejo de errores amigable
     function handleError(context, error) {
-      console.error(context, error);
-      // Si Firebase devuelve un objeto de error con code/message, muéstralo
+      logError(context, error);
+      // Si es un FirebaseError con code, mostrarlo en alerta también
       if (error && error.code) {
-        alert(`${context}: ${error.code} — ${error.message}`);
+        alert(`${context}: ${error.code}\n\nRevisa el panel de errores en la página para más detalles.`);
       } else {
         alert(`${context}: ${error?.message || error}`);
       }
     }
 
-    // Helper para inspeccionar la respuesta de la petición signUp en DevTools:
-    // Abre DevTools -> Network -> filtra por "identitytoolkit" y revisa Response.
-    // También puedes ejecutar el curl que se comenta más abajo para ver la respuesta cruda.
+    // Fallback: consulta REST a Identity Toolkit para obtener la respuesta cruda (útil para diagnosticar CONFIGURATION_NOT_FOUND)
+    async function restSignUp(apiKey, email, password) {
+      const url = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${encodeURIComponent(apiKey)}`;
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password, returnSecureToken: true })
+        });
+        const json = await res.json();
+        return { status: res.status, ok: res.ok, json };
+      } catch (err) {
+        return { status: 0, ok: false, json: { error: { message: err.message || String(err) } } };
+      }
+    }
 
     // Login
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = document.getElementById("userEmail").value.trim();
       const password = document.getElementById("userPassword").value;
+      if (!email || !password) return alert("Ingresa correo y contraseña.");
       try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        // Leer rol desde Realtime Database
         const snapshot = await get(ref(db, 'usuarios/' + btoa(email)));
         if (snapshot.exists()) {
           const rol = snapshot.val().rol;
@@ -192,13 +248,13 @@
       }
     });
 
-    // Mostrar/ocultar subformulario administrador
+    // Toggle admin form
     document.getElementById("adminToggle").addEventListener("click", () => {
       const form = document.getElementById("adminRegisterForm");
       form.style.display = form.style.display === "none" ? "block" : "none";
     });
 
-    // Registro exclusivo administrador
+    // Registro administrador con fallback REST diagnóstico
     document.getElementById("adminRegisterForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = document.getElementById("adminRegEmail").value.trim();
@@ -211,29 +267,35 @@
         alert("La contraseña debe tener al menos 6 caracteres.");
         return;
       }
+
       try {
-        // Intento de crear usuario en Firebase Auth
+        // Intento normal con SDK
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        // Guardar rol en Realtime Database
         await set(ref(db, 'usuarios/' + btoa(email)), { email, rol: "Administrador" });
         alert("Administrador registrado correctamente.");
         e.target.reset();
       } catch (error) {
-        handleError("Error en registro", error);
-        console.warn("Si el error es CONFIGURATION_NOT_FOUND, revisa Firebase Console → Authentication → Sign-in method y la API key en Google Cloud Console.");
+        // Si falla, intentamos obtener la respuesta cruda del endpoint para diagnosticar
+        try {
+          const apiKey = firebaseConfig.apiKey;
+          const rest = await restSignUp(apiKey, email, password);
+          const msg = `SDK error: ${error?.code || error?.message || error}\n\nREST response (status ${rest.status}):\n${JSON.stringify(rest.json, null, 2)}`;
+          logError("Error en registro (SDK + REST)", msg);
+          alert("Error en registro. Revisa el panel de errores en la página para detalles. Si ves CONFIGURATION_NOT_FOUND, activa Email/Password en Firebase Console y revisa restricciones de API key.");
+        } catch (inner) {
+          handleError("Error en registro y diagnóstico", inner);
+        }
       }
     });
 
     // Fecha dinámica en footer
     document.getElementById("fecha").textContent = new Date().toLocaleDateString();
 
-    // Opcional: función para probar la REST API de signUp (útil para debugging)
-    // Ejecuta en terminal (reemplaza TU_API_KEY) o usa Postman:
-    /*
-    curl -s -X POST "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=TU_API_KEY" \
-      -H "Content-Type: application/json" \
-      -d '{"email":"test@example.com","password":"123456","returnSecureToken":true}'
-    */
+    // Nota: si sigues viendo auth/configuration-not-found, los pasos más efectivos son:
+    // 1) Firebase Console → Authentication → Sign-in method → activar Email/Password.
+    // 2) Google Cloud Console → API Keys → quitar temporalmente restricciones (HTTP referrers / APIs) para probar.
+    // 3) Crear una nueva Web App en Firebase Console y usar su firebaseConfig para descartar problemas de app mal registrada.
+    // 4) Revisar DevTools → Network → filtrar por "identitytoolkit" y ver Response JSON (esta página también muestra la respuesta cruda).
   </script>
 </body>
 </html>
