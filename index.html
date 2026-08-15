@@ -1,170 +1,197 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Employment - Sistema de Requisiciones</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>Employment - Sistema de Requisiciones (Auth + Verificación)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Roboto&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Roboto', sans-serif; margin: 0; background-color: #FFCC00; }
     h1, h2 { font-family: 'Montserrat', sans-serif; }
-
-    .banner {
-      background: linear-gradient(135deg, #FFCC00 70%, #001F3F 30%);
-      color: #FFFFFF;
-      text-align: center;
-      padding: 50px 20px;
-    }
-    .banner h1 { font-size: 2.8em; margin: 0; color: #001F3F; }
-    .banner p { font-size: 1.1em; margin: 8px 0 0; color: #FF6600; font-weight: bold; }
-
-    form {
-      margin: 20px auto;
-      background: #FFFFFF;
-      padding: 18px;
-      border-radius: 8px;
-      border: 2px solid #001F3F;
-      width: 90%;
-      max-width: 420px;
-      text-align: center;
-    }
-    input, button {
-      margin: 8px;
-      padding: 10px;
-      width: calc(100% - 20px);
-      font-size: 1em;
-    }
-    button {
-      background-color: #FF6600;
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-    }
+    .banner { background: linear-gradient(135deg, #FFCC00 70%, #001F3F 30%); color: #FFFFFF; text-align: center; padding: 40px 20px; }
+    .banner h1 { font-size: 2.4em; margin: 0; color: #001F3F; }
+    .banner p { font-size: 1.05em; margin: 8px 0 0; color: #FF6600; font-weight: bold; }
+    form { margin: 20px auto; background: #FFFFFF; padding: 18px; border-radius: 8px; border: 2px solid #001F3F; width: 90%; max-width: 980px; text-align: left; }
+    input, select, button, textarea { margin: 8px 0; padding: 8px; font-size: 1em; }
+    button { background-color: #FF6600; color: #fff; border: none; cursor: pointer; font-weight: bold; padding: 8px 12px; }
     button:hover { background-color: #001F3F; }
-
-    footer {
-      background: #001F3F;
-      color: #FFCC00;
-      text-align: center;
-      padding: 15px;
-      font-size: 0.9em;
-      position: relative;
-      bottom: 0;
-      width: 100%;
-    }
-
-    .admin-btn {
-      display: block;
-      margin: 20px auto;
-      text-align: center;
-      background-color: #001F3F;
-      color: #FFCC00;
-      padding: 10px 20px;
-      border-radius: 5px;
-      text-decoration: none;
-      font-weight: bold;
-      width: fit-content;
-    }
-    .admin-btn:hover { background-color: #FF6600; color: #fff; }
-
-    .whatsapp-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background-color: #25D366;
-      color: white;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 30px;
-      text-decoration: none;
-      box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
-    }
-    .whatsapp-btn:hover { background-color: #128C7E; }
-
-    .info {
-      max-width: 420px;
-      margin: 10px auto;
-      padding: 10px;
-      background: #fff8e1;
-      border: 1px solid #ffd54f;
-      color: #333;
-      border-radius: 6px;
-      font-size: 0.95em;
-    }
-
-    .error-log {
-      max-width: 420px;
-      margin: 10px auto;
-      padding: 10px;
-      background: #ffe6e6;
-      border: 1px solid #ff8a80;
-      color: #800;
-      border-radius: 6px;
-      font-size: 0.9em;
-      white-space: pre-wrap;
-      display: none;
-    }
+    .admin-btn { display: inline-block; margin: 12px 0; background-color: #001F3F; color: #FFCC00; padding: 8px 14px; border-radius: 5px; text-decoration: none; font-weight: bold; }
+    footer { background: #001F3F; color: #FFCC00; text-align: center; padding: 12px; font-size: 0.9em; position: relative; bottom: 0; width: 100%; }
+    .whatsapp-btn { position: fixed; bottom: 20px; right: 20px; background-color: #25D366; color: white; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 30px; text-decoration: none; box-shadow: 2px 2px 5px rgba(0,0,0,0.3); }
+    .info { max-width: 980px; margin: 10px auto; padding: 10px; background: #fff8e1; border: 1px solid #ffd54f; color: #333; border-radius: 6px; font-size: 0.95em; }
+    .error-log { max-width: 980px; margin: 10px auto; padding: 10px; background: #ffe6e6; border: 1px solid #ff8a80; color: #800; border-radius: 6px; font-size: 0.9em; white-space: pre-wrap; display: none; }
+    .table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    .table th, .table td { border: 1px solid #ddd; padding: 8px; }
+    .badge { padding: 6px 10px; border-radius: 999px; font-weight: bold; }
+    .btn-outline-secondary { background: transparent; border: 1px solid #ccc; padding: 6px 10px; cursor: pointer; }
+    .btn-orange { background: #FF6600; color: #fff; padding: 8px 12px; border: none; }
+    .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; }
+    .modal.show { display:flex; }
+    .modal-content { background:#fff; padding:16px; border-radius:8px; width:90%; max-width:900px; }
+    .small-muted { font-size:0.9em; color:#666; }
   </style>
 </head>
 <body>
   <div class="banner">
     <h1>Employment</h1>
     <p>Sistema de Requisiciones con Control Interno</p>
-    <p id="conexion"></p>
+    <p id="conexion">Inicializando...</p>
   </div>
 
-  <!-- Login -->
-  <form id="loginForm">
+  <!-- LOGIN / REGISTRO (Auth) -->
+  <form id="loginForm" style="max-width:420px;margin:18px auto;">
     <h2>Acceso al Sistema</h2>
-    <input type="email" id="userEmail" placeholder="Correo electrónico" required>
-    <input type="password" id="userPassword" placeholder="Contraseña" required>
-    <button type="submit">Ingresar</button>
+    <input type="email" id="userEmail" placeholder="Correo electrónico" required style="width:100%">
+    <input type="password" id="userPassword" placeholder="Contraseña" required style="width:100%">
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button type="submit">Ingresar</button>
+      <button type="button" id="btnShowRegister" style="background:#001F3F">Registrar</button>
+    </div>
+    <p class="small-muted">Si no recibes el correo de verificación, revisa tu carpeta de spam o pulsa reenviar desde el panel.</p>
   </form>
 
-  <!-- Botón Administrador -->
-  <button id="adminToggle">Administrador</button>
+  <!-- ADMIN TOGGLE Y FORMULARIO -->
+  <div style="max-width:980px;margin:0 auto;padding:0 12px;">
+    <button id="adminToggle" class="admin-btn">Administrador</button>
 
-  <!-- Subformulario de registro oculto -->
-  <form id="adminRegisterForm" style="display:none; margin-top:20px;">
-    <h2>Registro Administrador</h2>
-    <input type="email" id="adminRegEmail" placeholder="Correo electrónico" required>
-    <input type="password" id="adminRegPassword" placeholder="Contraseña" required>
-    <button type="submit">Registrar Administrador</button>
-  </form>
+    <form id="adminRegisterForm" style="display:none; margin-top:12px; background:#fff;padding:12px;border-radius:8px;">
+      <h3>Registro Administrador (Auth)</h3>
+      <input type="email" id="adminRegEmail" placeholder="Correo electrónico" required style="width:100%">
+      <input type="password" id="adminRegPassword" placeholder="Contraseña" required style="width:100%">
+      <div style="display:flex;gap:8px;">
+        <button type="submit" class="btn-orange">Registrar Administrador</button>
+        <button type="button" id="btnCancelAdmin" class="btn-outline-secondary">Cancelar</button>
+      </div>
+    </form>
 
-  <!-- Botón administrativo -->
-  <a href="requiadmin.html" class="admin-btn">Acceso Administrativo</a>
+    <div class="info">
+      <strong>Nota:</strong> Este modo usa <strong>Firebase Auth (Email/Password)</strong> con verificación de correo y persistencia local. Activa Email/Password en Firebase Console → Authentication → Sign-in method antes de probar.
+    </div>
 
-  <div class="info" id="tips">
-    <strong>Si ves auth/configuration-not-found:</strong> revisa en Firebase Console → Authentication → Sign-in method que <em>Email/Password</em> esté activado; y en Google Cloud Console revisa restricciones de la API key (referrers/APIs). Si quieres, el sistema intentará mostrar la respuesta cruda del servidor para diagnosticar.
+    <div id="errorLog" class="error-log"></div>
+
+    <!-- SECCIÓN 1: Roles -->
+    <div style="background:#fff;padding:12px;border-radius:8px;margin-top:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h4>1. Catálogo y Motor de Roles Dinámicos (Firebase)</h4>
+        <button id="btnNuevoRol" class="btn-orange">Crear Nuevo Rol Dinámico</button>
+      </div>
+      <div style="overflow:auto;margin-top:8px;">
+        <table class="table">
+          <thead><tr><th>Nombre del Rol</th><th>Nivel</th><th>Scope</th><th>Permisos</th><th>Acciones</th></tr></thead>
+          <tbody id="tablaRolesBody"><tr><td colspan="5" style="text-align:center;color:#666;padding:18px;">Cargando roles desde Firebase...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 2: Ficha de Colaborador -->
+    <div style="background:#fff;padding:12px;border-radius:8px;margin-top:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h4>2. Ficha de Colaborador y Cadena de Mando Dinámica</h4>
+        <span id="roleBadgeDisplay" class="badge" style="background:#001F3F;color:#FFCC00">Modo: Nuevo Colaborador</span>
+      </div>
+
+      <form id="formStaff" style="margin-top:8px;">
+        <input type="hidden" id="staffId">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:220px;">
+            <label>Nombre Completo</label>
+            <input id="staffNombre" required style="width:100%">
+          </div>
+          <div style="flex:1;min-width:220px;">
+            <label>Teléfono (WhatsApp)</label>
+            <input id="staffTelefono" maxlength="10" pattern="[0-9]{10}" style="width:100%">
+          </div>
+          <div style="flex:1;min-width:220px;">
+            <label>Clave (PIN)</label>
+            <input id="staffPin" type="password" placeholder="Modificar solo si cambia" style="width:100%">
+          </div>
+          <div style="flex:1;min-width:220px;">
+            <label>Rol Dinámico</label>
+            <select id="staffRol" required style="width:100%"><option value="">Cargando roles...</option></select>
+          </div>
+        </div>
+
+        <div style="margin-top:8px;">
+          <label>Email (opcional, para crear cuenta Auth)</label>
+          <input id="staffEmail" type="email" placeholder="correo@empresa.com" style="width:100%">
+          <label style="display:block;margin-top:6px;"><input id="chkCreateAuth" type="checkbox"> Crear cuenta Auth con este email (se enviará verificación)</label>
+        </div>
+
+        <div id="groupCompanies" style="margin-top:8px;">
+          <label>Empresas Asignadas Directamente</label>
+          <div id="empresasContainer" style="border:1px solid #ddd;padding:8px;border-radius:6px;">Cargando empresas...</div>
+        </div>
+
+        <div style="margin-top:12px;text-align:right;">
+          <button type="submit" class="btn-orange">Guardar Ficha y Reglas</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- DIRECTORIO -->
+    <div style="background:#fff;padding:12px;border-radius:8px;margin-top:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h4>Directorio Activo de Personal</h4>
+        <span id="totalStaffBadge" class="badge" style="background:#ffd54f;color:#000">0 Registros</span>
+      </div>
+      <div style="overflow:auto;margin-top:8px;">
+        <table class="table">
+          <thead><tr><th>Colaborador</th><th>Rol</th><th>Contacto</th><th>Empresas</th><th>Zonas</th><th>Estatus</th><th>Acciones</th></tr></thead>
+          <tbody id="tablaStaffBody"><tr><td colspan="7" style="text-align:center;color:#666;padding:18px;">Cargando personal...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
   </div>
-
-  <div id="errorLog" class="error-log"></div>
 
   <!-- Footer -->
   <footer>
-    <p>Todos los derechos reservados por el programador.  
-    Cualquier intento de copia o reproducción será penalizado.  
-    Este es un software protegido por su institución Employment.  
-    <span id="fecha"></span></p>
+    <p>Todos los derechos reservados por el programador. Este software está protegido por Employment. <span id="fecha"></span></p>
   </footer>
 
-  <!-- Botones flotantes WhatsApp -->
   <a href="https://wa.me/5219999999999" class="whatsapp-btn" target="_blank" title="Director">📱</a>
-  <a href="https://wa.me/5216461974763" class="whatsapp-btn" style="right:90px;" target="_blank" title="Administrador">📱</a>
 
-  <!-- Firebase y lógica integrada -->
+  <!-- MODAL ROL -->
+  <div id="modalRol" class="modal" aria-hidden="true">
+    <div class="modal-content">
+      <h3 id="modalRolTitle">Gestor de Rol Dinámico</h3>
+      <form id="formNuevoRol">
+        <input type="hidden" id="rolIdHidden">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:220px;">
+            <label>Nombre del Rol</label>
+            <input id="rolNombre" required>
+          </div>
+          <div style="flex:1;min-width:160px;">
+            <label>Nivel</label>
+            <select id="rolNivel"><option value="5">5</option><option value="4">4</option><option value="3">3</option><option value="2" selected>2</option><option value="1">1</option></select>
+          </div>
+          <div style="flex:1;min-width:160px;">
+            <label>Scope</label>
+            <select id="rolScope"><option value="global">Global</option><option value="regional" selected>Regional</option><option value="plant">Planta</option></select>
+          </div>
+        </div>
+
+        <div style="margin-top:8px;">
+          <label>Matriz de Permisos (JSON simple)</label>
+          <textarea id="rolPermisos" rows="6" style="width:100%" placeholder='Ej: {"moduloA":{"r":true,"c":false,"u":false,"d":false}}'></textarea>
+        </div>
+
+        <div style="text-align:right;margin-top:8px;">
+          <button type="button" id="btnCloseModal" class="btn-outline-secondary">Cancelar</button>
+          <button type="submit" class="btn-orange">Guardar Rol en Firebase</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Firebase + Lógica (Auth + Realtime DB + Email verification + persistence) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getDatabase, ref, set, get, push, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    // --- CONFIG: pega aquí exactamente lo que te da Firebase Console ---
+    /***** CONFIG: reemplaza si necesitas otra app *****/
     const firebaseConfig = {
       apiKey: "AIzaSyCGmcrxJsMy5bVS9SgTGLMgrLui_tA6luY",
       authDomain: "sistema-de-requisiciones-47df8.firebaseapp.com",
@@ -181,121 +208,351 @@
       app = initializeApp(firebaseConfig);
       auth = getAuth(app);
       db = getDatabase(app);
-      document.getElementById("conexion").textContent = "✅ Firebase inicializado (SDK cargado)";
+      // Persistencia local para mantener sesión
+      await setPersistence(auth, browserLocalPersistence);
+      document.getElementById("conexion").textContent = "✅ Firebase inicializado (Auth + Realtime DB)";
     } catch (err) {
-      document.getElementById("conexion").textContent = "❌ Error inicializando Firebase";
-      logError("Inicialización Firebase", err);
+      showError("Inicialización Firebase", err);
     }
 
-    // Mostrar errores en pantalla y consola
-    function logError(title, err) {
+    // --- Helpers UI / errores ---
+    function showError(title, err) {
       console.error(title, err);
       const el = document.getElementById("errorLog");
       el.style.display = "block";
-      let text = typeof err === "string" ? err : (err && err.message) ? `${err.message}` : JSON.stringify(err);
+      let text = (err && err.message) ? `${err.message}` : String(err);
       if (err && err.code) text = `${err.code} — ${text}`;
-      el.textContent = `${title}:\n${text}\n\nRevisa DevTools → Network → identitytoolkit for raw response.`;
+      el.textContent = `${title}:\n${text}`;
     }
+    function clearError() { const el = document.getElementById("errorLog"); el.style.display = "none"; el.textContent = ""; }
 
-    // Manejo de errores amigable
-    function handleError(context, error) {
-      logError(context, error);
-      // Si es un FirebaseError con code, mostrarlo en alerta también
-      if (error && error.code) {
-        alert(`${context}: ${error.code}\n\nRevisa el panel de errores en la página para más detalles.`);
-      } else {
-        alert(`${context}: ${error?.message || error}`);
-      }
-    }
-
-    // Fallback: consulta REST a Identity Toolkit para obtener la respuesta cruda (útil para diagnosticar CONFIGURATION_NOT_FOUND)
-    async function restSignUp(apiKey, email, password) {
-      const url = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${encodeURIComponent(apiKey)}`;
-      try {
-        const res = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password, returnSecureToken: true })
-        });
-        const json = await res.json();
-        return { status: res.status, ok: res.ok, json };
-      } catch (err) {
-        return { status: 0, ok: false, json: { error: { message: err.message || String(err) } } };
-      }
-    }
-
-    // Login
+    // --- Auth: Login y Registro Admin (Auth) ---
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
+      e.preventDefault(); clearError();
       const email = document.getElementById("userEmail").value.trim();
       const password = document.getElementById("userPassword").value;
       if (!email || !password) return alert("Ingresa correo y contraseña.");
       try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const snapshot = await get(ref(db, 'usuarios/' + btoa(email)));
-        if (snapshot.exists()) {
-          const rol = snapshot.val().rol;
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        // Verificar email
+        if (!cred.user.emailVerified) {
+          // enviar verificación si el usuario lo solicita
+          const resend = confirm("Tu correo no está verificado. ¿Deseas que reenviemos el correo de verificación?");
+          if (resend) {
+            await sendEmailVerification(cred.user);
+            alert("Correo de verificación enviado. Revisa tu bandeja y confirma antes de ingresar.");
+          }
+          // cerrar sesión local para evitar acceso sin verificar
+          await auth.signOut();
+          return;
+        }
+        // Al iniciar sesión, cargamos la ficha desde DB por uid
+        const uid = cred.user.uid;
+        const snap = await get(ref(db, `usuarios/${uid}`));
+        if (snap.exists()) {
+          const data = snap.val();
+          const rol = data.rol || "";
           if (rol === "Solicitante") window.location.href = "requisiciones.html";
           else if (rol === "Jefe de Área") window.location.href = "aprobaciones.html";
           else if (rol === "Finanzas") window.location.href = "reportes.html";
           else if (rol === "Administrador" && email === "jvalladares@hremploy.com.mx") window.location.href = "requiadmin.html";
           else alert("Tu rol aún no ha sido asignado.");
         } else {
-          alert("Usuario sin rol asignado.");
+          alert("Usuario autenticado pero sin ficha en DB. Contacta al administrador.");
         }
       } catch (error) {
-        handleError("Error en login", error);
+        showError("Error en login", error);
+        alert("Error en login: " + (error.message || error.code || error));
       }
     });
 
-    // Toggle admin form
-    document.getElementById("adminToggle").addEventListener("click", () => {
-      const form = document.getElementById("adminRegisterForm");
-      form.style.display = form.style.display === "none" ? "block" : "none";
+    // Mostrar formulario de registro
+    document.getElementById("btnShowRegister").addEventListener("click", () => {
+      document.getElementById("adminRegisterForm").style.display = "block";
+    });
+    document.getElementById("btnCancelAdmin").addEventListener("click", () => {
+      document.getElementById("adminRegisterForm").style.display = "none";
     });
 
-    // Registro administrador con fallback REST diagnóstico
+    // Registro administrador (Auth) -> crea cuenta en Auth y ficha en DB
     document.getElementById("adminRegisterForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
+      e.preventDefault(); clearError();
       const email = document.getElementById("adminRegEmail").value.trim();
       const password = document.getElementById("adminRegPassword").value;
-      if (email !== "jvalladares@hremploy.com.mx") {
-        alert("Solo el administrador autorizado puede registrarse aquí.");
-        return;
-      }
-      if (password.length < 6) {
-        alert("La contraseña debe tener al menos 6 caracteres.");
-        return;
-      }
-
+      if (email !== "jvalladares@hremploy.com.mx") return alert("Solo el administrador autorizado puede registrarse aquí.");
+      if (password.length < 6) return alert("La contraseña debe tener al menos 6 caracteres.");
       try {
-        // Intento normal con SDK
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        await set(ref(db, 'usuarios/' + btoa(email)), { email, rol: "Administrador" });
-        alert("Administrador registrado correctamente.");
-        e.target.reset();
+        const userCred = await createUserWithEmailAndPassword(auth, email, password);
+        const uid = userCred.user.uid;
+        // Guardar ficha mínima en DB
+        await set(ref(db, `usuarios/${uid}`), { email, rol: "Administrador", createdAt: Date.now() });
+        // Enviar verificación
+        await sendEmailVerification(userCred.user);
+        alert("Administrador registrado correctamente. Se ha enviado correo de verificación.");
+        document.getElementById("adminRegisterForm").reset();
+        document.getElementById("adminRegisterForm").style.display = "none";
+        cargarRoles();
+        cargarStaff();
       } catch (error) {
-        // Si falla, intentamos obtener la respuesta cruda del endpoint para diagnosticar
-        try {
-          const apiKey = firebaseConfig.apiKey;
-          const rest = await restSignUp(apiKey, email, password);
-          const msg = `SDK error: ${error?.code || error?.message || error}\n\nREST response (status ${rest.status}):\n${JSON.stringify(rest.json, null, 2)}`;
-          logError("Error en registro (SDK + REST)", msg);
-          alert("Error en registro. Revisa el panel de errores en la página para detalles. Si ves CONFIGURATION_NOT_FOUND, activa Email/Password en Firebase Console y revisa restricciones de API key.");
-        } catch (inner) {
-          handleError("Error en registro y diagnóstico", inner);
-        }
+        showError("Error en registro", error);
+        alert("Error en registro: " + (error.message || error.code || error));
       }
     });
 
-    // Fecha dinámica en footer
-    document.getElementById("fecha").textContent = new Date().toLocaleDateString();
+    // --- Roles: cargar / guardar / eliminar ---
+    async function cargarRoles() {
+      try {
+        const snap = await get(ref(db, 'roles'));
+        const tbody = document.getElementById("tablaRolesBody");
+        const selectRol = document.getElementById("staffRol");
+        tbody.innerHTML = '';
+        selectRol.innerHTML = '<option value="">Selecciona rol...</option>';
+        if (!snap.exists()) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#666;padding:18px;">No hay roles definidos.</td></tr>';
+          return;
+        }
+        const roles = snap.val();
+        Object.keys(roles).forEach(key => {
+          const r = roles[key];
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${r.nombre}</td><td>${r.nivel}</td><td>${r.scope}</td><td><pre style="white-space:pre-wrap">${JSON.stringify(r.permisos)}</pre></td>
+            <td style="text-align:right">
+              <button data-id="${key}" class="btn-edit-role">Editar</button>
+              <button data-id="${key}" class="btn-del-role" style="background:#c00">Eliminar</button>
+            </td>`;
+          tbody.appendChild(tr);
+          const opt = document.createElement('option'); opt.value = key; opt.textContent = r.nombre; selectRol.appendChild(opt);
+        });
+        document.querySelectorAll('.btn-edit-role').forEach(b => b.addEventListener('click', abrirEditarRol));
+        document.querySelectorAll('.btn-del-role').forEach(b => b.addEventListener('click', eliminarRol));
+      } catch (err) { showError("cargarRoles", err); }
+    }
 
-    // Nota: si sigues viendo auth/configuration-not-found, los pasos más efectivos son:
-    // 1) Firebase Console → Authentication → Sign-in method → activar Email/Password.
-    // 2) Google Cloud Console → API Keys → quitar temporalmente restricciones (HTTP referrers / APIs) para probar.
-    // 3) Crear una nueva Web App en Firebase Console y usar su firebaseConfig para descartar problemas de app mal registrada.
-    // 4) Revisar DevTools → Network → filtrar por "identitytoolkit" y ver Response JSON (esta página también muestra la respuesta cruda).
+    document.getElementById("btnNuevoRol").addEventListener("click", () => abrirModalRol());
+    function abrirModalRol(rolId = null, rolData = null) {
+      document.getElementById("modalRol").classList.add('show');
+      if (rolId && rolData) {
+        document.getElementById("rolIdHidden").value = rolId;
+        document.getElementById("rolNombre").value = rolData.nombre || '';
+        document.getElementById("rolNivel").value = rolData.nivel || '2';
+        document.getElementById("rolScope").value = rolData.scope || 'regional';
+        document.getElementById("rolPermisos").value = JSON.stringify(rolData.permisos || {}, null, 2);
+      } else {
+        document.getElementById("rolIdHidden").value = '';
+        document.getElementById("rolNombre").value = '';
+        document.getElementById("rolNivel").value = '2';
+        document.getElementById("rolScope").value = 'regional';
+        document.getElementById("rolPermisos").value = '{}';
+      }
+    }
+    document.getElementById("btnCloseModal").addEventListener("click", () => document.getElementById("modalRol").classList.remove('show'));
+
+    async function abrirEditarRol(e) {
+      const id = e.currentTarget.dataset.id;
+      try {
+        const snap = await get(ref(db, `roles/${id}`));
+        if (!snap.exists()) return alert("Rol no encontrado.");
+        abrirModalRol(id, snap.val());
+      } catch (err) { showError("abrirEditarRol", err); }
+    }
+
+    async function eliminarRol(e) {
+      const id = e.currentTarget.dataset.id;
+      if (!confirm("Eliminar rol? Esto afectará asignaciones existentes.")) return;
+      try {
+        await remove(ref(db, `roles/${id}`));
+        alert("Rol eliminado.");
+        cargarRoles();
+      } catch (err) { showError("eliminarRol", err); }
+    }
+
+    document.getElementById("formNuevoRol").addEventListener("submit", async (e) => {
+      e.preventDefault(); clearError();
+      const id = document.getElementById("rolIdHidden").value || null;
+      const nombre = document.getElementById("rolNombre").value.trim();
+      const nivel = document.getElementById("rolNivel").value;
+      const scope = document.getElementById("rolScope").value;
+      let permisos = {};
+      try { permisos = JSON.parse(document.getElementById("rolPermisos").value || '{}'); } catch (err) { return alert("Permisos JSON inválido."); }
+      if (!nombre) return alert("Nombre requerido.");
+      try {
+        if (id) {
+          await update(ref(db, `roles/${id}`), { nombre, nivel, scope, permisos });
+        } else {
+          const newRef = push(ref(db, 'roles'));
+          await set(newRef, { nombre, nivel, scope, permisos, createdAt: Date.now() });
+        }
+        document.getElementById("modalRol").classList.remove('show');
+        cargarRoles();
+      } catch (err) { showError("guardarRol", err); }
+    });
+
+    // --- Staff: cargar / guardar / editar / baja masiva ---
+    async function cargarStaff() {
+      try {
+        const snap = await get(ref(db, 'usuarios'));
+        const tbody = document.getElementById("tablaStaffBody");
+        tbody.innerHTML = '';
+        let total = 0;
+        if (!snap.exists()) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#666;padding:18px;">No hay personal registrado.</td></tr>';
+          document.getElementById("totalStaffBadge").textContent = '0 Registros';
+          return;
+        }
+        const users = snap.val();
+        Object.keys(users).forEach(uid => {
+          const u = users[uid];
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${u.nombre || u.email || '(sin nombre)'}</td>
+            <td>${u.rol || ''}</td>
+            <td>${u.telefono || u.email || ''}</td>
+            <td>${(u.empresas || []).join(', ')}</td>
+            <td>${(u.zonas || []).join(', ')}</td>
+            <td>${u.estatus || 'Activo'}</td>
+            <td style="text-align:right">
+              <button data-uid="${uid}" class="btn-edit-staff">Editar</button>
+              <button data-uid="${uid}" class="btn-baja-staff" style="background:#c00">Baja</button>
+            </td>`;
+          tbody.appendChild(tr);
+          total++;
+        });
+        document.getElementById("totalStaffBadge").textContent = `${total} Registros`;
+        document.querySelectorAll('.btn-edit-staff').forEach(b => b.addEventListener('click', editarStaff));
+        document.querySelectorAll('.btn-baja-staff').forEach(b => b.addEventListener('click', bajaStaff));
+      } catch (err) { showError("cargarStaff", err); }
+    }
+
+    async function editarStaff(e) {
+      const uid = e.currentTarget.dataset.uid;
+      try {
+        const snap = await get(ref(db, `usuarios/${uid}`));
+        if (!snap.exists()) return alert("Registro no encontrado.");
+        const data = snap.val();
+        document.getElementById("staffId").value = uid;
+        document.getElementById("staffNombre").value = data.nombre || '';
+        document.getElementById("staffTelefono").value = data.telefono || '';
+        document.getElementById("staffRol").value = data.rol || '';
+        document.getElementById("staffEmail").value = data.email || '';
+        renderEmpresasSelection(data.empresas || []);
+        document.getElementById("roleBadgeDisplay").textContent = `Modo: Editando ${data.nombre || ''}`;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (err) { showError("editarStaff", err); }
+    }
+
+    function renderEmpresasSelection(selected = []) {
+      const cont = document.getElementById("empresasContainer");
+      const empresas = ['Empresa A','Empresa B','Empresa C'];
+      cont.innerHTML = '';
+      empresas.forEach(emp => {
+        const id = 'emp_' + emp.replace(/\s+/g,'_');
+        const checked = selected.includes(emp) ? 'checked' : '';
+        const html = `<label style="display:block"><input type="checkbox" data-empresa="${emp}" ${checked}> ${emp}</label>`;
+        cont.insertAdjacentHTML('beforeend', html);
+      });
+    }
+
+    // Crear cuenta Auth y ficha en DB (si se solicita)
+    async function createAuthAndFicha(email, password, fichaPayload) {
+      try {
+        const userCred = await createUserWithEmailAndPassword(auth, email, password);
+        const uid = userCred.user.uid;
+        // Guardar ficha enlazada al uid
+        await set(ref(db, `usuarios/${uid}`), { ...fichaPayload, email, createdAt: Date.now() });
+        // Enviar verificación
+        await sendEmailVerification(userCred.user);
+        return { ok: true, uid };
+      } catch (err) {
+        return { ok: false, error: err };
+      }
+    }
+
+    document.getElementById("formStaff").addEventListener("submit", async (e) => {
+      e.preventDefault(); clearError();
+      const uid = document.getElementById("staffId").value || null;
+      const nombre = document.getElementById("staffNombre").value.trim();
+      const telefono = document.getElementById("staffTelefono").value.trim();
+      const pin = document.getElementById("staffPin").value;
+      const rol = document.getElementById("staffRol").value;
+      const email = (document.getElementById("staffEmail").value || '').trim();
+      const createAuth = document.getElementById("chkCreateAuth").checked;
+      const empresas = Array.from(document.querySelectorAll('#empresasContainer input[type="checkbox"]'))
+        .filter(ch => ch.checked).map(ch => ch.dataset.empresa);
+      if (!nombre || !rol) return alert("Nombre y rol son requeridos.");
+      try {
+        if (uid) {
+          // actualizar ficha existente
+          const payload = { nombre, telefono, rol, empresas, updatedAt: Date.now() };
+          if (pin) payload.pinHash = await hashPin(pin);
+          if (email) payload.email = email;
+          await update(ref(db, `usuarios/${uid}`), payload);
+          alert("Ficha actualizada.");
+        } else {
+          // Si se solicita crear cuenta Auth y se proporcionó email, crear Auth y ficha
+          if (createAuth) {
+            if (!email) return alert("Para crear cuenta Auth necesitas un email.");
+            if (!pin || pin.length < 6) return alert("Para crear cuenta Auth usa un PIN de al menos 6 caracteres (se usará como contraseña inicial).");
+            const fichaPayload = { nombre, telefono, rol, empresas, estatus: 'Activo' };
+            const res = await createAuthAndFicha(email, pin, fichaPayload);
+            if (!res.ok) {
+              showError("createAuthAndFicha", res.error);
+              return alert("No se pudo crear la cuenta Auth: " + (res.error.message || res.error.code || res.error));
+            }
+            alert("Cuenta Auth creada y correo de verificación enviado. La ficha fue guardada.");
+          } else {
+            // crear ficha en DB sin Auth (uid generado por push)
+            const newRef = push(ref(db, 'usuarios'));
+            const newUid = newRef.key;
+            const payload = { nombre, telefono, rol, empresas, estatus: 'Activo', createdAt: Date.now() };
+            if (pin) payload.pinHash = await hashPin(pin);
+            if (email) payload.email = email;
+            await set(ref(db, `usuarios/${newUid}`), payload);
+            alert("Ficha creada en DB (sin cuenta Auth).");
+          }
+        }
+        document.getElementById("formStaff").reset();
+        document.getElementById("staffId").value = '';
+        document.getElementById("roleBadgeDisplay").textContent = 'Modo: Nuevo Colaborador';
+        cargarStaff();
+      } catch (err) { showError("guardarStaff", err); }
+    });
+
+    // Baja operativa simple (marca Inactivo)
+    async function bajaStaff(e) {
+      const uid = e.currentTarget.dataset.uid;
+      if (!confirm("Marcar como Inactivo y reasignar?")) return;
+      try {
+        await update(ref(db, `usuarios/${uid}`), { estatus: 'Inactivo', updatedAt: Date.now() });
+        alert("Usuario marcado como Inactivo.");
+        cargarStaff();
+      } catch (err) { showError("bajaStaff", err); }
+    }
+
+    // --- Util: hash PIN (SHA-256 hex) ---
+    async function hashPin(pin) {
+      const enc = new TextEncoder();
+      const data = enc.encode(pin);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+
+    // --- Inicialización: cargar datos ---
+    (async function init() {
+      try {
+        renderEmpresasSelection([]);
+        await cargarRoles();
+        await cargarStaff();
+        document.getElementById("fecha").textContent = new Date().toLocaleDateString();
+      } catch (err) { showError("init", err); }
+    })();
+
+    // Observadores en tiempo real
+    onValue(ref(db, 'roles'), snapshot => { cargarRoles(); }, err => { console.warn('roles onValue err', err); });
+    onValue(ref(db, 'usuarios'), snapshot => { cargarStaff(); }, err => { console.warn('usuarios onValue err', err); });
+
+    // Nota: migración a Auth
+    // Si ya tienes fichas sin uid y quieres migrarlas a Auth, crea cuentas con createUserWithEmailAndPassword
+    // y luego copia la ficha a usuarios/<uid>. Para migraciones masivas usa Admin SDK en servidor.
   </script>
 </body>
 </html>
