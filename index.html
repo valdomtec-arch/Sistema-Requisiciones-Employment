@@ -1,120 +1,113 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Employment - Sistema de Requisiciones (Auth + Verificación)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <title>Employment - Sistema de Requisiciones (Auth integrado)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Roboto&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Roboto', sans-serif; margin: 0; background-color: #FFCC00; }
-    h1, h2 { font-family: 'Montserrat', sans-serif; }
-    .banner { background: linear-gradient(135deg, #FFCC00 70%, #001F3F 30%); color: #FFFFFF; text-align: center; padding: 40px 20px; }
-    .banner h1 { font-size: 2.4em; margin: 0; color: #001F3F; }
-    .banner p { font-size: 1.05em; margin: 8px 0 0; color: #FF6600; font-weight: bold; }
-    form { margin: 20px auto; background: #FFFFFF; padding: 18px; border-radius: 8px; border: 2px solid #001F3F; width: 90%; max-width: 980px; text-align: left; }
-    input, select, button, textarea { margin: 8px 0; padding: 8px; font-size: 1em; }
-    button { background-color: #FF6600; color: #fff; border: none; cursor: pointer; font-weight: bold; padding: 8px 12px; }
-    button:hover { background-color: #001F3F; }
-    .admin-btn { display: inline-block; margin: 12px 0; background-color: #001F3F; color: #FFCC00; padding: 8px 14px; border-radius: 5px; text-decoration: none; font-weight: bold; }
-    footer { background: #001F3F; color: #FFCC00; text-align: center; padding: 12px; font-size: 0.9em; position: relative; bottom: 0; width: 100%; }
-    .whatsapp-btn { position: fixed; bottom: 20px; right: 20px; background-color: #25D366; color: white; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 30px; text-decoration: none; box-shadow: 2px 2px 5px rgba(0,0,0,0.3); }
-    .info { max-width: 980px; margin: 10px auto; padding: 10px; background: #fff8e1; border: 1px solid #ffd54f; color: #333; border-radius: 6px; font-size: 0.95em; }
-    .error-log { max-width: 980px; margin: 10px auto; padding: 10px; background: #ffe6e6; border: 1px solid #ff8a80; color: #800; border-radius: 6px; font-size: 0.9em; white-space: pre-wrap; display: none; }
-    .table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-    .table th, .table td { border: 1px solid #ddd; padding: 8px; }
-    .badge { padding: 6px 10px; border-radius: 999px; font-weight: bold; }
-    .btn-outline-secondary { background: transparent; border: 1px solid #ccc; padding: 6px 10px; cursor: pointer; }
-    .btn-orange { background: #FF6600; color: #fff; padding: 8px 12px; border: none; }
-    .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; }
+    body { font-family: 'Roboto', sans-serif; margin: 0; background: #FFCC00; color:#001F3F; }
+    .container { max-width: 1100px; margin: 18px auto; padding: 12px; }
+    .banner { background: linear-gradient(135deg,#FFCC00 70%,#001F3F 30%); color:#fff; text-align:center; padding:28px 12px; border-radius:8px; }
+    .banner h1 { margin:0; font-family:'Montserrat'; color:#001F3F; }
+    form { background:#fff; padding:14px; border-radius:8px; border:2px solid #001F3F; margin-top:12px; }
+    input, select, textarea, button { font-size:1rem; padding:8px; margin:6px 0; width:100%; box-sizing:border-box; }
+    button { cursor:pointer; border:none; background:#FF6600; color:#fff; font-weight:700; padding:10px; border-radius:6px; }
+    .btn-secondary { background:#001F3F; color:#FFCC00; }
+    .small-muted { font-size:0.9rem; color:#666; margin-top:6px; }
+    .info { background:#fff8e1; border:1px solid #ffd54f; padding:10px; border-radius:6px; margin-top:12px; }
+    .error-log { display:none; background:#ffe6e6; border:1px solid #ff8a80; padding:10px; border-radius:6px; margin-top:12px; white-space:pre-wrap; color:#800; }
+    .table { width:100%; border-collapse:collapse; margin-top:12px; background:#fff; border-radius:6px; overflow:hidden; }
+    .table th, .table td { padding:8px; border:1px solid #ddd; text-align:left; }
+    .badge { display:inline-block; padding:6px 10px; border-radius:999px; font-weight:700; }
+    .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); align-items:center; justify-content:center; z-index:9999; }
     .modal.show { display:flex; }
-    .modal-content { background:#fff; padding:16px; border-radius:8px; width:90%; max-width:900px; }
-    .small-muted { font-size:0.9em; color:#666; }
+    .modal-content { background:#fff; padding:16px; border-radius:8px; width:92%; max-width:720px; }
+    .flex { display:flex; gap:8px; align-items:center; }
+    .right { text-align:right; }
+    .muted { color:#666; font-size:0.9rem; }
   </style>
 </head>
 <body>
   <div class="banner">
     <h1>Employment</h1>
     <p>Sistema de Requisiciones con Control Interno</p>
-    <p id="conexion">Inicializando...</p>
+    <p id="conexion" class="muted">Inicializando...</p>
   </div>
 
-  <!-- LOGIN / REGISTRO (Auth) -->
-  <form id="loginForm" style="max-width:420px;margin:18px auto;">
-    <h2>Acceso al Sistema</h2>
-    <input type="email" id="userEmail" placeholder="Correo electrónico" required style="width:100%">
-    <input type="password" id="userPassword" placeholder="Contraseña" required style="width:100%">
-    <div style="display:flex;gap:8px;align-items:center;">
-      <button type="submit">Ingresar</button>
-      <button type="button" id="btnShowRegister" style="background:#001F3F">Registrar</button>
-    </div>
-    <p class="small-muted">Si no recibes el correo de verificación, revisa tu carpeta de spam o pulsa reenviar desde el panel.</p>
-  </form>
+  <div class="container">
+    <!-- LOGIN -->
+    <form id="loginForm" aria-label="Login">
+      <h2>Acceso al Sistema</h2>
+      <input id="userEmail" type="email" placeholder="Correo electrónico" required />
+      <input id="userPassword" type="password" placeholder="Contraseña" required />
+      <div class="flex">
+        <button type="submit">Ingresar</button>
+        <button type="button" id="btnShowRegister" class="btn-secondary">Registrar</button>
+      </div>
+      <p class="small-muted">Si tu correo no está verificado, el sistema te ofrecerá reenviar el correo de verificación.</p>
+    </form>
 
-  <!-- ADMIN TOGGLE Y FORMULARIO -->
-  <div style="max-width:980px;margin:0 auto;padding:0 12px;">
-    <button id="adminToggle" class="admin-btn">Administrador</button>
-
-    <form id="adminRegisterForm" style="display:none; margin-top:12px; background:#fff;padding:12px;border-radius:8px;">
+    <!-- ADMIN REGISTER (Auth) -->
+    <form id="adminRegisterForm" style="display:none;">
       <h3>Registro Administrador (Auth)</h3>
-      <input type="email" id="adminRegEmail" placeholder="Correo electrónico" required style="width:100%">
-      <input type="password" id="adminRegPassword" placeholder="Contraseña" required style="width:100%">
-      <div style="display:flex;gap:8px;">
-        <button type="submit" class="btn-orange">Registrar Administrador</button>
-        <button type="button" id="btnCancelAdmin" class="btn-outline-secondary">Cancelar</button>
+      <input id="adminRegEmail" type="email" placeholder="Correo administrador" required />
+      <input id="adminRegPassword" type="password" placeholder="Contraseña (>=6)" required />
+      <div class="flex">
+        <button type="submit">Registrar Administrador</button>
+        <button type="button" id="btnCancelAdmin" class="btn-secondary">Cancelar</button>
       </div>
     </form>
 
     <div class="info">
-      <strong>Nota:</strong> Este modo usa <strong>Firebase Auth (Email/Password)</strong> con verificación de correo y persistencia local. Activa Email/Password en Firebase Console → Authentication → Sign-in method antes de probar.
+      <strong>Nota:</strong> Este sistema usa Firebase Auth (Email/Password) y Realtime Database. Activa Email/Password en Firebase Console → Authentication → Sign-in method. Si ves CONFIGURATION_NOT_FOUND, habilita Identity Toolkit API en Google Cloud.
     </div>
 
     <div id="errorLog" class="error-log"></div>
 
-    <!-- SECCIÓN 1: Roles -->
-    <div style="background:#fff;padding:12px;border-radius:8px;margin-top:12px;">
+    <!-- Roles -->
+    <section style="margin-top:12px;">
       <div style="display:flex;justify-content:space-between;align-items:center;">
-        <h4>1. Catálogo y Motor de Roles Dinámicos (Firebase)</h4>
-        <button id="btnNuevoRol" class="btn-orange">Crear Nuevo Rol Dinámico</button>
+        <h3>Catálogo y Motor de Roles Dinámicos</h3>
+        <button id="btnNuevoRol">Crear Nuevo Rol</button>
       </div>
-      <div style="overflow:auto;margin-top:8px;">
-        <table class="table">
-          <thead><tr><th>Nombre del Rol</th><th>Nivel</th><th>Scope</th><th>Permisos</th><th>Acciones</th></tr></thead>
-          <tbody id="tablaRolesBody"><tr><td colspan="5" style="text-align:center;color:#666;padding:18px;">Cargando roles desde Firebase...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
+      <table class="table" aria-live="polite">
+        <thead><tr><th>Nombre</th><th>Nivel</th><th>Scope</th><th>Permisos</th><th>Acciones</th></tr></thead>
+        <tbody id="tablaRolesBody"><tr><td colspan="5" class="muted right">Cargando roles desde Firebase...</td></tr></tbody>
+      </table>
+    </section>
 
-    <!-- SECCIÓN 2: Ficha de Colaborador -->
-    <div style="background:#fff;padding:12px;border-radius:8px;margin-top:12px;">
+    <!-- Staff -->
+    <section style="margin-top:12px;">
       <div style="display:flex;justify-content:space-between;align-items:center;">
-        <h4>2. Ficha de Colaborador y Cadena de Mando Dinámica</h4>
+        <h3>Ficha de Colaborador y Cadena de Mando</h3>
         <span id="roleBadgeDisplay" class="badge" style="background:#001F3F;color:#FFCC00">Modo: Nuevo Colaborador</span>
       </div>
 
-      <form id="formStaff" style="margin-top:8px;">
-        <input type="hidden" id="staffId">
+      <form id="formStaff">
+        <input id="staffId" type="hidden" />
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <div style="flex:1;min-width:220px;">
             <label>Nombre Completo</label>
-            <input id="staffNombre" required style="width:100%">
+            <input id="staffNombre" required />
           </div>
           <div style="flex:1;min-width:220px;">
             <label>Teléfono (WhatsApp)</label>
-            <input id="staffTelefono" maxlength="10" pattern="[0-9]{10}" style="width:100%">
+            <input id="staffTelefono" maxlength="10" pattern="[0-9]{10}" />
           </div>
           <div style="flex:1;min-width:220px;">
             <label>Clave (PIN)</label>
-            <input id="staffPin" type="password" placeholder="Modificar solo si cambia" style="width:100%">
+            <input id="staffPin" type="password" placeholder="Modificar solo si cambia" />
           </div>
           <div style="flex:1;min-width:220px;">
             <label>Rol Dinámico</label>
-            <select id="staffRol" required style="width:100%"><option value="">Cargando roles...</option></select>
+            <select id="staffRol" required><option value="">Cargando roles...</option></select>
           </div>
         </div>
 
         <div style="margin-top:8px;">
           <label>Email (opcional, para crear cuenta Auth)</label>
-          <input id="staffEmail" type="email" placeholder="correo@empresa.com" style="width:100%">
+          <input id="staffEmail" type="email" placeholder="correo@empresa.com" />
           <label style="display:block;margin-top:6px;"><input id="chkCreateAuth" type="checkbox"> Crear cuenta Auth con este email (se enviará verificación)</label>
         </div>
 
@@ -123,44 +116,35 @@
           <div id="empresasContainer" style="border:1px solid #ddd;padding:8px;border-radius:6px;">Cargando empresas...</div>
         </div>
 
-        <div style="margin-top:12px;text-align:right;">
-          <button type="submit" class="btn-orange">Guardar Ficha y Reglas</button>
+        <div class="right" style="margin-top:12px;">
+          <button type="submit">Guardar Ficha y Reglas</button>
         </div>
       </form>
-    </div>
+    </section>
 
-    <!-- DIRECTORIO -->
-    <div style="background:#fff;padding:12px;border-radius:8px;margin-top:12px;">
+    <!-- Directorio -->
+    <section style="margin-top:12px;">
       <div style="display:flex;justify-content:space-between;align-items:center;">
-        <h4>Directorio Activo de Personal</h4>
+        <h3>Directorio Activo de Personal</h3>
         <span id="totalStaffBadge" class="badge" style="background:#ffd54f;color:#000">0 Registros</span>
       </div>
-      <div style="overflow:auto;margin-top:8px;">
-        <table class="table">
-          <thead><tr><th>Colaborador</th><th>Rol</th><th>Contacto</th><th>Empresas</th><th>Zonas</th><th>Estatus</th><th>Acciones</th></tr></thead>
-          <tbody id="tablaStaffBody"><tr><td colspan="7" style="text-align:center;color:#666;padding:18px;">Cargando personal...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
+      <table class="table">
+        <thead><tr><th>Colaborador</th><th>Rol</th><th>Contacto</th><th>Empresas</th><th>Zonas</th><th>Estatus</th><th>Acciones</th></tr></thead>
+        <tbody id="tablaStaffBody"><tr><td colspan="7" class="muted right">Cargando personal...</td></tr></tbody>
+      </table>
+    </section>
   </div>
 
-  <!-- Footer -->
-  <footer>
-    <p>Todos los derechos reservados por el programador. Este software está protegido por Employment. <span id="fecha"></span></p>
-  </footer>
-
-  <a href="https://wa.me/5219999999999" class="whatsapp-btn" target="_blank" title="Director">📱</a>
-
-  <!-- MODAL ROL -->
+  <!-- Modal: Rol -->
   <div id="modalRol" class="modal" aria-hidden="true">
     <div class="modal-content">
       <h3 id="modalRolTitle">Gestor de Rol Dinámico</h3>
       <form id="formNuevoRol">
-        <input type="hidden" id="rolIdHidden">
+        <input id="rolIdHidden" type="hidden" />
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <div style="flex:1;min-width:220px;">
             <label>Nombre del Rol</label>
-            <input id="rolNombre" required>
+            <input id="rolNombre" required />
           </div>
           <div style="flex:1;min-width:160px;">
             <label>Nivel</label>
@@ -171,27 +155,58 @@
             <select id="rolScope"><option value="global">Global</option><option value="regional" selected>Regional</option><option value="plant">Planta</option></select>
           </div>
         </div>
-
         <div style="margin-top:8px;">
-          <label>Matriz de Permisos (JSON simple)</label>
-          <textarea id="rolPermisos" rows="6" style="width:100%" placeholder='Ej: {"moduloA":{"r":true,"c":false,"u":false,"d":false}}'></textarea>
+          <label>Matriz de Permisos (JSON)</label>
+          <textarea id="rolPermisos" rows="6" placeholder='Ej: {"modA":{"r":true,"c":false,"u":false,"d":false}}'></textarea>
         </div>
-
-        <div style="text-align:right;margin-top:8px;">
-          <button type="button" id="btnCloseModal" class="btn-outline-secondary">Cancelar</button>
-          <button type="submit" class="btn-orange">Guardar Rol en Firebase</button>
+        <div class="right" style="margin-top:8px;">
+          <button type="button" id="btnCloseModal" class="btn-secondary">Cancelar</button>
+          <button type="submit">Guardar Rol en Firebase</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Firebase + Lógica (Auth + Realtime DB + Email verification + persistence) -->
+  <!-- Modal: Email already in use (options) -->
+  <div id="modalEmailInUse" class="modal" aria-hidden="true">
+    <div class="modal-content">
+      <h3>Correo ya en uso</h3>
+      <p id="modalEmailInUseText" class="muted">El correo ya está registrado en Auth.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+        <button id="btnSendReset" class="btn-orange">Enviar correo de restablecimiento</button>
+        <button id="btnOpenLogin" class="btn-secondary">Ir a iniciar sesión</button>
+        <button id="btnCancelEmailInUse" class="btn-secondary">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <footer style="margin-top:18px;padding:12px;text-align:center;background:#001F3F;color:#FFCC00;">
+    Todos los derechos reservados por el programador. <span id="fecha"></span>
+  </footer>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getDatabase, ref, set, get, push, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      sendEmailVerification,
+      sendPasswordResetEmail,
+      setPersistence,
+      browserLocalPersistence
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import {
+      getDatabase,
+      ref,
+      set,
+      get,
+      push,
+      update,
+      remove,
+      onValue
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    /***** CONFIG: reemplaza si necesitas otra app *****/
+    // ---------- CONFIG ----------
     const firebaseConfig = {
       apiKey: "AIzaSyCGmcrxJsMy5bVS9SgTGLMgrLui_tA6luY",
       authDomain: "sistema-de-requisiciones-47df8.firebaseapp.com",
@@ -202,20 +217,19 @@
       appId: "1:596189555034:web:abcdef1234567890"
     };
 
-    // Inicializar Firebase
+    // ---------- INIT ----------
     let app, auth, db;
     try {
       app = initializeApp(firebaseConfig);
       auth = getAuth(app);
       db = getDatabase(app);
-      // Persistencia local para mantener sesión
       await setPersistence(auth, browserLocalPersistence);
       document.getElementById("conexion").textContent = "✅ Firebase inicializado (Auth + Realtime DB)";
     } catch (err) {
       showError("Inicialización Firebase", err);
     }
 
-    // --- Helpers UI / errores ---
+    // ---------- UI helpers ----------
     function showError(title, err) {
       console.error(title, err);
       const el = document.getElementById("errorLog");
@@ -224,9 +238,36 @@
       if (err && err.code) text = `${err.code} — ${text}`;
       el.textContent = `${title}:\n${text}`;
     }
-    function clearError() { const el = document.getElementById("errorLog"); el.style.display = "none"; el.textContent = ""; }
+    function clearError() {
+      const el = document.getElementById("errorLog");
+      el.style.display = "none";
+      el.textContent = "";
+    }
+    function setRegisterButtonsDisabled(disabled = true) {
+      document.querySelectorAll('button, input[type="submit"]').forEach(b => b.disabled = disabled);
+    }
 
-    // --- Auth: Login y Registro Admin (Auth) ---
+    // ---------- Email-ficha check ----------
+    async function emailHasFicha(email) {
+      if (!email) return null;
+      try {
+        const snap = await get(ref(db, 'usuarios'));
+        if (!snap.exists()) return null;
+        const users = snap.val();
+        for (const uid in users) {
+          const u = users[uid];
+          if (u && u.email && u.email.toLowerCase() === email.toLowerCase()) {
+            return { uid, ficha: u };
+          }
+        }
+        return null;
+      } catch (err) {
+        console.warn('emailHasFicha error', err);
+        return null;
+      }
+    }
+
+    // ---------- Auth: login ----------
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault(); clearError();
       const email = document.getElementById("userEmail").value.trim();
@@ -234,19 +275,15 @@
       if (!email || !password) return alert("Ingresa correo y contraseña.");
       try {
         const cred = await signInWithEmailAndPassword(auth, email, password);
-        // Verificar email
         if (!cred.user.emailVerified) {
-          // enviar verificación si el usuario lo solicita
-          const resend = confirm("Tu correo no está verificado. ¿Deseas que reenviemos el correo de verificación?");
+          const resend = confirm("Tu correo no está verificado. ¿Deseas reenviar el correo de verificación?");
           if (resend) {
             await sendEmailVerification(cred.user);
-            alert("Correo de verificación enviado. Revisa tu bandeja y confirma antes de ingresar.");
+            alert("Correo de verificación enviado. Revisa tu bandeja.");
           }
-          // cerrar sesión local para evitar acceso sin verificar
           await auth.signOut();
           return;
         }
-        // Al iniciar sesión, cargamos la ficha desde DB por uid
         const uid = cred.user.uid;
         const snap = await get(ref(db, `usuarios/${uid}`));
         if (snap.exists()) {
@@ -260,13 +297,13 @@
         } else {
           alert("Usuario autenticado pero sin ficha en DB. Contacta al administrador.");
         }
-      } catch (error) {
-        showError("Error en login", error);
-        alert("Error en login: " + (error.message || error.code || error));
+      } catch (err) {
+        showError("Error en login", err);
+        alert("Error en login: " + (err.message || err.code || err));
       }
     });
 
-    // Mostrar formulario de registro
+    // ---------- Admin register form UI ----------
     document.getElementById("btnShowRegister").addEventListener("click", () => {
       document.getElementById("adminRegisterForm").style.display = "block";
     });
@@ -274,32 +311,106 @@
       document.getElementById("adminRegisterForm").style.display = "none";
     });
 
-    // Registro administrador (Auth) -> crea cuenta en Auth y ficha en DB
+    // ---------- Register flow with checks (A + B) ----------
+    async function handleRegisterWithCheck(email, password) {
+      clearError();
+      setRegisterButtonsDisabled(true);
+      try {
+        // 1) check DB for existing ficha
+        const existing = await emailHasFicha(email);
+        if (existing) {
+          const msg = `Ya existe una ficha en DB para este email (uid: ${existing.uid}).\n` +
+                      `¿Deseas enviar un correo de restablecimiento para que el propietario reclame la cuenta?`;
+          const sendReset = confirm(msg);
+          if (sendReset) {
+            try {
+              await sendPasswordResetEmail(auth, email);
+              alert("Correo de restablecimiento enviado al email indicado.");
+            } catch (resetErr) {
+              showError("sendPasswordResetEmail", resetErr);
+              alert("No se pudo enviar el correo de restablecimiento. Revisa consola.");
+            }
+          } else {
+            alert("Operación cancelada. Revisa la ficha en DB o usa Firebase Console.");
+          }
+          return;
+        }
+
+        // 2) try to create Auth account
+        try {
+          const userCred = await createUserWithEmailAndPassword(auth, email, password);
+          const uid = userCred.user.uid;
+          await set(ref(db, `usuarios/${uid}`), { email, rol: "Administrador", createdAt: Date.now() });
+          await sendEmailVerification(userCred.user);
+          alert("Cuenta creada y correo de verificación enviado.");
+          return { ok: true, uid };
+        } catch (err) {
+          if (err.code === 'auth/email-already-in-use') {
+            // show modal with options
+            openEmailInUseModal(email);
+          } else {
+            showError("Error en createUserWithEmailAndPassword", err);
+            alert("Error en registro: " + (err.message || err.code || err));
+          }
+        }
+      } finally {
+        setRegisterButtonsDisabled(false);
+      }
+    }
+
+    // Hook admin register form to new flow
     document.getElementById("adminRegisterForm").addEventListener("submit", async (e) => {
-      e.preventDefault(); clearError();
+      e.preventDefault();
       const email = document.getElementById("adminRegEmail").value.trim();
       const password = document.getElementById("adminRegPassword").value;
-      if (email !== "jvalladares@hremploy.com.mx") return alert("Solo el administrador autorizado puede registrarse aquí.");
-      if (password.length < 6) return alert("La contraseña debe tener al menos 6 caracteres.");
-      try {
-        const userCred = await createUserWithEmailAndPassword(auth, email, password);
-        const uid = userCred.user.uid;
-        // Guardar ficha mínima en DB
-        await set(ref(db, `usuarios/${uid}`), { email, rol: "Administrador", createdAt: Date.now() });
-        // Enviar verificación
-        await sendEmailVerification(userCred.user);
-        alert("Administrador registrado correctamente. Se ha enviado correo de verificación.");
-        document.getElementById("adminRegisterForm").reset();
-        document.getElementById("adminRegisterForm").style.display = "none";
-        cargarRoles();
-        cargarStaff();
-      } catch (error) {
-        showError("Error en registro", error);
-        alert("Error en registro: " + (error.message || error.code || error));
-      }
+      if (!email || password.length < 6) return alert("Email y contraseña (>=6) requeridos.");
+      await handleRegisterWithCheck(email, password);
     });
 
-    // --- Roles: cargar / guardar / eliminar ---
+    // ---------- Modal: email already in use handlers ----------
+    function openEmailInUseModal(email) {
+      document.getElementById("modalEmailInUseText").textContent = `El correo ${email} ya está registrado en Auth. Elige una acción:`;
+      const modal = document.getElementById("modalEmailInUse");
+      modal.classList.add('show');
+      // attach actions
+      const btnSendReset = document.getElementById("btnSendReset");
+      const btnOpenLogin = document.getElementById("btnOpenLogin");
+      const btnCancel = document.getElementById("btnCancelEmailInUse");
+
+      async function sendResetHandler() {
+        try {
+          await sendPasswordResetEmail(auth, email);
+          alert("Correo de restablecimiento enviado.");
+        } catch (err) {
+          showError("sendPasswordResetEmail", err);
+          alert("No se pudo enviar el correo de restablecimiento.");
+        } finally {
+          closeEmailInUseModal();
+        }
+      }
+      function openLoginHandler() {
+        closeEmailInUseModal();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      function cancelHandler() { closeEmailInUseModal(); }
+
+      btnSendReset.addEventListener('click', sendResetHandler, { once: true });
+      btnOpenLogin.addEventListener('click', openLoginHandler, { once: true });
+      btnCancel.addEventListener('click', cancelHandler, { once: true });
+    }
+    function closeEmailInUseModal() {
+      const modal = document.getElementById("modalEmailInUse");
+      modal.classList.remove('show');
+      // remove listeners by cloning nodes (clean)
+      const newSend = document.getElementById("btnSendReset").cloneNode(true);
+      document.getElementById("btnSendReset").parentNode.replaceChild(newSend, document.getElementById("btnSendReset"));
+      const newOpen = document.getElementById("btnOpenLogin").cloneNode(true);
+      document.getElementById("btnOpenLogin").parentNode.replaceChild(newOpen, document.getElementById("btnOpenLogin"));
+      const newCancel = document.getElementById("btnCancelEmailInUse").cloneNode(true);
+      document.getElementById("btnCancelEmailInUse").parentNode.replaceChild(newCancel, document.getElementById("btnCancelEmailInUse"));
+    }
+
+    // ---------- Roles CRUD ----------
     async function cargarRoles() {
       try {
         const snap = await get(ref(db, 'roles'));
@@ -308,7 +419,7 @@
         tbody.innerHTML = '';
         selectRol.innerHTML = '<option value="">Selecciona rol...</option>';
         if (!snap.exists()) {
-          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#666;padding:18px;">No hay roles definidos.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="5" class="muted right">No hay roles definidos.</td></tr>';
           return;
         }
         const roles = snap.val();
@@ -316,7 +427,7 @@
           const r = roles[key];
           const tr = document.createElement('tr');
           tr.innerHTML = `<td>${r.nombre}</td><td>${r.nivel}</td><td>${r.scope}</td><td><pre style="white-space:pre-wrap">${JSON.stringify(r.permisos)}</pre></td>
-            <td style="text-align:right">
+            <td class="right">
               <button data-id="${key}" class="btn-edit-role">Editar</button>
               <button data-id="${key}" class="btn-del-role" style="background:#c00">Eliminar</button>
             </td>`;
@@ -387,7 +498,7 @@
       } catch (err) { showError("guardarRol", err); }
     });
 
-    // --- Staff: cargar / guardar / editar / baja masiva ---
+    // ---------- Staff CRUD ----------
     async function cargarStaff() {
       try {
         const snap = await get(ref(db, 'usuarios'));
@@ -395,7 +506,7 @@
         tbody.innerHTML = '';
         let total = 0;
         if (!snap.exists()) {
-          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#666;padding:18px;">No hay personal registrado.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="7" class="muted right">No hay personal registrado.</td></tr>';
           document.getElementById("totalStaffBadge").textContent = '0 Registros';
           return;
         }
@@ -409,7 +520,7 @@
             <td>${(u.empresas || []).join(', ')}</td>
             <td>${(u.zonas || []).join(', ')}</td>
             <td>${u.estatus || 'Activo'}</td>
-            <td style="text-align:right">
+            <td class="right">
               <button data-uid="${uid}" class="btn-edit-staff">Editar</button>
               <button data-uid="${uid}" class="btn-baja-staff" style="background:#c00">Baja</button>
             </td>`;
@@ -444,26 +555,10 @@
       const empresas = ['Empresa A','Empresa B','Empresa C'];
       cont.innerHTML = '';
       empresas.forEach(emp => {
-        const id = 'emp_' + emp.replace(/\s+/g,'_');
         const checked = selected.includes(emp) ? 'checked' : '';
         const html = `<label style="display:block"><input type="checkbox" data-empresa="${emp}" ${checked}> ${emp}</label>`;
         cont.insertAdjacentHTML('beforeend', html);
       });
-    }
-
-    // Crear cuenta Auth y ficha en DB (si se solicita)
-    async function createAuthAndFicha(email, password, fichaPayload) {
-      try {
-        const userCred = await createUserWithEmailAndPassword(auth, email, password);
-        const uid = userCred.user.uid;
-        // Guardar ficha enlazada al uid
-        await set(ref(db, `usuarios/${uid}`), { ...fichaPayload, email, createdAt: Date.now() });
-        // Enviar verificación
-        await sendEmailVerification(userCred.user);
-        return { ok: true, uid };
-      } catch (err) {
-        return { ok: false, error: err };
-      }
     }
 
     document.getElementById("formStaff").addEventListener("submit", async (e) => {
@@ -480,26 +575,38 @@
       if (!nombre || !rol) return alert("Nombre y rol son requeridos.");
       try {
         if (uid) {
-          // actualizar ficha existente
           const payload = { nombre, telefono, rol, empresas, updatedAt: Date.now() };
           if (pin) payload.pinHash = await hashPin(pin);
           if (email) payload.email = email;
           await update(ref(db, `usuarios/${uid}`), payload);
           alert("Ficha actualizada.");
         } else {
-          // Si se solicita crear cuenta Auth y se proporcionó email, crear Auth y ficha
           if (createAuth) {
             if (!email) return alert("Para crear cuenta Auth necesitas un email.");
             if (!pin || pin.length < 6) return alert("Para crear cuenta Auth usa un PIN de al menos 6 caracteres (se usará como contraseña inicial).");
-            const fichaPayload = { nombre, telefono, rol, empresas, estatus: 'Activo' };
-            const res = await createAuthAndFicha(email, pin, fichaPayload);
-            if (!res.ok) {
-              showError("createAuthAndFicha", res.error);
-              return alert("No se pudo crear la cuenta Auth: " + (res.error.message || res.error.code || res.error));
+            // check DB for existing ficha or Auth
+            const existing = await emailHasFicha(email);
+            if (existing) {
+              alert("Ya existe una ficha con ese email. Usa el flujo de registro con verificación o migración.");
+              return;
             }
-            alert("Cuenta Auth creada y correo de verificación enviado. La ficha fue guardada.");
+            // create Auth and ficha
+            const res = await createUserWithEmailAndPassword(auth, email, pin).then(async uc => {
+              const uidNew = uc.user.uid;
+              await set(ref(db, `usuarios/${uidNew}`), { nombre, telefono, rol, empresas, estatus: 'Activo', email, createdAt: Date.now() });
+              await sendEmailVerification(uc.user);
+              return { ok: true, uid: uidNew };
+            }).catch(async err => {
+              if (err.code === 'auth/email-already-in-use') {
+                openEmailInUseModal(email);
+                return { ok: false, error: err };
+              } else {
+                showError("createUserWithEmailAndPassword", err);
+                return { ok: false, error: err };
+              }
+            });
+            if (res.ok) alert("Cuenta Auth creada y correo de verificación enviado.");
           } else {
-            // crear ficha en DB sin Auth (uid generado por push)
             const newRef = push(ref(db, 'usuarios'));
             const newUid = newRef.key;
             const payload = { nombre, telefono, rol, empresas, estatus: 'Activo', createdAt: Date.now() };
@@ -516,7 +623,7 @@
       } catch (err) { showError("guardarStaff", err); }
     });
 
-    // Baja operativa simple (marca Inactivo)
+    // Baja operativa
     async function bajaStaff(e) {
       const uid = e.currentTarget.dataset.uid;
       if (!confirm("Marcar como Inactivo y reasignar?")) return;
@@ -527,7 +634,7 @@
       } catch (err) { showError("bajaStaff", err); }
     }
 
-    // --- Util: hash PIN (SHA-256 hex) ---
+    // ---------- Utilities ----------
     async function hashPin(pin) {
       const enc = new TextEncoder();
       const data = enc.encode(pin);
@@ -536,7 +643,11 @@
       return hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
     }
 
-    // --- Inicialización: cargar datos ---
+    // ---------- Real-time listeners ----------
+    onValue(ref(db, 'roles'), snapshot => { cargarRoles(); }, err => { console.warn('roles onValue err', err); });
+    onValue(ref(db, 'usuarios'), snapshot => { cargarStaff(); }, err => { console.warn('usuarios onValue err', err); });
+
+    // ---------- Init ----------
     (async function init() {
       try {
         renderEmpresasSelection([]);
@@ -546,13 +657,10 @@
       } catch (err) { showError("init", err); }
     })();
 
-    // Observadores en tiempo real
-    onValue(ref(db, 'roles'), snapshot => { cargarRoles(); }, err => { console.warn('roles onValue err', err); });
-    onValue(ref(db, 'usuarios'), snapshot => { cargarStaff(); }, err => { console.warn('usuarios onValue err', err); });
+    // ---------- Modal close helpers ----------
+    document.getElementById("btnCloseModal").addEventListener("click", () => document.getElementById("modalRol").classList.remove('show'));
 
-    // Nota: migración a Auth
-    // Si ya tienes fichas sin uid y quieres migrarlas a Auth, crea cuentas con createUserWithEmailAndPassword
-    // y luego copia la ficha a usuarios/<uid>. Para migraciones masivas usa Admin SDK en servidor.
+    // ---------- End ----------
   </script>
 </body>
 </html>
