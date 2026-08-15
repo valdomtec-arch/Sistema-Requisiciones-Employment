@@ -180,7 +180,7 @@
       form.style.display = form.style.display === "none" ? "block" : "none";
     });
 
-    // Registro exclusivo administrador
+       // Registro exclusivo administrador
     document.getElementById("adminRegisterForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = document.getElementById("adminRegEmail").value;
@@ -197,9 +197,6 @@
       } catch (error) {
         alert("Error en registro: " + error.message);
       }
-    });
-
-    // Fecha dinámica en footer
     });
 
     // Fecha dinámica en footer
