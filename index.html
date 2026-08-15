@@ -125,7 +125,7 @@
 
   <!-- Botones flotantes WhatsApp -->
   <a href="https://wa.me/5219999999999" class="whatsapp-btn" target="_blank" title="Director">📱</a>
-  <a href="https://wa.me/5218888888888" class="whatsapp-btn" style="right:90px;" target="_blank" title="Administrador">📱</a>
+  <a href="https://wa.me/5216461974763" class="whatsapp-btn" style="right:90px;" target="_blank" title="Administrador">📱</a>
 
   <!-- Firebase y lógica -->
   <script type="module">
@@ -133,9 +133,9 @@
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    // Configuración real de tu proyecto
+    // Configuración real de tu proyecto (copiada de Firebase Console)
     const firebaseConfig = {
-      apiKey: "AIzaSyCGmcrxJsMy5bVS9STGLMgLrui_tA6lUY",
+      apiKey: "TU_API_KEY_REAL_DE_FIREBASE",
       authDomain: "sistema-de-requisiciones-47df8.firebaseapp.com",
       databaseURL: "https://sistema-de-requisiciones-47df8-default-rtdb.firebaseio.com",
       projectId: "sistema-de-requisiciones-47df8",
@@ -192,7 +192,7 @@
       }
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        await set(ref(db, 'usuarios/' + btoa(email)), { email, rol: "Administrador" });
+                await set(ref(db, 'usuarios/' + btoa(email)), { email, rol: "Administrador" });
         alert("Administrador registrado correctamente.");
         e.target.reset();
       } catch (error) {
@@ -200,7 +200,7 @@
       }
     });
 
-       // Fecha dinámica en footer
+    // Fecha dinámica en footer
     document.getElementById("fecha").textContent = new Date().toLocaleDateString();
   </script>
 </body>
