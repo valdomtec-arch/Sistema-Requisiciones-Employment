@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Employment - Módulo de Aprobaciones</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --azul-marino: #001F3F; --amarillo: #FFCC00; --naranja: #FF6600; --blanco: #FFFFFF; --gris-fondo: #F4F6F9; --gris-borde: #CCCCCC; }
+    body { font-family: 'Roboto', sans-serif; margin: 0; background: var(--gris-fondo); color: var(--azul-marino); }
+    .container { max-width: 1100px; margin: 20px auto; padding: 15px; }
+    .nav-bar { background: var(--azul-marino); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); flex-wrap: wrap; gap: 10px; }
+    .nav-brand { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--amarillo); font-size: 1.2rem; text-decoration: none; }
+    .nav-links { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .nav-item { color: var(--blanco); text-decoration: none; font-size: 0.88rem; font-weight: 500; padding: 6px 12px; border-radius: 4px; }
+    .nav-item.active { background: var(--naranja); color: var(--blanco); font-weight: 700; }
+    .btn-logout { background: transparent; border: 1px solid var(--amarillo); color: var(--amarillo); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+
+    .card { background: var(--blanco); padding: 20px; border-radius: 8px; border: 1px solid var(--gris-borde); margin-top: 18px; }
+    .table { width: 100%; border-collapse: collapse; margin-top: 12px; background: var(--blanco); border-radius: 6px; overflow: hidden; border: 1px solid var(--gris-borde); }
+    .table th { background: var(--azul-marino); color: var(--amarillo); padding: 10px; text-align: left; font-size: 0.85rem; }
+    .table td { padding: 10px; border-bottom: 1px solid #EEEEEE; font-size: 0.9rem; }
+    
+    .btn-approve { background: #28a745; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    .btn-reject { background: #dc3545; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <nav class="nav-bar">
+    <a href="dashboard.html" class="nav-brand">Employment Portal</a>
+    <div class="nav-links">
+      <a href="dashboard.html" class="nav-item">Panel Principal</a>
+      <a href="requisiciones.html" class="nav-item">Requisiciones</a>
+      <a href="aprobaciones.html" class="nav-item active">Aprobaciones</a>
+      <a href="catalogos.html" class="nav-item">Catálogos</a>
+      <a href="auditoria.html" class="nav-item">Auditoría</a>
+      <a href="requiadmin.html" class="nav-item">Administración</a>
+      <button id="btnGlobalLogout" class="btn-logout">Salir</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h2>Centro de Aprobaciones y Control de Jerarquías</h2>
+
+    <div class="card">
+      <h3>Solicitudes Pendientes de Autorización</h3>
+      <table class="table">
+        <thead>
+          <tr><th>Solicitante</th><th>Empresa / Puesto</th><th>Plazas</th><th>Sueldo</th><th>Acción</th></tr>
+        </thead>
+        <tbody id="tablaAprobacionesBody">
+          <tr><td colspan="5" style="text-align:center;">Cargando solicitudes...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getDatabase, ref, update, push, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCGmcrxJsMy5bVS9SgTGLMgrLui_tA6luY",
+      authDomain: "sistema-de-requisiciones-47df8.firebaseapp.com",
+      databaseURL: "https://sistema-de-requisiciones-47df8-default-rtdb.firebaseio.com",
+      projectId: "sistema-de-requisiciones-47df8",
+      storageBucket: "sistema-de-requisiciones-47df8.appspot.com",
+      messagingSenderId: "596189555034",
+      appId: "1:596189555034:web:abcdef1234567890"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    let currentUserData = null;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = "index.html"; return; }
+      const snap = await get(ref(db, `usuarios/${user.uid}`));
+      if (snap.exists()) {
+        currentUserData = snap.val();
+        currentUserData.uid = user.uid;
+        
+        // Solo Niveles >= 3 pueden acceder a aprobaciones
+        if ((currentUserData.nivel || 2) < 3) {
+          alert("Acceso denegado: Su nivel de usuario no tiene permisos de aprobación.");
+          window.location.href = "dashboard.html";
+          return;
+        }
+      }
+      cargarPendientes();
+    });
+
+    async function registrarTraza(accion, detalle) {
+      const trazaRef = push(ref(db, 'trazas'));
+      await set(trazaRef, {
+        timestamp: Date.now(),
+        uid: currentUserData.uid,
+        usuario: currentUserData.nombre || currentUserData.email,
+        rol: currentUserData.nombreRol || 'Aprobador',
+        accion: accion,
+        detalle: detalle
+      });
+    }
+
+    function cargarPendientes() {
+      onValue(ref(db, 'requisiciones'), snap => {
+        const tbody = document.getElementById("tablaAprobacionesBody");
+        tbody.innerHTML = '';
+        if(!snap.exists()) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay solicitudes pendientes.</td></tr>';
+          return;
+        }
+
+        let pendientes = 0;
+        Object.keys(snap.val()).forEach(key => {
+          const r = snap.val()[key];
+          if(r.estatus === 'Pendiente') {
+            pendientes++;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td><strong>${r.solicitanteNombre}</strong></td>
+              <td>${r.empresa}<br><small>${r.puesto}</small></td>
+              <td>${r.plazas}</td>
+              <td>$${r.sueldo.toLocaleString()}</td>
+              <td>
+                <button onclick="window.resolver('${key}', 'Aprobada')" class="btn-approve">Aprobar</button>
+                <button onclick="window.resolver('${key}', 'Rechazada')" class="btn-reject">Rechazar</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          }
+        });
+
+        if(pendientes === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay requisiciones pendientes de autorizar.</td></tr>';
+        }
+      });
+    }
+
+    window.resolver = async (key, nuevoEstatus) => {
+      await update(ref(db, `requisiciones/${key}`), {
+        estatus: nuevoEstatus,
+        aprobadorUid: currentUserData.uid,
+        aprobadorNombre: currentUserData.nombre || currentUserData.email,
+        resolvedAt: Date.now()
+      });
+
+      await registrarTraza(`REQUISICION_${nuevoEstatus.toUpperCase()}`, `Solicitud #${key.substr(-5)} marcada como ${nuevoEstatus}`);
+      alert(`Requisición ${nuevoEstatus.toLowerCase()} con éxito.`);
+    };
+
+    document.getElementById("btnGlobalLogout").addEventListener("click", () => signOut(auth));
+  </script>
+</body>
+</html>
