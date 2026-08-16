@@ -25,7 +25,6 @@
       min-height: 100vh;
     }
 
-    /* BARRA DE NAVEGACIÓN SUPERIOR */
     .nav-bar {
       background: var(--azul-marino);
       padding: 12px 20px;
@@ -36,53 +35,14 @@
       flex-wrap: wrap;
       gap: 10px;
     }
-    .nav-brand {
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 700;
-      color: var(--amarillo);
-      font-size: 1.2rem;
-      text-decoration: none;
-    }
-    .nav-links {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .nav-item {
-      color: var(--blanco);
-      text-decoration: none;
-      font-size: 0.88rem;
-      font-weight: 500;
-      padding: 6px 12px;
-      border-radius: 4px;
-      transition: background 0.2s, color 0.2s;
-    }
-    .nav-item:hover {
-      background: rgba(255,255,255,0.15);
-      color: var(--amarillo);
-    }
-    .nav-item.active {
-      background: var(--naranja);
-      color: var(--blanco);
-      font-weight: 700;
-    }
-    .btn-logout-nav {
-      background: transparent;
-      border: 1px solid var(--amarillo);
-      color: var(--amarillo);
-      padding: 5px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.8rem;
-      font-weight: bold;
-    }
-    .btn-logout-nav:hover {
-      background: var(--amarillo);
-      color: var(--azul-marino);
-    }
+    .nav-brand { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--amarillo); font-size: 1.2rem; text-decoration: none; }
+    .nav-links { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .nav-item { color: var(--blanco); text-decoration: none; font-size: 0.88rem; font-weight: 500; padding: 6px 12px; border-radius: 4px; transition: background 0.2s, color 0.2s; }
+    .nav-item:hover { background: rgba(255,255,255,0.15); color: var(--amarillo); }
+    .nav-item.active { background: var(--naranja); color: var(--blanco); font-weight: 700; }
+    .btn-logout-nav { background: transparent; border: 1px solid var(--amarillo); color: var(--amarillo); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+    .btn-logout-nav:hover { background: var(--amarillo); color: var(--azul-marino); }
 
-    /* CONTENEDOR PRINCIPAL FLEXIBLE */
     .main-content {
       flex: 1;
       max-width: 1100px;
@@ -92,7 +52,6 @@
       box-sizing: border-box;
     }
 
-    /* BANNER DE BIENVENIDA */
     .banner { 
       background: linear-gradient(135deg, var(--azul-marino) 70%, var(--naranja) 100%); 
       color: var(--blanco); 
@@ -112,7 +71,6 @@
     .user-info { background: rgba(255,255,255,0.15); padding: 10px 16px; border-radius: 8px; text-align: right; }
     .user-info .badge-rol { background: var(--amarillo); color: var(--azul-marino); font-weight: 700; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; display: inline-block; margin-top: 4px; }
 
-    /* GRILLA ESTRUCTURADA DE MÓDULOS */
     .grid-modulos { 
       display: grid; 
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
@@ -162,17 +120,14 @@
 </head>
 <body>
 
-  <!-- BARRA DE NAVEGACIÓN SUPERIOR FIJA -->
   <nav class="nav-bar">
     <a href="dashboard.html" class="nav-brand">Employment Portal</a>
     <div class="nav-links" id="navLinksContainer">
       <a href="dashboard.html" class="nav-item active">Panel Principal</a>
-      <!-- Los enlaces dinámicos se habilitarán según el nivel del usuario -->
     </div>
     <button id="btnNavLogout" class="btn-logout-nav">Salir</button>
   </nav>
 
-  <!-- CONTENIDO PRINCIPAL -->
   <main class="main-content">
     <div class="banner">
       <div>
@@ -185,7 +140,6 @@
       </div>
     </div>
 
-    <!-- MÓDULOS DE ACCESO DINÁMICO -->
     <div class="grid-modulos" id="contenedorModulos">
       <div style="grid-column: 1/-1; text-align: center; padding: 40px;">Verificando nivel de acceso...</div>
     </div>
@@ -220,24 +174,46 @@
         return;
       }
 
+      const userEmail = (user.email || "").toLowerCase();
+      let nivelUsuario = 2;
+      let nombreUsuario = user.email;
+      let nombreRol = "Solicitante";
+
       try {
-        const snapUser = await get(ref(db, `usuarios/${user.uid}`));
-        let userData = snapUser.exists() ? snapUser.val() : { nombre: user.email, rol: "rol_reclutador" };
+        const snapUsers = await get(ref(db, "usuarios"));
+        if (snapUsers.exists()) {
+          const usuariosData = snapUsers.val();
+          
+          // BUSCA COINCIDENCIA POR CORREO
+          const userKey = Object.keys(usuariosData).find(
+            key => usuariosData[key].email && usuariosData[key].email.toLowerCase() === userEmail
+          );
 
-        const snapRol = await get(ref(db, `roles/${userData.rol}`));
-        let rolData = snapRol.exists() ? snapRol.val() : { nombre: "Solicitante", nivel: 2 };
+          if (userKey) {
+            const perfil = usuariosData[userKey];
+            nombreUsuario = perfil.nombre || user.email;
+            nombreRol = perfil.nombreRol || "Usuario";
+            nivelUsuario = parseInt(perfil.nivel) || 2;
+          }
+        }
 
-        document.getElementById("userName").textContent = userData.nombre || user.email;
-        document.getElementById("userRole").textContent = rolData.nombre;
+        // REGLA DE RESPALDO PARA ADMINISTRADOR
+        if (userEmail === "jvalladares@hremploy.com.mx") {
+          nivelUsuario = 5;
+          nombreRol = "Administrador Master";
+        }
 
-        configurarNavegacionSuperior(rolData.nivel, userData.rol);
-        renderizarModulos(rolData.nivel, userData.rol);
+        document.getElementById("userName").textContent = nombreUsuario;
+        document.getElementById("userRole").textContent = nombreRol;
+
+        configurarNavegacionSuperior(nivelUsuario);
+        renderizarModulos(nivelUsuario);
       } catch (err) {
         console.error("Error al cargar perfil:", err);
       }
     });
 
-    function configurarNavegacionSuperior(nivel, idRol) {
+    function configurarNavegacionSuperior(nivel) {
       const nav = document.getElementById("navLinksContainer");
       let linksHTML = `<a href="dashboard.html" class="nav-item active">Panel Principal</a>`;
 
@@ -248,18 +224,17 @@
         linksHTML += `<a href="aprobaciones.html" class="nav-item">Aprobaciones</a>`;
         linksHTML += `<a href="catalogos.html" class="nav-item">Catálogos</a>`;
       }
-      if (nivel >= 5 || idRol === "rol_admin") {
+      if (nivel >= 5) {
         linksHTML += `<a href="requiadmin.html" class="nav-item">Administración</a>`;
       }
 
       nav.innerHTML = linksHTML;
     }
 
-    function renderizarModulos(nivel, idRol) {
+    function renderizarModulos(nivel) {
       const container = document.getElementById("contenedorModulos");
       container.innerHTML = "";
 
-      // 1. MÓDULO SOLICITUDES (Nivel 2 o superior)
       if (nivel >= 2) {
         container.innerHTML += `
           <div class="card-modulo">
@@ -272,7 +247,6 @@
         `;
       }
 
-      // 2. MÓDULO BANDEJA DE APROBACIONES (Nivel 4 o superior)
       if (nivel >= 4) {
         container.innerHTML += `
           <div class="card-modulo">
@@ -283,10 +257,7 @@
             <a href="aprobaciones.html" class="btn-modulo">Revisar Solicitudes</a>
           </div>
         `;
-      }
 
-      // 3. MÓDULO CATÁLOGOS (Nivel 4 o superior)
-      if (nivel >= 4) {
         container.innerHTML += `
           <div class="card-modulo">
             <div>
@@ -298,8 +269,7 @@
         `;
       }
 
-      // 4. MÓDULO ADMINISTRACIÓN Y ROLES (Exclusivo Nivel 5)
-      if (nivel >= 5 || idRol === "rol_admin") {
+      if (nivel >= 5) {
         container.innerHTML += `
           <div class="card-modulo admin">
             <div>

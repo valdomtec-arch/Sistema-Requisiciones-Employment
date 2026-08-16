@@ -18,7 +18,6 @@
     body { font-family: 'Roboto', sans-serif; margin: 0; background: var(--gris-fondo); color: var(--azul-marino); }
     .container { max-width: 1100px; margin: 20px auto; padding: 15px; }
     
-    /* BARRA DE NAVEGACIÓN PRINCIPAL */
     .nav-bar {
       background: var(--azul-marino);
       padding: 12px 20px;
@@ -29,53 +28,14 @@
       flex-wrap: wrap;
       gap: 10px;
     }
-    .nav-brand {
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 700;
-      color: var(--amarillo);
-      font-size: 1.2rem;
-      text-decoration: none;
-    }
-    .nav-links {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .nav-item {
-      color: var(--blanco);
-      text-decoration: none;
-      font-size: 0.88rem;
-      font-weight: 500;
-      padding: 6px 12px;
-      border-radius: 4px;
-      transition: background 0.2s, color 0.2s;
-    }
-    .nav-item:hover {
-      background: rgba(255,255,255,0.15);
-      color: var(--amarillo);
-    }
-    .nav-item.active {
-      background: var(--naranja);
-      color: var(--blanco);
-      font-weight: 700;
-    }
-    .btn-logout-nav {
-      background: transparent;
-      border: 1px solid var(--amarillo);
-      color: var(--amarillo);
-      padding: 5px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.8rem;
-      font-weight: bold;
-    }
-    .btn-logout-nav:hover {
-      background: var(--amarillo);
-      color: var(--azul-marino);
-    }
+    .nav-brand { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--amarillo); font-size: 1.2rem; text-decoration: none; }
+    .nav-links { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .nav-item { color: var(--blanco); text-decoration: none; font-size: 0.88rem; font-weight: 500; padding: 6px 12px; border-radius: 4px; transition: background 0.2s, color 0.2s; }
+    .nav-item:hover { background: rgba(255,255,255,0.15); color: var(--amarillo); }
+    .nav-item.active { background: var(--naranja); color: var(--blanco); font-weight: 700; }
+    .btn-logout-nav { background: transparent; border: 1px solid var(--amarillo); color: var(--amarillo); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+    .btn-logout-nav:hover { background: var(--amarillo); color: var(--azul-marino); }
 
-    /* BANNER INSTITUCIONAL */
     .banner { 
       background: linear-gradient(135deg, var(--azul-marino) 70%, var(--naranja) 100%); 
       color: var(--blanco); 
@@ -89,7 +49,6 @@
     .banner p { margin: 5px 0 0 0; font-size: 1rem; color: var(--blanco); }
     .status-conexion { font-size: 0.85rem; background: rgba(255,255,255,0.15); display: inline-block; padding: 4px 12px; border-radius: 20px; margin-top: 8px; }
 
-    /* TARJETAS Y FORMULARIOS */
     .card { background: var(--blanco); padding: 20px; border-radius: 8px; border: 1px solid var(--gris-borde); margin-top: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
     h2, h3 { font-family: 'Montserrat', sans-serif; color: var(--azul-marino); margin-top: 0; }
     
@@ -97,7 +56,6 @@
     input, select, textarea { font-size: 0.95rem; padding: 10px; margin: 4px 0 12px 0; width: 100%; box-sizing: border-box; border: 1px solid var(--gris-borde); border-radius: 6px; }
     input:focus, select:focus, textarea:focus { outline: none; border-color: var(--naranja); box-shadow: 0 0 5px rgba(255,102,0,0.3); }
 
-    /* BOTONES CON PALETA DE COLORES */
     button { cursor: pointer; border: none; background: var(--naranja); color: var(--blanco); font-weight: 700; padding: 10px 16px; border-radius: 6px; font-size: 0.95rem; transition: background 0.2s; }
     button:hover { background: #e05500; }
     .btn-secondary { background: var(--azul-marino); color: var(--amarillo); }
@@ -105,14 +63,12 @@
     .btn-danger { background: #CC0000; color: var(--blanco); }
     .btn-danger:hover { background: #990000; }
 
-    /* TABLAS Y BADGES */
     .table { width: 100%; border-collapse: collapse; margin-top: 12px; background: var(--blanco); border-radius: 6px; overflow: hidden; border: 1px solid var(--gris-borde); }
     .table th { background: var(--azul-marino); color: var(--amarillo); padding: 10px; text-align: left; font-family: 'Montserrat', sans-serif; font-size: 0.85rem; }
     .table td { padding: 10px; border-bottom: 1px solid #EEEEEE; font-size: 0.9rem; }
     .table tr:hover { background: #FFFDE6; }
     .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.8rem; background: var(--amarillo); color: var(--azul-marino); }
 
-    /* MODALES */
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,31,63,0.7); align-items: center; justify-content: center; z-index: 9999; }
     .modal.show { display: flex; }
     .modal-content { background: var(--blanco); padding: 24px; border-radius: 8px; width: 92%; max-width: 650px; border-top: 6px solid var(--naranja); box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
@@ -125,7 +81,6 @@
 </head>
 <body>
 
-  <!-- BARRA DE NAVEGACIÓN SUPERIOR -->
   <nav class="nav-bar">
     <a href="dashboard.html" class="nav-brand">Employment Portal</a>
     <div class="nav-links">
@@ -140,44 +95,15 @@
 
   <div class="container">
 
-    <!-- BANNER CABECERA -->
     <div class="banner">
       <h1>Employment Requisiciones</h1>
       <p>Panel de Control Administrativo & Segregación de Funciones</p>
       <div id="conexion" class="status-conexion">Conectando con servidor...</div>
     </div>
 
-    <!-- LOGIN DE ACCESO DIRECTO -->
-    <div class="card" id="cardLogin">
-      <h2>Acceso al Panel de Administración</h2>
-      <form id="loginForm">
-        <label>Correo Institucional</label>
-        <input id="userEmail" type="email" placeholder="jvalladares@hremploy.com.mx" required />
-        <label>Contraseña</label>
-        <input id="userPassword" type="password" placeholder="••••••••" required />
-        <div class="flex" style="margin-top:10px;">
-          <button type="submit">Ingresar al Panel</button>
-          <button type="button" id="btnShowRegister" class="btn-secondary">Registrar Admin</button>
-        </div>
-      </form>
-    </div>
-
-    <!-- REGISTRO AUXILIAR ADMIN -->
-    <div class="card" id="adminRegisterForm" style="display:none;">
-      <h3>Crear Cuenta Administrador (Auth)</h3>
-      <form id="formRegAdmin">
-        <input id="adminRegEmail" type="email" placeholder="correo.admin@hremploy.com.mx" required />
-        <input id="adminRegPassword" type="password" placeholder="Contraseña (Mínimo 6 caracteres)" required />
-        <div class="flex" style="margin-top:10px;">
-          <button type="submit">Guardar Administrador</button>
-          <button type="button" id="btnCancelAdmin" class="btn-secondary">Cancelar</button>
-        </div>
-      </form>
-    </div>
-
     <div id="errorLog" class="error-log"></div>
 
-    <!-- SECCIÓN: ROLES DINÁMICOS DEL SISTEMA -->
+    <!-- ROLES DEL SISTEMA -->
     <div class="card">
       <div class="flex" style="justify-content:space-between;">
         <h3>Catálogo de Roles y Niveles de Autorización</h3>
@@ -185,23 +111,22 @@
       </div>
       <table class="table">
         <thead>
-          <tr><th>Nombre del Rol</th><th>Nivel</th><th>Scope</th><th>Módulos Autorizados</th><th>Acciones</th></tr>
+          <tr><th>Nombre del Rol</th><th>Nivel</th><th>Scope</th><th>Acciones</th></tr>
         </thead>
         <tbody id="tablaRolesBody">
-          <tr><td colspan="5" style="text-align:center;">Cargando catálogo de roles...</td></tr>
+          <tr><td colspan="4" style="text-align:center;">Cargando catálogo de roles...</td></tr>
         </tbody>
       </table>
     </div>
 
-    <!-- SECCIÓN: FICHA DE PERSONAL / RECLUTADORES -->
+    <!-- FICHA DE PERSONAL -->
     <div class="card">
       <div class="flex" style="justify-content:space-between;">
         <h3>Ficha de Personal y Cadena de Mando</h3>
-        <span id="roleBadgeDisplay" class="badge">Modo: Nuevo Registro</span>
+        <span id="roleBadgeDisplay" class="badge">Nuevo Registro</span>
       </div>
 
       <form id="formStaff" style="margin-top:12px;">
-        <input id="staffId" type="hidden" />
         <div class="flex" style="flex-wrap:wrap;">
           <div style="flex:1; min-width:220px;">
             <label>Nombre Completo</label>
@@ -217,19 +142,14 @@
           </div>
         </div>
 
-        <div>
-          <label>Correo Electrónico (Acceso Auth)</label>
-          <input id="staffEmail" type="email" placeholder="reclutador@hremploy.com.mx" required />
-          <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer;">
-            <input id="chkCreateAuth" type="checkbox" style="width:auto; margin:0;" checked> 
-            Enviar correo de verificación/activación de cuenta
-          </label>
-        </div>
-
-        <div style="margin-top:12px;">
-          <label>Vacantes y Clientes Asignados para Gastos</label>
-          <div id="vacantesContainer" style="border:1px solid var(--gris-borde); padding:10px; border-radius:6px; background:#FAFAFA;">
-            Cargando vacantes activas...
+        <div class="flex" style="flex-wrap:wrap;">
+          <div style="flex:1; min-width:220px;">
+            <label>Correo Electrónico (Acceso System)</label>
+            <input id="staffEmail" type="email" placeholder="usuario@hremploy.com.mx" required />
+          </div>
+          <div style="flex:1; min-width:220px;">
+            <label>Contraseña Inicial</label>
+            <input id="staffPassword" type="password" placeholder="Mínimo 6 caracteres" required />
           </div>
         </div>
 
@@ -239,7 +159,7 @@
       </form>
     </div>
 
-    <!-- SECCIÓN: DIRECTORIO ACTIVO -->
+    <!-- DIRECTORIO ACTIVO -->
     <div class="card">
       <div class="flex" style="justify-content:space-between;">
         <h3>Directorio Activo de Personal</h3>
@@ -247,7 +167,7 @@
       </div>
       <table class="table">
         <thead>
-          <tr><th>Colaborador</th><th>Rol</th><th>Contacto</th><th>Clientes/Vacantes</th><th>Estatus</th><th>Acciones</th></tr>
+          <tr><th>Colaborador</th><th>Rol</th><th>Nivel</th><th>Contacto</th><th>Estatus</th><th>Acciones</th></tr>
         </thead>
         <tbody id="tablaStaffBody">
           <tr><td colspan="6" style="text-align:center;">Cargando personal...</td></tr>
@@ -257,12 +177,11 @@
 
   </div>
 
-  <!-- MODAL: CREAR/EDITAR ROL -->
+  <!-- MODAL: CREAR ROL -->
   <div id="modalRol" class="modal">
     <div class="modal-content">
-      <h3 id="modalRolTitle">Gestor de Rol Dinámico</h3>
+      <h3>Gestor de Rol Dinámico</h3>
       <form id="formNuevoRol">
-        <input id="rolIdHidden" type="hidden" />
         <div class="flex" style="flex-wrap:wrap;">
           <div style="flex:1; min-width:200px;">
             <label>Nombre del Rol</label>
@@ -273,6 +192,7 @@
             <select id="rolNivel">
               <option value="5">Nivel 5 (Director / Admin)</option>
               <option value="4">Nivel 4 (Gerente / Coordinador)</option>
+              <option value="3">Nivel 3 (Supervisor / Implant)</option>
               <option value="2" selected>Nivel 2 (Reclutador / Solicitante)</option>
             </select>
           </div>
@@ -284,11 +204,6 @@
               <option value="plant">Local / Planta</option>
             </select>
           </div>
-        </div>
-
-        <div>
-          <label>Configuración de Permisos (JSON)</label>
-          <textarea id="rolPermisos" rows="5" placeholder='{"mod_requisiciones": {"crear": true, "aprobar": false}}'></textarea>
         </div>
 
         <div class="right" style="margin-top:12px;">
@@ -303,26 +218,21 @@
     Employment Requisiciones v2.0 | Todos los derechos reservados &copy; <span id="fecha"></span>
   </footer>
 
-  <!-- SCRIPT DE INICIALIZACIÓN Y LÓGICA DE CONTROL -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import {
       getAuth,
-      signInWithEmailAndPassword,
-      signOut,
-      setPersistence,
-      browserLocalPersistence
+      signOut
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import {
       getDatabase,
       ref,
       set,
-      get,
       push,
+      remove,
       onValue
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    // CONFIGURACIÓN DE FIREBASE
     const firebaseConfig = {
       apiKey: "AIzaSyCGmcrxJsMy5bVS9SgTGLMgrLui_tA6luY",
       authDomain: "sistema-de-requisiciones-47df8.firebaseapp.com",
@@ -333,16 +243,11 @@
       appId: "1:596189555034:web:abcdef1234567890"
     };
 
-    let app, auth, db;
-    try {
-      app = initializeApp(firebaseConfig);
-      auth = getAuth(app);
-      db = getDatabase(app);
-      await setPersistence(auth, browserLocalPersistence);
-      document.getElementById("conexion").textContent = "✅ Servidor Conectado (Auth + Realtime DB)";
-    } catch (err) {
-      showError("Error de Conexión", err);
-    }
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    document.getElementById("conexion").textContent = "✅ Servidor Conectado";
 
     function showError(title, err) {
       const el = document.getElementById("errorLog");
@@ -350,34 +255,8 @@
       el.textContent = `${title}: ${err.message || err}`;
     }
 
-    // MANEJO DE LOGIN
-    document.getElementById("loginForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("userEmail").value.trim();
-      const password = document.getElementById("userPassword").value;
-      try {
-        const cred = await signInWithEmailAndPassword(auth, email, password);
-        const uid = cred.user.uid;
-        const snap = await get(ref(db, `usuarios/${uid}`));
-        if (snap.exists()) {
-          alert("Acceso correcto. Bienvenido al panel.");
-          document.getElementById("cardLogin").style.display = "none";
-        } else {
-          alert("Usuario autenticado sin ficha activa en la Base de Datos.");
-        }
-      } catch (err) {
-        showError("Error al Iniciar Sesión", err);
-      }
-    });
+    let rolesCache = {};
 
-    // CERRAR SESIÓN DESDE LA NAV-BAR
-    document.getElementById("btnGlobalLogout").addEventListener("click", () => {
-      signOut(auth).then(() => {
-        window.location.href = "index.html";
-      });
-    });
-
-    // CARGAR ROLES
     function cargarRoles() {
       onValue(ref(db, 'roles'), (snap) => {
         const tbody = document.getElementById("tablaRolesBody");
@@ -386,21 +265,20 @@
         selectRol.innerHTML = '<option value="">Selecciona un Rol...</option>';
 
         if (!snap.exists()) {
-          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay roles registrados.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No hay roles registrados.</td></tr>';
           return;
         }
 
-        const roles = snap.val();
-        Object.keys(roles).forEach(key => {
-          const r = roles[key];
+        rolesCache = snap.val();
+        Object.keys(rolesCache).forEach(key => {
+          const r = rolesCache[key];
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td><strong>${r.nombre}</strong></td>
             <td>Nivel ${r.nivel}</td>
             <td>${r.scope}</td>
-            <td><small>${JSON.stringify(r.permisos || {})}</small></td>
             <td>
-              <button onclick="eliminarRol('${key}')" class="btn-danger" style="padding:4px 8px; font-size:0.75rem;">Eliminar</button>
+              <button onclick="window.eliminarRol('${key}')" class="btn-danger" style="padding:4px 8px; font-size:0.75rem;">Eliminar</button>
             </td>
           `;
           tbody.appendChild(tr);
@@ -413,7 +291,6 @@
       });
     }
 
-    // CARGAR PERSONAL
     function cargarStaff() {
       onValue(ref(db, 'usuarios'), (snap) => {
         const tbody = document.getElementById("tablaStaffBody");
@@ -432,12 +309,12 @@
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td><strong>${u.nombre}</strong><br><small>${u.email}</small></td>
-            <td>${u.rol}</td>
+            <td>${u.nombreRol || 'Sin asignar'}</td>
+            <td>Nivel ${u.nivel || 2}</td>
             <td>${u.telefono || 'N/A'}</td>
-            <td><small>${(u.vacantes || ['Todas']).join(', ')}</small></td>
             <td><span class="badge">${u.estatus || 'Activo'}</span></td>
             <td>
-              <button onclick="bajaStaff('${uid}')" class="btn-danger" style="padding:4px 8px; font-size:0.75rem;">Baja</button>
+              <button onclick="window.bajaStaff('${uid}')" class="btn-danger" style="padding:4px 8px; font-size:0.75rem;">Baja</button>
             </td>
           `;
           tbody.appendChild(tr);
@@ -446,32 +323,38 @@
       });
     }
 
-    // REGISTRAR NUEVO PERSONAL
+    // CREACIÓN DE NUEVO PERSONAL CON ROL Y NIVEL APLANADO
     document.getElementById("formStaff").addEventListener("submit", async (e) => {
       e.preventDefault();
       const nombre = document.getElementById("staffNombre").value.trim();
       const telefono = document.getElementById("staffTelefono").value.trim();
-      const rol = document.getElementById("staffRol").value;
-      const email = document.getElementById("staffEmail").value.trim();
+      const rolKey = document.getElementById("staffRol").value;
+      const email = document.getElementById("staffEmail").value.trim().toLowerCase();
+
+      const rolSeleccionado = rolesCache[rolKey];
+      const nivel = rolSeleccionado ? parseInt(rolSeleccionado.nivel) : 2;
+      const nombreRol = rolSeleccionado ? rolSeleccionado.nombre : 'Solicitante';
 
       try {
         const newRef = push(ref(db, 'usuarios'));
         await set(newRef, {
           nombre,
           telefono,
-          rol,
+          rolKey,
+          nombreRol,
+          nivel,
           email,
           estatus: 'Activo',
           createdAt: Date.now()
         });
-        alert("Ficha de colaborador guardada exitosamente.");
+        alert(`Colaborador ${nombre} guardado exitosamente con Nivel ${nivel}.`);
         document.getElementById("formStaff").reset();
       } catch (err) {
         showError("Error al guardar personal", err);
       }
     });
 
-    // ABRIR/CERRAR MODAL ROL
+    // MODAL DE ROLES
     document.getElementById("btnNuevoRol").addEventListener("click", () => {
       document.getElementById("modalRol").classList.add("show");
     });
@@ -479,7 +362,38 @@
       document.getElementById("modalRol").classList.remove("show");
     });
 
-    // INICIALIZACIÓN
+    document.getElementById("formNuevoRol").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const nombre = document.getElementById("rolNombre").value.trim();
+      const nivel = parseInt(document.getElementById("rolNivel").value);
+      const scope = document.getElementById("rolScope").value;
+
+      try {
+        const newRef = push(ref(db, 'roles'));
+        await set(newRef, { nombre, nivel, scope, createdAt: Date.now() });
+        document.getElementById("modalRol").classList.remove("show");
+        document.getElementById("formNuevoRol").reset();
+      } catch (err) {
+        showError("Error al crear rol", err);
+      }
+    });
+
+    window.eliminarRol = (key) => {
+      if (confirm("¿Deseas eliminar este rol?")) {
+        remove(ref(db, `roles/${key}`));
+      }
+    };
+
+    window.bajaStaff = (key) => {
+      if (confirm("¿Deseas dar de baja a este colaborador?")) {
+        remove(ref(db, `usuarios/${key}`));
+      }
+    };
+
+    document.getElementById("btnGlobalLogout").addEventListener("click", () => {
+      signOut(auth).then(() => window.location.href = "index.html");
+    });
+
     document.getElementById("fecha").textContent = new Date().getFullYear();
     cargarRoles();
     cargarStaff();
