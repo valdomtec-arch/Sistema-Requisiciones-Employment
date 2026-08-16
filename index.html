@@ -164,11 +164,6 @@
       signInWithEmailAndPassword,
       onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import {
-      getDatabase,
-      ref,
-      get
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCGmcrxJsMy5bVS9SgTGLMgrLui_tA6luY",
@@ -182,7 +177,6 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getDatabase(app);
 
     const msgBox = document.getElementById("statusMsg");
 
@@ -192,35 +186,16 @@
       msgBox.style.display = "block";
     }
 
-    // REDIRECCIÓN SEGÚN ROL REGISTRADO EN REALTIME DATABASE
-    async function redirigirPorRol(uid) {
-      showMsg("Validando permisos y rol de usuario...", "info");
-      try {
-        const snap = await get(ref(db, `usuarios/${uid}`));
-        if (snap.exists()) {
-          const userData = snap.val();
-          const rol = userData.rol;
-
-          if (rol === "rol_admin") {
-            window.location.href = "requiadmin.html";
-          } else if (rol === "rol_coordinador") {
-            window.location.href = "aprobaciones.html";
-          } else {
-            window.location.href = "requisiciones.html";
-          }
-        } else {
-          // Si es un usuario nuevo en Auth pero sin nodo en DB, entra por defecto a Administración
-          window.location.href = "requiadmin.html";
-        }
-      } catch (err) {
-        showMsg("Error al consultar perfil de usuario: " + err.message, "error");
-      }
+    // REDIRECCIÓN UNIFICADA AL DASHBOARD
+    function redirigirAlDashboard() {
+      showMsg("Acceso autorizado. Redirigiendo al panel...", "info");
+      window.location.href = "dashboard.html";
     }
 
     // MANEJO DE SESIÓN ACTIVA
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        redirigirPorRol(user.uid);
+        redirigirAlDashboard();
       }
     });
 
@@ -236,8 +211,8 @@
       msgBox.style.display = "none";
 
       try {
-        const cred = await signInWithEmailAndPassword(auth, email, password);
-        await redirigirPorRol(cred.user.uid);
+        await signInWithEmailAndPassword(auth, email, password);
+        redirigirAlDashboard();
       } catch (err) {
         btn.disabled = false;
         btn.textContent = "Ingresar al Sistema";

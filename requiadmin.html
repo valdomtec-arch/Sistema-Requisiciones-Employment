@@ -18,6 +18,63 @@
     body { font-family: 'Roboto', sans-serif; margin: 0; background: var(--gris-fondo); color: var(--azul-marino); }
     .container { max-width: 1100px; margin: 20px auto; padding: 15px; }
     
+    /* BARRA DE NAVEGACIÓN PRINCIPAL */
+    .nav-bar {
+      background: var(--azul-marino);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .nav-brand {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      color: var(--amarillo);
+      font-size: 1.2rem;
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-item {
+      color: var(--blanco);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 4px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .nav-item:hover {
+      background: rgba(255,255,255,0.15);
+      color: var(--amarillo);
+    }
+    .nav-item.active {
+      background: var(--naranja);
+      color: var(--blanco);
+      font-weight: 700;
+    }
+    .btn-logout-nav {
+      background: transparent;
+      border: 1px solid var(--amarillo);
+      color: var(--amarillo);
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+    .btn-logout-nav:hover {
+      background: var(--amarillo);
+      color: var(--azul-marino);
+    }
+
     /* BANNER INSTITUCIONAL */
     .banner { 
       background: linear-gradient(135deg, var(--azul-marino) 70%, var(--naranja) 100%); 
@@ -68,14 +125,27 @@
 </head>
 <body>
 
-  <!-- BANNER CABECERA -->
-  <div class="banner">
-    <h1>Employment Requisiciones</h1>
-    <p>Panel de Control Administrativo & Segregación de Funciones</p>
-    <div id="conexion" class="status-conexion">Conectando con servidor...</div>
-  </div>
+  <!-- BARRA DE NAVEGACIÓN SUPERIOR -->
+  <nav class="nav-bar">
+    <a href="dashboard.html" class="nav-brand">Employment Portal</a>
+    <div class="nav-links">
+      <a href="dashboard.html" class="nav-item">Panel Principal</a>
+      <a href="requisiciones.html" class="nav-item">Requisiciones</a>
+      <a href="aprobaciones.html" class="nav-item">Aprobaciones</a>
+      <a href="catalogos.html" class="nav-item">Catálogos</a>
+      <a href="requiadmin.html" class="nav-item active">Administración</a>
+      <button id="btnGlobalLogout" class="btn-logout-nav">Salir</button>
+    </div>
+  </nav>
 
   <div class="container">
+
+    <!-- BANNER CABECERA -->
+    <div class="banner">
+      <h1>Employment Requisiciones</h1>
+      <p>Panel de Control Administrativo & Segregación de Funciones</p>
+      <div id="conexion" class="status-conexion">Conectando con servidor...</div>
+    </div>
 
     <!-- LOGIN DE ACCESO DIRECTO -->
     <div class="card" id="cardLogin">
@@ -238,9 +308,8 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import {
       getAuth,
-      createUserWithEmailAndPassword,
       signInWithEmailAndPassword,
-      sendEmailVerification,
+      signOut,
       setPersistence,
       browserLocalPersistence
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -250,8 +319,6 @@
       set,
       get,
       push,
-      update,
-      remove,
       onValue
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
@@ -301,6 +368,13 @@
       } catch (err) {
         showError("Error al Iniciar Sesión", err);
       }
+    });
+
+    // CERRAR SESIÓN DESDE LA NAV-BAR
+    document.getElementById("btnGlobalLogout").addEventListener("click", () => {
+      signOut(auth).then(() => {
+        window.location.href = "index.html";
+      });
     });
 
     // CARGAR ROLES
@@ -406,7 +480,7 @@
     });
 
     // INICIALIZACIÓN
-    document.getElementById("fecha").textContent = new Date().toLocaleDateString();
+    document.getElementById("fecha").textContent = new Date().getFullYear();
     cargarRoles();
     cargarStaff();
   </script>
