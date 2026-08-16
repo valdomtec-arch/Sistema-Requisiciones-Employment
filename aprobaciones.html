@@ -34,7 +34,9 @@
     
     .btn-approve { background: #28a745; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.8rem; margin-right: 4px; }
     .btn-reject { background: #dc3545; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
-    .btn-ws { background: #25D366; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.8rem; text-decoration: none; display: inline-block; margin-bottom: 6px; }
+    .btn-ws { background: #25D366; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.8rem; text-decoration: none; display: inline-block; margin-top: 4px; }
+
+    .select-aprobador { width: 100%; max-width: 160px; font-size: 0.8rem; padding: 4px; border: 1px solid var(--gris-borde); border-radius: 4px; margin-bottom: 4px; display: block; }
 
     .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.8rem; background: var(--amarillo); color: var(--azul-marino); }
     .badge-success { background: #28a745; color: #fff; }
@@ -121,12 +123,17 @@
       cargarSolicitudes();
     });
 
-    // Cargar números de teléfono de Supervisores / Administradores / Directores
+    // Cargar únicamente usuarios Nivel 5 autorizados para aprobar con teléfono
     async function cargarAprobadores() {
       const snapUsers = await get(ref(db, 'usuarios'));
       if (snapUsers.exists()) {
         const users = snapUsers.val();
-        listaAprobadores = Object.values(users).filter(u => u.nivel >= 4 && u.telefono);
+        // Filtramos usuarios Nivel 5 con teléfono y flag puedeAprobar (o fallback si aún no se asigna)
+        listaAprobadores = Object.values(users).filter(u => 
+          u.nivel === 5 && 
+          u.telefono && 
+          (u.puedeAprobar === true || u.puedeAprobar === undefined)
+        );
       }
     }
 
@@ -155,11 +162,16 @@
         Object.keys(data).forEach(key => {
           const r = data[key];
           const tr = document.createElement('tr');
-          
-          // Teléfono para WhatsApp (Aprobador asignado o primer Nivel 4/5 activo)
-          const telAprobador = (listaAprobadores.length > 0) ? listaAprobadores[0].telefono : "8124447841";
-          const msjWS = encodeURIComponent(`Hola, se ha generado la Requisición #${key.substr(-5)} por $${(r.totalGasto || 0).toFixed(2)} para ${r.empresaProveedor || 'Proveedor'}. Por favor ingresa a autorizar.`);
-          const urlWS = `https://wa.me/52${telAprobador}?text=${msjWS}`;
+
+          // Generar las opciones del <select> con los usuarios Nivel 5
+          let optionsAprobadores = '';
+          if (listaAprobadores.length > 0) {
+            optionsAprobadores = listaAprobadores.map(ap => 
+              `<option value="${ap.telefono}">${ap.nombre || 'Aprobador'} (${ap.nombreRol || 'Nivel 5'})</option>`
+            ).join('');
+          } else {
+            optionsAprobadores = `<option value="8124447841">General (Sin Nivel 5 asignado)</option>`;
+          }
 
           let estatusBadge = `<span class="badge">${r.estatus || 'Pendiente'}</span>`;
           if(r.estatus === 'Aprobada') estatusBadge = `<span class="badge badge-success">Aprobada</span>`;
@@ -182,7 +194,10 @@
             <td><strong>${r.empresaProveedor || 'N/A'}</strong><br><small>${r.vacanteCliente || 'General'}</small></td>
             <td><strong>$${(r.totalGasto || 0).toLocaleString('es-MX', {minimumFractionDigits:2})}</strong></td>
             <td>
-              <a href="${urlWS}" target="_blank" class="btn-ws">📲 Enviar WS</a>
+              <select id="select_aprobador_${key}" class="select-aprobador">
+                ${optionsAprobadores}
+              </select>
+              <button onclick="window.enviarWhatsApp('${key}', '${r.totalGasto || 0}', '${r.empresaProveedor || 'Proveedor'}')" class="btn-ws">📲 Enviar WS</button>
             </td>
             <td>${accionesHTML}</td>
           `;
@@ -190,6 +205,17 @@
         });
       });
     }
+
+    // Función para abrir la API de WhatsApp con el número del Nivel 5 seleccionado
+    window.enviarWhatsApp = (key, totalGasto, proveedor) => {
+      const selectElem = document.getElementById(`select_aprobador_${key}`);
+      const telefonoDestino = selectElem ? selectElem.value : "8124447841";
+      
+      const msjWS = encodeURIComponent(`Hola, se ha generado la Requisición #${key.substr(-5)} por $${parseFloat(totalGasto).toFixed(2)} para ${proveedor}. Por favor ingresa a autorizar.`);
+      const urlWS = `https://wa.me/52${telefonoDestino}?text=${msjWS}`;
+      
+      window.open(urlWS, '_blank');
+    };
 
     window.resolver = async (key, nuevoEstatus) => {
       const inpMotivo = document.getElementById(`motivo_${key}`);
