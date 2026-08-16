@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Employment - Catálogos Unificados</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --azul-marino: #001F3F;
+      --amarillo: #FFCC00;
+      --naranja: #FF6600;
+      --blanco: #FFFFFF;
+      --gris-fondo: #F4F6F9;
+      --gris-borde: #CCCCCC;
+    }
+
+    body { font-family: 'Roboto', sans-serif; margin: 0; background: var(--gris-fondo); color: var(--azul-marino); }
+    .container { max-width: 1200px; margin: 20px auto; padding: 15px; }
+
+    /* BANNER INSTITUCIONAL */
+    .banner { 
+      background: linear-gradient(135deg, var(--azul-marino) 70%, var(--naranja) 100%); 
+      color: var(--blanco); 
+      text-align: center; 
+      padding: 20px 15px; 
+      border-radius: 10px;
+      border-bottom: 5px solid var(--amarillo);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .banner h1 { margin: 0; font-family: 'Montserrat', sans-serif; font-size: 2rem; color: var(--amarillo); }
+    .banner p { margin: 5px 0 0 0; font-size: 0.95rem; color: var(--blanco); }
+
+    /* NAVEGACIÓN RÁPIDA */
+    .nav-bar { display: flex; gap: 10px; margin-top: 15px; }
+    .nav-bar a { text-decoration: none; padding: 8px 16px; background: var(--azul-marino); color: var(--amarillo); border-radius: 6px; font-weight: 700; font-size: 0.85rem; }
+    .nav-bar a:hover { background: #001226; }
+
+    /* TARJETAS Y TABLAS */
+    .card { background: var(--blanco); padding: 18px; border-radius: 8px; border: 1px solid var(--gris-borde); margin-top: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    h3 { font-family: 'Montserrat', sans-serif; color: var(--azul-marino); margin-top: 0; font-size: 1.1rem; }
+    
+    label { font-weight: 600; font-size: 0.8rem; margin-top: 8px; display: block; color: var(--azul-marino); }
+    input, select { font-size: 0.9rem; padding: 8px; margin: 4px 0 10px 0; width: 100%; box-sizing: border-box; border: 1px solid var(--gris-borde); border-radius: 6px; }
+    input:focus, select:focus { outline: none; border-color: var(--naranja); box-shadow: 0 0 5px rgba(255,102,0,0.3); }
+
+    button { cursor: pointer; border: none; background: var(--naranja); color: var(--blanco); font-weight: 700; padding: 8px 14px; border-radius: 6px; font-size: 0.85rem; transition: background 0.2s; width: 100%; }
+    button:hover { background: #e05500; }
+
+    .table { width: 100%; border-collapse: collapse; margin-top: 10px; background: var(--blanco); border-radius: 6px; overflow: hidden; border: 1px solid var(--gris-borde); }
+    .table th { background: var(--azul-marino); color: var(--amarillo); padding: 8px; text-align: left; font-family: 'Montserrat', sans-serif; font-size: 0.8rem; }
+    .table td { padding: 8px; border-bottom: 1px solid #EEEEEE; font-size: 0.85rem; }
+    .table tr:hover { background: #FFFDE6; }
+    
+    .badge-active { background: #E8F5E9; color: #2E7D32; padding: 2px 6px; border-radius: 10px; font-weight: bold; font-size: 0.7rem; }
+    .badge-inactive { background: #FFEBEE; color: #C62828; padding: 2px 6px; border-radius: 10px; font-weight: bold; font-size: 0.7rem; }
+
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px; }
+
+    footer { margin-top: 30px; padding: 15px; text-align: center; background: var(--azul-marino); color: var(--amarillo); font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="banner">
+      <h1>Employment Catálogos Unificados</h1>
+      <p>Administración de Vacantes, Departamentos de Insumo y Categorías de Gasto</p>
+    </div>
+
+    <div class="nav-bar">
+      <a href="requiadmin.html">← Usuarios y Roles</a>
+      <a href="requisiciones.html">Nueva Requisición</a>
+      <a href="aprobaciones.html">Panel de Aprobaciones</a>
+    </div>
+
+    <div class="grid-3">
+      
+      <!-- 1. VACANTES Y CLIENTES -->
+      <div class="card">
+        <h3>1. Clientes y Vacantes</h3>
+        <form id="formVacante">
+          <label>Cliente / Empresa</label>
+          <input id="vacCliente" placeholder="Ej. Empresa Logistics" required />
+          <label>Puesto / Vacante</label>
+          <input id="vacPuesto" placeholder="Ej. Montacarguista" required />
+          <button type="submit">+ Guardar Vacante</button>
+        </form>
+
+        <table class="table">
+          <thead>
+            <tr><th>Cliente / Vacante</th><th>Estatus</th><th>Acción</th></tr>
+          </thead>
+          <tbody id="tablaVacantesBody">
+            <tr><td colspan="3" style="text-align:center;">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 2. DEPARTAMENTOS E INSUMOS INTERNOS -->
+      <div class="card">
+        <h3>2. Departamentos (Interno)</h3>
+        <form id="formDepartamento">
+          <label>Nombre del Departamento</label>
+          <input id="depNombre" placeholder="Ej. Recursos Humanos, TI, Operaciones" required />
+          <button type="submit">+ Guardar Departamento</button>
+        </form>
+
+        <table class="table">
+          <thead>
+            <tr><th>Departamento</th><th>Estatus</th><th>Acción</th></tr>
+          </thead>
+          <tbody id="tablaDepartamentosBody">
+            <tr><td colspan="3" style="text-align:center;">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 3. CATEGORÍAS DE GASTO E INSUMOS -->
+      <div class="card">
+        <h3>3. Categorías de Insumos</h3>
+        <form id="formCategoria">
+          <label>Concepto / Tipo de Material</label>
+          <input id="catNombre" placeholder="Ej. Papelería, Pauta FB, Equipos" required />
+          <button type="submit">+ Guardar Concepto</button>
+        </form>
+
+        <table class="table">
+          <thead>
+            <tr><th>Concepto</th><th>Estatus</th><th>Acción</th></tr>
+          </thead>
+          <tbody id="tablaCategoriasBody">
+            <tr><td colspan="3" style="text-align:center;">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    Employment Requisiciones v2.0 | Módulo de Catálogos &copy; <span id="fecha"></span>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCGmcrxJsMy5bVS9SgTGLMgrLui_tA6luY",
+      authDomain: "sistema-de-requisiciones-47df8.firebaseapp.com",
+      databaseURL: "https://sistema-de-requisiciones-47df8-default-rtdb.firebaseio.com",
+      projectId: "sistema-de-requisiciones-47df8",
+      storageBucket: "sistema-de-requisiciones-47df8.appspot.com",
+      messagingSenderId: "596189555034",
+      appId: "1:596189555034:web:abcdef1234567890"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // REGISTROS
+    document.getElementById("formVacante").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      await push(ref(db, "catalogos/vacantes"), {
+        cliente: document.getElementById("vacCliente").value.trim(),
+        puesto: document.getElementById("vacPuesto").value.trim(),
+        activa: true
+      });
+      document.getElementById("formVacante").reset();
+    });
+
+    document.getElementById("formDepartamento").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      await push(ref(db, "catalogos/departamentos"), {
+        nombre: document.getElementById("depNombre").value.trim(),
+        activo: true
+      });
+      document.getElementById("formDepartamento").reset();
+    });
+
+    document.getElementById("formCategoria").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      await push(ref(db, "catalogos/categorias_gasto"), {
+        nombre: document.getElementById("catNombre").value.trim(),
+        activa: true
+      });
+      document.getElementById("formCategoria").reset();
+    });
+
+    // LECTURA EN TIEMPO REAL
+    onValue(ref(db, "catalogos/vacantes"), (snap) => {
+      const tbody = document.getElementById("tablaVacantesBody");
+      tbody.innerHTML = snap.exists() ? "" : '<tr><td colspan="3" style="text-align:center;">Sin datos</td></tr>';
+      if (snap.exists()) {
+        Object.entries(snap.val()).forEach(([key, item]) => {
+          tbody.innerHTML += `
+            <tr>
+              <td><strong>${item.puesto}</strong><br><small>${item.cliente}</small></td>
+              <td><span class="${item.activa ? 'badge-active' : 'badge-inactive'}">${item.activa ? 'Activa' : 'Inactiva'}</span></td>
+              <td><button onclick="toggleEstado('vacantes', '${key}', ${!item.activa})" style="padding:2px 5px; font-size:0.7rem;">Cambiar</button></td>
+            </tr>`;
+        });
+      }
+    });
+
+    onValue(ref(db, "catalogos/departamentos"), (snap) => {
+      const tbody = document.getElementById("tablaDepartamentosBody");
+      tbody.innerHTML = snap.exists() ? "" : '<tr><td colspan="3" style="text-align:center;">Sin datos</td></tr>';
+      if (snap.exists()) {
+        Object.entries(snap.val()).forEach(([key, item]) => {
+          tbody.innerHTML += `
+            <tr>
+              <td><strong>${item.nombre}</strong></td>
+              <td><span class="${item.activo ? 'badge-active' : 'badge-inactive'}">${item.activo ? 'Activo' : 'Inactivo'}</span></td>
+              <td><button onclick="toggleEstado('departamentos', '${key}', ${!item.activo})" style="padding:2px 5px; font-size:0.7rem;">Cambiar</button></td>
+            </tr>`;
+        });
+      }
+    });
+
+    onValue(ref(db, "catalogos/categorias_gasto"), (snap) => {
+      const tbody = document.getElementById("tablaCategoriasBody");
+      tbody.innerHTML = snap.exists() ? "" : '<tr><td colspan="3" style="text-align:center;">Sin datos</td></tr>';
+      if (snap.exists()) {
+        Object.entries(snap.val()).forEach(([key, item]) => {
+          tbody.innerHTML += `
+            <tr>
+              <td><strong>${item.nombre}</strong></td>
+              <td><span class="${item.activa ? 'badge-active' : 'badge-inactive'}">${item.activa ? 'Activa' : 'Inactiva'}</span></td>
+              <td><button onclick="toggleEstado('categorias_gasto', '${key}', ${!item.activa})" style="padding:2px 5px; font-size:0.7rem;">Cambiar</button></td>
+            </tr>`;
+        });
+      }
+    });
+
+    window.toggleEstado = async (nodo, key, nuevoEstado) => {
+      const campo = nodo === 'departamentos' ? 'activo' : 'activa';
+      await update(ref(db, `catalogos/${nodo}/${key}`), { [campo]: nuevoEstado });
+    };
+
+    document.getElementById("fecha").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
