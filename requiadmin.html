@@ -123,7 +123,7 @@
     <div class="card">
       <div class="flex" style="justify-content:space-between;">
         <h3>Ficha de Personal y Cadena de Mando</h3>
-        <span id="roleBadgeDisplay" class="badge">Nuevo Registro</span>
+        <span id="roleBadgeDisplay" class="badge">Alta de Usuario</span>
       </div>
 
       <form id="formStaff" style="margin-top:12px;">
@@ -148,13 +148,13 @@
             <input id="staffEmail" type="email" placeholder="usuario@hremploy.com.mx" required />
           </div>
           <div style="flex:1; min-width:220px;">
-            <label>Contraseña Inicial</label>
-            <input id="staffPassword" type="password" placeholder="Mínimo 6 caracteres" required />
+            <label>Contraseña Inicial de Acceso</label>
+            <input id="staffPassword" type="password" placeholder="Mínimo 6 caracteres" minlength="6" required />
           </div>
         </div>
 
         <div class="right" style="margin-top:15px;">
-          <button type="submit">Guardar Ficha de Personal</button>
+          <button type="submit" id="btnSaveStaff">Crear Usuario e Iniciar Acceso</button>
         </div>
       </form>
     </div>
@@ -222,6 +222,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import {
       getAuth,
+      createUserWithEmailAndPassword,
       signOut
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import {
@@ -243,9 +244,14 @@
       appId: "1:596189555034:web:abcdef1234567890"
     };
 
+    // INSTANCIA PRINCIPAL (Para la sesión del Administrador)
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
+
+    // INSTANCIA SECUNDARIA (Para crear usuarios sin cerrar la sesión actual)
+    const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp");
+    const secondaryAuth = getAuth(secondaryApp);
 
     document.getElementById("conexion").textContent = "✅ Servidor Conectado";
 
@@ -323,21 +329,30 @@
       });
     }
 
-    // CREACIÓN DE NUEVO PERSONAL CON ROL Y NIVEL APLANADO
+    // CREACIÓN COMPLETA DE USUARIO (AUTH + BASE DE DATOS)
     document.getElementById("formStaff").addEventListener("submit", async (e) => {
       e.preventDefault();
+      const btn = document.getElementById("btnSaveStaff");
+      btn.disabled = true;
+      btn.textContent = "Creando credencial en servidor...";
+
       const nombre = document.getElementById("staffNombre").value.trim();
       const telefono = document.getElementById("staffTelefono").value.trim();
       const rolKey = document.getElementById("staffRol").value;
       const email = document.getElementById("staffEmail").value.trim().toLowerCase();
+      const password = document.getElementById("staffPassword").value;
 
       const rolSeleccionado = rolesCache[rolKey];
       const nivel = rolSeleccionado ? parseInt(rolSeleccionado.nivel) : 2;
       const nombreRol = rolSeleccionado ? rolSeleccionado.nombre : 'Solicitante';
 
       try {
-        const newRef = push(ref(db, 'usuarios'));
-        await set(newRef, {
+        // 1. Crear la cuenta real en Firebase Auth usando la instancia secundaria
+        const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+        const newUid = userCredential.user.uid;
+
+        // 2. Guardar el perfil en Realtime Database usando el UID como llave
+        await set(ref(db, `usuarios/${newUid}`), {
           nombre,
           telefono,
           rolKey,
@@ -347,10 +362,18 @@
           estatus: 'Activo',
           createdAt: Date.now()
         });
-        alert(`Colaborador ${nombre} guardado exitosamente con Nivel ${nivel}.`);
+
+        // 3. Cerrar la sesión de la instancia secundaria para mantener limpia la app
+        await signOut(secondaryAuth);
+
+        alert(`✅ Usuario ${nombre} registrado exitosamente con Nivel ${nivel}.\nYa puede ingresar al sistema desde la pantalla principal.`);
         document.getElementById("formStaff").reset();
+        document.getElementById("errorLog").style.display = "none";
       } catch (err) {
-        showError("Error al guardar personal", err);
+        showError("Error al crear credenciales de usuario", err);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Crear Usuario e Iniciar Acceso";
       }
     });
 
