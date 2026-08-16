@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Employment - Portal de Acceso</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --azul-marino: #001F3F;
+      --amarillo: #FFCC00;
+      --naranja: #FF6600;
+      --blanco: #FFFFFF;
+      --gris-fondo: #F4F6F9;
+      --gris-borde: #CCCCCC;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      background: var(--gris-fondo);
+      color: var(--azul-marino);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .main-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card-login {
+      background: var(--blanco);
+      padding: 30px;
+      border-radius: 10px;
+      border: 1px solid var(--gris-borde);
+      border-top: 6px solid var(--azul-marino);
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .logo-container h1 {
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.8rem;
+      color: var(--azul-marino);
+    }
+
+    .logo-container p {
+      margin: 5px 0 20px 0;
+      font-size: 0.9rem;
+      color: #666666;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 0.85rem;
+      display: block;
+      text-align: left;
+      margin-top: 12px;
+      color: var(--azul-marino);
+    }
+
+    input {
+      font-size: 0.95rem;
+      padding: 12px;
+      margin-top: 5px;
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid var(--gris-borde);
+      border-radius: 6px;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--naranja);
+      box-shadow: 0 0 5px rgba(255,102,0,0.3);
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: var(--naranja);
+      color: var(--blanco);
+      font-weight: 700;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 1rem;
+      width: 100%;
+      margin-top: 20px;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #e05500;
+    }
+
+    .status-msg {
+      margin-top: 15px;
+      font-size: 0.85rem;
+      padding: 10px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-msg.error {
+      background: #FFE6E6;
+      color: #990000;
+      border: 1px solid #FF8A80;
+    }
+
+    .status-msg.info {
+      background: #E3F2FD;
+      color: #0D47A1;
+      border: 1px solid #90CAF9;
+    }
+
+    footer {
+      padding: 15px;
+      text-align: center;
+      background: var(--azul-marino);
+      color: var(--amarillo);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="main-container">
+    <div class="card-login">
+      <div class="logo-container">
+        <h1>Employment</h1>
+        <p>Sistema de Requisiciones de Personal</p>
+      </div>
+
+      <form id="portalLoginForm">
+        <label for="email">Correo Institucional</label>
+        <input id="email" type="email" placeholder="usuario@hremploy.com.mx" required />
+
+        <label for="password">Contraseña</label>
+        <input id="password" type="password" placeholder="••••••••" required />
+
+        <button type="submit" id="btnLogin">Ingresar al Sistema</button>
+      </form>
+
+      <div id="statusMsg" class="status-msg"></div>
+    </div>
+  </div>
+
+  <footer>
+    Employment Requisiciones v2.0 | Todos los derechos reservados &copy; <span id="fecha"></span>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import {
+      getDatabase,
+      ref,
+      get
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCGmcrxJsMy5bVS9SgTGLMgrLui_tA6luY",
+      authDomain: "sistema-de-requisiciones-47df8.firebaseapp.com",
+      databaseURL: "https://sistema-de-requisiciones-47df8-default-rtdb.firebaseio.com",
+      projectId: "sistema-de-requisiciones-47df8",
+      storageBucket: "sistema-de-requisiciones-47df8.appspot.com",
+      messagingSenderId: "596189555034",
+      appId: "1:596189555034:web:abcdef1234567890"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    const msgBox = document.getElementById("statusMsg");
+
+    function showMsg(text, type = "info") {
+      msgBox.className = `status-msg ${type}`;
+      msgBox.textContent = text;
+      msgBox.style.display = "block";
+    }
+
+    // REDIRECCIÓN SEGÚN ROL REGISTRADO EN REALTIME DATABASE
+    async function redirigirPorRol(uid) {
+      showMsg("Validando permisos y rol de usuario...", "info");
+      try {
+        const snap = await get(ref(db, `usuarios/${uid}`));
+        if (snap.exists()) {
+          const userData = snap.val();
+          const rol = userData.rol;
+
+          if (rol === "rol_admin") {
+            window.location.href = "requiadmin.html";
+          } else if (rol === "rol_coordinador") {
+            window.location.href = "aprobaciones.html";
+          } else {
+            window.location.href = "requisiciones.html";
+          }
+        } else {
+          // Si es un usuario nuevo en Auth pero sin nodo en DB, entra por defecto a Administración
+          window.location.href = "requiadmin.html";
+        }
+      } catch (err) {
+        showMsg("Error al consultar perfil de usuario: " + err.message, "error");
+      }
+    }
+
+    // MANEJO DE SESIÓN ACTIVA
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        redirigirPorRol(user.uid);
+      }
+    });
+
+    // INICIO DE SESIÓN
+    document.getElementById("portalLoginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const btn = document.getElementById("btnLogin");
+
+      btn.disabled = true;
+      btn.textContent = "Autenticando...";
+      msgBox.style.display = "none";
+
+      try {
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        await redirigirPorRol(cred.user.uid);
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = "Ingresar al Sistema";
+        showMsg("Error de autenticación: Verifica tu correo y contraseña.", "error");
+      }
+    });
+
+    document.getElementById("fecha").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
