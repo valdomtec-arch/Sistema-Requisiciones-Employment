@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Employment - Bitácora de Auditoría</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --azul-marino: #001F3F; --amarillo: #FFCC00; --naranja: #FF6600; --blanco: #FFFFFF; --gris-fondo: #F4F6F9; --gris-borde: #CCCCCC; }
+    body { font-family: 'Roboto', sans-serif; margin: 0; background: var(--gris-fondo); color: var(--azul-marino); }
+    .container { max-width: 1100px; margin: 20px auto; padding: 15px; }
+    .nav-bar { background: var(--azul-marino); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); flex-wrap: wrap; gap: 10px; }
+    .nav-brand { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--amarillo); font-size: 1.2rem; text-decoration: none; }
+    .nav-links { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .nav-item { color: var(--blanco); text-decoration: none; font-size: 0.88rem; font-weight: 500; padding: 6px 12px; border-radius: 4px; }
+    .nav-item.active { background: var(--naranja); color: var(--blanco); font-weight: 700; }
+    .btn-logout { background: transparent; border: 1px solid var(--amarillo); color: var(--amarillo); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+
+    .card { background: var(--blanco); padding: 20px; border-radius: 8px; border: 1px solid var(--gris-borde); margin-top: 18px; }
+    .table { width: 100%; border-collapse: collapse; margin-top: 12px; background: var(--blanco); border-radius: 6px; overflow: hidden; border: 1px solid var(--gris-borde); }
+    .table th { background: var(--azul-marino); color: var(--amarillo); padding: 10px; text-align: left; font-size: 0.85rem; }
+    .table td { padding: 10px; border-bottom: 1px solid #EEEEEE; font-size: 0.88rem; }
+    .badge-action { background: var(--azul-marino); color: var(--amarillo); padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; }
+  </style>
+</head>
+<body>
+
+  <nav class="nav-bar">
+    <a href="dashboard.html" class="nav-brand">Employment Portal</a>
+    <div class="nav-links">
+      <a href="dashboard.html" class="nav-item">Panel Principal</a>
+      <a href="requisiciones.html" class="nav-item">Requisiciones</a>
+      <a href="aprobaciones.html" class="nav-item">Aprobaciones</a>
+      <a href="catalogos.html" class="nav-item">Catálogos</a>
+      <a href="auditoria.html" class="nav-item active">Auditoría</a>
+      <a href="requiadmin.html" class="nav-item">Administración</a>
+      <button id="btnGlobalLogout" class="btn-logout">Salir</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h2>Trazas de Auditoría e Historial de Operaciones</h2>
+
+    <div class="card">
+      <h3>Registro de Eventos del Sistema</h3>
+      <table class="table">
+        <thead>
+          <tr><th>Fecha y Hora</th><th>Usuario / Rol</th><th>Acción Executada</th><th>Detalle de la Operación</th></tr>
+        </thead>
+        <tbody id="tablaTrazasBody">
+          <tr><td colspan="4" style="text-align:center;">Cargando historial de trazas...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCGmcrxJsMy5bVS9SgTGLMgrLui_tA6luY",
+      authDomain: "sistema-de-requisiciones-47df8.firebaseapp.com",
+      databaseURL: "https://sistema-de-requisiciones-47df8-default-rtdb.firebaseio.com",
+      projectId: "sistema-de-requisiciones-47df8",
+      storageBucket: "sistema-de-requisiciones-47df8.appspot.com",
+      messagingSenderId: "596189555034",
+      appId: "1:596189555034:web:abcdef1234567890"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = "index.html"; return; }
+      const snap = await get(ref(db, `usuarios/${user.uid}`));
+      if (snap.exists() && (snap.val().nivel || 2) < 4) {
+        alert("Acceso denegado: El módulo de Auditoría requiere Nivel 4 o superior.");
+        window.location.href = "dashboard.html";
+        return;
+      }
+      cargarTrazas();
+    });
+
+    function cargarTrazas() {
+      onValue(ref(db, 'trazas'), snap => {
+        const tbody = document.getElementById("tablaTrazasBody");
+        tbody.innerHTML = '';
+        if(!snap.exists()) {
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No hay registros de traza almacenados.</td></tr>';
+          return;
+        }
+
+        const trazasArr = [];
+        Object.keys(snap.val()).forEach(key => trazasArr.push(snap.val()[key]));
+        
+        // Ordenar descendentemente por fecha
+        trazasArr.sort((a,b) => b.timestamp - a.timestamp);
+
+        trazasArr.forEach(t => {
+          const fecha = new Date(t.timestamp).toLocaleString('es-MX');
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><small>${fecha}</small></td>
+            <td><strong>${t.usuario}</strong><br><small>${t.rol}</small></td>
+            <td><span class="badge-action">${t.accion}</span></td>
+            <td>${t.detalle}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+    }
+
+    document.getElementById("btnGlobalLogout").addEventListener("click", () => signOut(auth));
+  </script>
+</body>
+</html>
