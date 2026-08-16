@@ -83,6 +83,13 @@
       box-shadow: 0 0 5px rgba(255,102,0,0.3);
     }
 
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
     button {
       cursor: pointer;
       border: none;
@@ -91,14 +98,23 @@
       font-weight: 700;
       padding: 12px;
       border-radius: 6px;
-      font-size: 1rem;
+      font-size: 0.95rem;
       width: 100%;
-      margin-top: 20px;
       transition: background 0.2s;
     }
 
     button:hover {
       background: #e05500;
+    }
+
+    .btn-admin {
+      background: var(--azul-marino);
+      color: var(--amarillo);
+      border: 1px solid var(--azul-marino);
+    }
+
+    .btn-admin:hover {
+      background: #001226;
     }
 
     .status-msg {
@@ -136,7 +152,7 @@
     <div class="card-login">
       <div class="logo-container">
         <h1>Employment</h1>
-        <p>Sistema de Requisiciones de Personal</p>
+        <p id="portalSubtitle">Sistema de Requisiciones de Personal</p>
       </div>
 
       <form id="portalLoginForm">
@@ -146,7 +162,10 @@
         <label for="password">Contraseña</label>
         <input id="password" type="password" placeholder="••••••••" required />
 
-        <button type="submit" id="btnLogin">Ingresar al Sistema</button>
+        <div class="btn-group">
+          <button type="submit" id="btnLogin">Ingresar al Sistema</button>
+          <button type="button" id="btnDirectAdmin" class="btn-admin">Ingresar a RequiAdmin</button>
+        </div>
       </form>
 
       <div id="statusMsg" class="status-msg"></div>
@@ -161,8 +180,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import {
       getAuth,
-      signInWithEmailAndPassword,
-      onAuthStateChanged
+      signInWithEmailAndPassword
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -186,38 +204,35 @@
       msgBox.style.display = "block";
     }
 
-    // REDIRECCIÓN UNIFICADA AL DASHBOARD
-    function redirigirAlDashboard() {
-      showMsg("Acceso autorizado. Redirigiendo al panel...", "info");
-      window.location.href = "dashboard.html";
-    }
-
-    // MANEJO DE SESIÓN ACTIVA
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        redirigirAlDashboard();
-      }
-    });
-
-    // INICIO DE SESIÓN
-    document.getElementById("portalLoginForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
+    async function ejecutarAutenticacion(destino) {
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
-      const btn = document.getElementById("btnLogin");
 
-      btn.disabled = true;
-      btn.textContent = "Autenticando...";
-      msgBox.style.display = "none";
+      if (!email || !password) {
+        showMsg("Por favor, ingresa tu correo y contraseña.", "error");
+        return;
+      }
+
+      showMsg("Autenticando credenciales...", "info");
 
       try {
         await signInWithEmailAndPassword(auth, email, password);
-        redirigirAlDashboard();
+        showMsg("Acceso autorizado. Redirigiendo...", "info");
+        window.location.href = destino;
       } catch (err) {
-        btn.disabled = false;
-        btn.textContent = "Ingresar al Sistema";
         showMsg("Error de autenticación: Verifica tu correo y contraseña.", "error");
       }
+    }
+
+    // INGRESO ESTÁNDAR AL DASHBOARD
+    document.getElementById("portalLoginForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      ejecutarAutenticacion("dashboard.html");
+    });
+
+    // INGRESO DIRECTO A REQUIADMIN
+    document.getElementById("btnDirectAdmin").addEventListener("click", () => {
+      ejecutarAutenticacion("requiadmin.html");
     });
 
     document.getElementById("fecha").textContent = new Date().getFullYear();
