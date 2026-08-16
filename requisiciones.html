@@ -2,13 +2,21 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <title>Employment - Gestor de Requisiciones</title>
+  <title>Employment - Solicitud de Insumos y Gastos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    :root { --azul-marino: #001F3F; --amarillo: #FFCC00; --naranja: #FF6600; --blanco: #FFFFFF; --gris-fondo: #F4F6F9; --gris-borde: #CCCCCC; }
+    :root { 
+      --azul-marino: #001F3F; 
+      --amarillo: #FFCC00; 
+      --naranja: #FF6600; 
+      --blanco: #FFFFFF; 
+      --gris-fondo: #F4F6F9; 
+      --gris-borde: #CCCCCC; 
+    }
     body { font-family: 'Roboto', sans-serif; margin: 0; background: var(--gris-fondo); color: var(--azul-marino); }
     .container { max-width: 1100px; margin: 20px auto; padding: 15px; }
+    
     .nav-bar { background: var(--azul-marino); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); flex-wrap: wrap; gap: 10px; }
     .nav-brand { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--amarillo); font-size: 1.2rem; text-decoration: none; }
     .nav-links { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
@@ -19,71 +27,98 @@
     
     .card { background: var(--blanco); padding: 20px; border-radius: 8px; border: 1px solid var(--gris-borde); margin-top: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
     h2, h3 { font-family: 'Montserrat', sans-serif; color: var(--azul-marino); margin-top: 0; }
-    label { font-weight: 600; font-size: 0.9rem; margin-top: 8px; display: block; }
-    input, select, textarea { font-size: 0.95rem; padding: 10px; margin: 4px 0 12px 0; width: 100%; box-sizing: border-box; border: 1px solid var(--gris-borde); border-radius: 6px; }
+    label { font-weight: 600; font-size: 0.88rem; margin-top: 8px; display: block; }
+    input, select, textarea { font-size: 0.92rem; padding: 10px; margin: 4px 0 12px 0; width: 100%; box-sizing: border-box; border: 1px solid var(--gris-borde); border-radius: 6px; }
     button { cursor: pointer; border: none; background: var(--naranja); color: var(--blanco); font-weight: 700; padding: 10px 16px; border-radius: 6px; font-size: 0.95rem; }
-    
+    button:hover { background: #e05500; }
+
     .table { width: 100%; border-collapse: collapse; margin-top: 12px; background: var(--blanco); border-radius: 6px; overflow: hidden; border: 1px solid var(--gris-borde); }
     .table th { background: var(--azul-marino); color: var(--amarillo); padding: 10px; text-align: left; font-size: 0.85rem; }
     .table td { padding: 10px; border-bottom: 1px solid #EEEEEE; font-size: 0.9rem; }
+    
     .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.8rem; background: var(--amarillo); color: var(--azul-marino); }
     .badge-success { background: #28a745; color: #fff; }
     .badge-danger { background: #dc3545; color: #fff; }
+
+    .total-box { background: var(--azul-marino); color: var(--amarillo); padding: 12px; border-radius: 6px; font-family: 'Montserrat', sans-serif; font-size: 1.1rem; font-weight: bold; text-align: right; margin-top: 10px; }
   </style>
 </head>
 <body>
 
   <nav class="nav-bar">
     <a href="dashboard.html" class="nav-brand">Employment Portal</a>
-    <div class="nav-links">
+    <div class="nav-links" id="navLinksContainer">
       <a href="dashboard.html" class="nav-item">Panel Principal</a>
       <a href="requisiciones.html" class="nav-item active">Requisiciones</a>
-      <a href="aprobaciones.html" class="nav-item">Aprobaciones</a>
-      <a href="catalogos.html" class="nav-item">Catálogos</a>
-      <a href="auditoria.html" class="nav-item">Auditoría</a>
-      <a href="requiadmin.html" class="nav-item">Administración</a>
-      <button id="btnGlobalLogout" class="btn-logout">Salir</button>
     </div>
+    <button id="btnGlobalLogout" class="btn-logout">Salir</button>
   </nav>
 
   <div class="container">
-    <h2>Solicitud de Requisición de Personal</h2>
+    <h2>Solicitud de Insumos y Gastos Operativos</h2>
 
     <div class="card">
       <h3>Nueva Requisición</h3>
       <form id="formRequisicion">
+        
         <div style="display:flex; gap:12px; flex-wrap:wrap;">
           <div style="flex:1; min-width:220px;">
-            <label>Empresa Cliente</label>
-            <select id="reqEmpresa" required><option value="">Cargando empresas...</option></select>
+            <label>Departamento Solicitante</label>
+            <select id="reqDepartamento" required>
+              <option value="">Cargando departamentos...</option>
+            </select>
           </div>
+
           <div style="flex:1; min-width:220px;">
-            <label>Puesto Solicitado</label>
-            <select id="reqPuesto" required><option value="">Cargando puestos...</option></select>
-          </div>
-          <div style="flex:1; min-width:140px;">
-            <label>Número de Plazas</label>
-            <input type="number" id="reqPlazas" min="1" value="1" required />
-          </div>
-          <div style="flex:1; min-width:140px;">
-            <label>Sueldo Propuesto ($)</label>
-            <input type="number" id="reqSueldo" min="0" step="0.01" required />
+            <label>Empresa / Cliente / Vacante Destino</label>
+            <input type="text" id="reqDestino" placeholder="Ej. Planta Modelo / Cobertura Operadores" required />
           </div>
         </div>
-        <label>Observaciones / Detalle del Perfil</label>
-        <textarea id="reqObservaciones" rows="2" placeholder="Especificaciones adicionales del candidato..."></textarea>
+
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <div style="flex:2; min-width:220px;">
+            <label>Concepto / Tipo de Insumo</label>
+            <select id="reqCategoria" required>
+              <option value="">Cargando categorías...</option>
+            </select>
+          </div>
+
+          <div style="flex:1; min-width:120px;">
+            <label>Cantidad</label>
+            <input type="number" id="reqCantidad" min="1" value="1" required />
+          </div>
+
+          <div style="flex:1; min-width:140px;">
+            <label>Costo Estimado ($)</label>
+            <input type="number" id="reqCostoUnitario" min="0" step="0.01" placeholder="0.00" required />
+          </div>
+        </div>
+
+        <label>Justificación del Gasto / Detalle de la Operación</label>
+        <textarea id="reqJustificacion" rows="2" placeholder="Ej. Traslado para entrevista en campo, volantes de reclutamiento, insumos de oficina..." required></textarea>
         
-        <div style="text-align:right;">
-          <button type="submit">Guardar y Enviar a Aprobación</button>
+        <div class="total-box">
+          Total Requerido: $<span id="lblTotalCalculado">0.00</span>
+        </div>
+
+        <div style="text-align:right; margin-top:15px;">
+          <button type="submit">Guardar y Enviar a Revisión</button>
         </div>
       </form>
     </div>
 
     <div class="card">
-      <h3>Historial de Requisiciones</h3>
+      <h3>Historial de Solicitudes</h3>
       <table class="table">
         <thead>
-          <tr><th>ID / Fecha</th><th>Empresa</th><th>Puesto</th><th>Plazas</th><th>Sueldo</th><th>Estatus</th></tr>
+          <tr>
+            <th>ID / Fecha</th>
+            <th>Departamento / Destino</th>
+            <th>Concepto / Detalle</th>
+            <th>Cantidad</th>
+            <th>Total Solicitado</th>
+            <th>Estatus</th>
+          </tr>
         </thead>
         <tbody id="tablaReqBody">
           <tr><td colspan="6" style="text-align:center;">Cargando requisiciones...</td></tr>
@@ -114,16 +149,59 @@
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) { window.location.href = "index.html"; return; }
-      const snap = await get(ref(db, `usuarios/${user.uid}`));
-      if (snap.exists()) {
-        currentUserData = snap.val();
-        currentUserData.uid = user.uid;
+      
+      try {
+        const snapUser = await get(ref(db, `usuarios/${user.uid}`));
+        if (snapUser.exists()) {
+          currentUserData = snapUser.val();
+          currentUserData.uid = user.uid;
+        } else {
+          // Búsqueda por email en caso de discrepancia de UID
+          const userEmail = (user.email || "").toLowerCase();
+          const snapAllUsers = await get(ref(db, "usuarios"));
+          if (snapAllUsers.exists()) {
+            const usuariosData = snapAllUsers.val();
+            const keyFound = Object.keys(usuariosData).find(
+              k => usuariosData[k].email && usuariosData[k].email.toLowerCase() === userEmail
+            );
+            if (keyFound) {
+              currentUserData = usuariosData[keyFound];
+              currentUserData.uid = user.uid;
+            }
+          }
+        }
+
+        if (!currentUserData) {
+          currentUserData = { uid: user.uid, nombre: user.email, email: user.email, nivel: 2, nombreRol: 'Reclutador/a' };
+        }
+
+        configurarNavegacion(parseInt(currentUserData.nivel) || 2);
+        cargarCatalogos();
+        cargarRequisiciones();
+      } catch (err) {
+        console.error("Error al autenticar usuario:", err);
       }
-      cargarCatalogos();
-      cargarRequisiciones();
     });
 
-    // FUNCIÓN DE REGISTRO EN AUDITORÍA / TRAZAS
+    function configurarNavegacion(nivel) {
+      const navContainer = document.getElementById("navLinksContainer");
+      let html = `<a href="dashboard.html" class="nav-item">Panel Principal</a>`;
+
+      if (nivel >= 2) {
+        html += `<a href="requisiciones.html" class="nav-item active">Requisiciones</a>`;
+      }
+      if (nivel >= 4) {
+        html += `<a href="aprobaciones.html" class="nav-item">Aprobaciones</a>`;
+        html += `<a href="catalogos.html" class="nav-item">Catálogos</a>`;
+        html += `<a href="auditoria.html" class="nav-item">Auditoría</a>`;
+      }
+      if (nivel >= 5) {
+        html += `<a href="requiadmin.html" class="nav-item">Administración</a>`;
+      }
+
+      navContainer.innerHTML = html;
+    }
+
     async function registrarTraza(accion, detalle) {
       const trazaRef = push(ref(db, 'trazas'));
       await set(trazaRef, {
@@ -137,78 +215,110 @@
     }
 
     function cargarCatalogos() {
-      onValue(ref(db, 'catalogos/empresas'), snap => {
-        const sel = document.getElementById("reqEmpresa");
-        sel.innerHTML = '<option value="">Selecciona Empresa...</option>';
-        if(snap.exists()) {
-          Object.values(snap.val()).forEach(emp => {
-            sel.innerHTML += `<option value="${emp.nombre}">${emp.nombre}</option>`;
+      // Cargar Departamentos
+      onValue(ref(db, 'catalogos/departamentos'), snap => {
+        const sel = document.getElementById("reqDepartamento");
+        sel.innerHTML = '<option value="">Selecciona Departamento...</option>';
+        if (snap.exists()) {
+          Object.values(snap.val()).forEach(d => {
+            if (d.activo !== false) {
+              sel.innerHTML += `<option value="${d.nombre}">${d.nombre}</option>`;
+            }
           });
         }
       });
 
-      onValue(ref(db, 'catalogos/puestos'), snap => {
-        const sel = document.getElementById("reqPuesto");
-        sel.innerHTML = '<option value="">Selecciona Puesto...</option>';
-        if(snap.exists()) {
-          Object.values(snap.val()).forEach(p => {
-            sel.innerHTML += `<option value="${p.nombre}">${p.nombre}</option>`;
+      // Cargar Categorías de Gasto
+      onValue(ref(db, 'catalogos/categorias_gasto'), snap => {
+        const sel = document.getElementById("reqCategoria");
+        sel.innerHTML = '<option value="">Selecciona Concepto...</option>';
+        if (snap.exists()) {
+          Object.values(snap.val()).forEach(c => {
+            if (c.activa !== false) {
+              sel.innerHTML += `<option value="${c.nombre}">${c.nombre}</option>`;
+            }
           });
         }
       });
     }
 
+    // Cálculo dinámico del total
+    const inpCantidad = document.getElementById("reqCantidad");
+    const inpCosto = document.getElementById("reqCostoUnitario");
+    const lblTotal = document.getElementById("lblTotalCalculado");
+
+    function calcularTotal() {
+      const cant = parseFloat(inpCantidad.value) || 0;
+      const costo = parseFloat(inpCosto.value) || 0;
+      lblTotal.textContent = (cant * costo).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    inpCantidad.addEventListener("input", calcularTotal);
+    inpCosto.addEventListener("input", calcularTotal);
+
+    // Registro de la solicitud
     document.getElementById("formRequisicion").addEventListener("submit", async (e) => {
       e.preventDefault();
+
+      const cantidad = parseInt(inpCantidad.value);
+      const costoUnitario = parseFloat(inpCosto.value);
+      const totalGasto = cantidad * costoUnitario;
+
       const nuevaReqRef = push(ref(db, 'requisiciones'));
       const data = {
-        empresa: document.getElementById("reqEmpresa").value,
-        puesto: document.getElementById("reqPuesto").value,
-        plazas: parseInt(document.getElementById("reqPlazas").value),
-        sueldo: parseFloat(document.getElementById("reqSueldo").value),
-        observaciones: document.getElementById("reqObservaciones").value.trim(),
+        departamento: document.getElementById("reqDepartamento").value,
+        destino: document.getElementById("reqDestino").value.trim(),
+        concepto: document.getElementById("reqCategoria").value,
+        cantidad: cantidad,
+        costoUnitario: costoUnitario,
+        totalGasto: totalGasto,
+        justificacion: document.getElementById("reqJustificacion").value.trim(),
         estatus: "Pendiente",
         solicitanteUid: currentUserData.uid,
         solicitanteNombre: currentUserData.nombre || currentUserData.email,
+        solicitanteRol: currentUserData.nombreRol || 'Reclutador/a',
         createdAt: Date.now()
       };
 
       await set(nuevaReqRef, data);
-      await registrarTraza("ALTA_REQUISICION", `Creación de requisición para ${data.puesto} (${data.plazas} plazas) en ${data.empresa}`);
-      alert("✅ Requisición enviada a revisión exitosamente.");
+      await registrarTraza("ALTA_REQUISICION", `Solicitud por $${totalGasto.toFixed(2)} para ${data.concepto} (${data.departamento})`);
+      
+      alert("✅ Requisición de gastos registrada y enviada a revisión.");
       document.getElementById("formRequisicion").reset();
+      lblTotal.textContent = "0.00";
     });
 
+    // Cargar historial
     function cargarRequisiciones() {
       onValue(ref(db, 'requisiciones'), snap => {
         const tbody = document.getElementById("tablaReqBody");
         tbody.innerHTML = '';
-        if(!snap.exists()) {
-          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No hay requisiciones registradas.</td></tr>';
+        if (!snap.exists()) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No hay solicitudes registradas.</td></tr>';
           return;
         }
 
         Object.keys(snap.val()).forEach(key => {
           const r = snap.val()[key];
           let badgeClass = 'badge';
-          if(r.estatus === 'Aprobada') badgeClass = 'badge badge-success';
-          if(r.estatus === 'Rechazada') badgeClass = 'badge badge-danger';
+          if (r.estatus === 'Aprobada') badgeClass = 'badge badge-success';
+          if (r.estatus === 'Rechazada') badgeClass = 'badge badge-danger';
 
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td><strong>#${key.substr(-5)}</strong><br><small>${new Date(r.createdAt).toLocaleDateString()}</small></td>
-            <td>${r.empresa}</td>
-            <td>${r.puesto}</td>
-            <td>${r.plazas}</td>
-            <td>$${r.sueldo.toLocaleString()}</td>
-            <td><span class="${badgeClass}">${r.estatus}</span></td>
+            <td><strong>${r.departamento || 'N/A'}</strong><br><small>${r.destino || 'General'}</small></td>
+            <td><strong>${r.concepto || 'Insumo'}</strong><br><small>${r.justificacion || ''}</small></td>
+            <td>${r.cantidad || 1}</td>
+            <td><strong>$${(r.totalGasto || 0).toLocaleString('es-MX', {minimumFractionDigits: 2})}</strong></td>
+            <td><span class="${badgeClass}">${r.estatus || 'Pendiente'}</span></td>
           `;
           tbody.appendChild(tr);
         });
       });
     }
 
-    document.getElementById("btnGlobalLogout").addEventListener("click", () => signOut(auth));
+    document.getElementById("btnGlobalLogout").addEventListener("click", () => signOut(auth).then(() => window.location.href = "index.html"));
   </script>
 </body>
 </html>
