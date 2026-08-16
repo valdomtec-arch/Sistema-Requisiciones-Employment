@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Employment - Panel Principal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --azul-marino: #001F3F;
+      --amarillo: #FFCC00;
+      --naranja: #FF6600;
+      --blanco: #FFFFFF;
+      --gris-fondo: #F4F6F9;
+      --gris-borde: #CCCCCC;
+    }
+
+    body { font-family: 'Roboto', sans-serif; margin: 0; background: var(--gris-fondo); color: var(--azul-marino); }
+    .container { max-width: 1100px; margin: 20px auto; padding: 15px; }
+
+    /* BANNER DE BIENVENIDA */
+    .banner { 
+      background: linear-gradient(135deg, var(--azul-marino) 70%, var(--naranja) 100%); 
+      color: var(--blanco); 
+      padding: 24px; 
+      border-radius: 10px;
+      border-bottom: 5px solid var(--amarillo);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .banner h1 { margin: 0; font-family: 'Montserrat', sans-serif; font-size: 1.8rem; color: var(--amarillo); }
+    .banner p { margin: 5px 0 0 0; font-size: 0.95rem; }
+    
+    .user-info { background: rgba(255,255,255,0.15); padding: 10px 16px; border-radius: 8px; text-align: right; }
+    .user-info .badge-rol { background: var(--amarillo); color: var(--azul-marino); font-weight: 700; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; display: inline-block; margin-top: 4px; }
+
+    /* GRILLA DE MÓDULOS */
+    .grid-modulos { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 25px; }
+    
+    .card-modulo { 
+      background: var(--blanco); 
+      padding: 24px; 
+      border-radius: 10px; 
+      border: 1px solid var(--gris-borde); 
+      border-top: 5px solid var(--azul-marino);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .card-modulo:hover { transform: translateY(-4px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+    .card-modulo.admin { border-top-color: var(--naranja); }
+
+    .card-modulo h3 { font-family: 'Montserrat', sans-serif; margin: 0 0 10px 0; color: var(--azul-marino); font-size: 1.2rem; }
+    .card-modulo p { font-size: 0.9rem; color: #555555; line-height: 1.4; margin-bottom: 20px; }
+
+    .btn-modulo { 
+      text-decoration: none; 
+      text-align: center; 
+      background: var(--azul-marino); 
+      color: var(--amarillo); 
+      font-weight: 700; 
+      padding: 10px 16px; 
+      border-radius: 6px; 
+      font-size: 0.9rem; 
+      transition: background 0.2s; 
+      display: block;
+    }
+    .btn-modulo:hover { background: #001226; }
+    .btn-modulo.admin { background: var(--naranja); color: var(--blanco); }
+    .btn-modulo.admin:hover { background: #e05500; }
+
+    .btn-logout { background: transparent; border: 1px solid var(--amarillo); color: var(--amarillo); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 8px; }
+    .btn-logout:hover { background: var(--amarillo); color: var(--azul-marino); }
+
+    footer { margin-top: 40px; padding: 15px; text-align: center; background: var(--azul-marino); color: var(--amarillo); font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="banner">
+      <div>
+        <h1>Portal Employment</h1>
+        <p>Selecciona el módulo operativo al que deseas ingresar</p>
+      </div>
+      <div class="user-info">
+        <div id="userName" style="font-weight: bold;">Cargando usuario...</div>
+        <div id="userRole" class="badge-rol">...</div>
+        <div><button id="btnLogout" class="btn-logout">Cerrar Sesión</button></div>
+      </div>
+    </div>
+
+    <!-- MÓDULOS DE ACCESO DINÁMICO -->
+    <div class="grid-modulos" id="contenedorModulos">
+      <div style="grid-column: 1/-1; text-align: center; padding: 40px;">Verificando nivel de acceso...</div>
+    </div>
+  </div>
+
+  <footer>
+    Employment Requisiciones v2.0 | Portal Central &copy; <span id="fecha"></span>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCGmcrxJsMy5bVS9SgTGLMgrLui_tA6luY",
+      authDomain: "sistema-de-requisiciones-47df8.firebaseapp.com",
+      databaseURL: "https://sistema-de-requisiciones-47df8-default-rtdb.firebaseio.com",
+      projectId: "sistema-de-requisiciones-47df8",
+      storageBucket: "sistema-de-requisiciones-47df8.appspot.com",
+      messagingSenderId: "596189555034",
+      appId: "1:596189555034:web:abcdef1234567890"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      try {
+        const snapUser = await get(ref(db, `usuarios/${user.uid}`));
+        let userData = snapUser.exists() ? snapUser.val() : { nombre: user.email, rol: "rol_reclutador" };
+
+        const snapRol = await get(ref(db, `roles/${userData.rol}`));
+        let rolData = snapRol.exists() ? snapRol.val() : { nombre: "Solicitante", nivel: 2 };
+
+        document.getElementById("userName").textContent = userData.nombre || user.email;
+        document.getElementById("userRole").textContent = rolData.nombre;
+
+        renderizarModulos(rolData.nivel, userData.rol);
+      } catch (err) {
+        console.error("Error al cargar perfil:", err);
+      }
+    });
+
+    function renderizarModulos(nivel, idRol) {
+      const container = document.getElementById("contenedorModulos");
+      container.innerHTML = "";
+
+      // 1. MÓDULO SOLICITUDES (Nivel 2 o superior)
+      if (nivel >= 2) {
+        container.innerHTML += `
+          <div class="card-modulo">
+            <div>
+              <h3>Captura de Requisiciones</h3>
+              <p>Genera solicitudes de compra de insumos, materiales de oficina o asignaciones por vacante.</p>
+            </div>
+            <a href="requisiciones.html" class="btn-modulo">Crear Solicitud</a>
+          </div>
+        `;
+      }
+
+      // 2. MÓDULO BANDEJA DE APROBACIONES (Nivel 4 o superior)
+      if (nivel >= 4) {
+        container.innerHTML += `
+          <div class="card-modulo">
+            <div>
+              <h3>Bandeja de Aprobaciones</h3>
+              <p>Revisa, autoriza o rechaza las solicitudes de gasto pendientes generadas por el equipo.</p>
+            </div>
+            <a href="aprobaciones.html" class="btn-modulo">Revisar Solicitudes</a>
+          </div>
+        `;
+      }
+
+      // 3. MÓDULO CATÁLOGOS (Nivel 4 o superior)
+      if (nivel >= 4) {
+        container.innerHTML += `
+          <div class="card-modulo">
+            <div>
+              <h3>Gestión de Catálogos</h3>
+              <p>Administra las vacantes activas, departamentos internos y conceptos autorizados de gasto.</p>
+            </div>
+            <a href="catalogos.html" class="btn-modulo">Administrar Catálogos</a>
+          </div>
+        `;
+      }
+
+      // 4. MÓDULO ADMINISTRACIÓN Y ROLES (Exclusivo Nivel 5)
+      if (nivel >= 5 || idRol === "rol_admin") {
+        container.innerHTML += `
+          <div class="card-modulo admin">
+            <div>
+              <h3>Control de Usuarios (Admin)</h3>
+              <p>Gestión del directorio de colaboradores, asignación de roles y permisos del sistema.</p>
+            </div>
+            <a href="requiadmin.html" class="btn-modulo admin">Panel de Control</a>
+          </div>
+        `;
+      }
+    }
+
+    document.getElementById("btnLogout").addEventListener("click", () => {
+      signOut(auth).then(() => window.location.href = "index.html");
+    });
+
+    document.getElementById("fecha").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
