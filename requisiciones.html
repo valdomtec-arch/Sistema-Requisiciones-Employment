@@ -48,12 +48,47 @@
     .grid-3 { display: flex; gap: 12px; flex-wrap: wrap; }
     .grid-3 > div { flex: 1; min-width: 150px; }
 
-    /* ESTILOS DE IMPRESIÓN / ACUSE */
+    /* ESTILOS DE IMPRESIÓN CORREGIDOS (SIN DESBORDAMIENTO) */
+    @page {
+      size: letter portrait;
+      margin: 15mm;
+    }
+
     @media print {
-      body * { visibility: hidden; }
-      #seccionAcuse, #seccionAcuse * { visibility: visible; }
-      #seccionAcuse { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; }
-      .nav-bar, .card, h2 { display: none !important; }
+      body * { 
+        visibility: hidden; 
+      }
+      #seccionAcuse, #seccionAcuse * { 
+        visibility: visible; 
+      }
+      #seccionAcuse { 
+        position: absolute; 
+        left: 0; 
+        top: 0; 
+        width: 100% !important; 
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 0 !important; 
+        margin: 0 !important;
+        font-size: 10pt;
+      }
+      
+      #seccionAcuse table {
+        width: 100% !important;
+        table-layout: fixed !important;
+        word-wrap: break-word !important;
+        word-break: break-all !important;
+      }
+
+      #seccionAcuse p, #seccionAcuse div, #seccionAcuse td, #seccionAcuse th {
+        overflow-wrap: break-word !important;
+        word-wrap: break-word !important;
+        white-space: normal !important;
+      }
+
+      .nav-bar, .card, h2, .ai-box { 
+        display: none !important; 
+      }
     }
   </style>
 </head>
@@ -195,13 +230,13 @@
     </div>
   </div>
 
-  <!-- SECCIÓN DE IMPRESIÓN DE ACUSE (OCULTA EN PANTALLA) -->
+  <!-- SECCIÓN DE IMPRESIÓN DE ACUSE -->
   <div id="seccionAcuse" style="display:none; background:#fff; padding:20px;">
     <div style="text-align:center; border-bottom:2px solid #001F3F; padding-bottom:10px;">
-      <h2 style="margin:0; color:#001F3F;">ACUSE OFICIAL DE REQUISICIÓN DE GASTOS</h2>
-      <p style="margin:5px 0 0 0; font-size:0.9rem;">Employment Portal - Control de Operaciones y Transporte</p>
+      <h2 style="margin:0; color:#001F3F; font-size:1.3rem;">ACUSE OFICIAL DE REQUISICIÓN DE GASTOS</h2>
+      <p style="margin:5px 0 0 0; font-size:0.85rem;">Employment Portal - Control de Operaciones y Transporte</p>
     </div>
-    <div id="contenidoAcuse" style="margin-top:20px; font-size:0.95rem; line-height:1.5;"></div>
+    <div id="contenidoAcuse" style="margin-top:15px; font-size:0.9rem; line-height:1.4;"></div>
   </div>
 
   <script type="module">
@@ -219,7 +254,7 @@
       appId: "1:596189555034:web:abcdef1234567890"
     };
 
-    const GEMINI_API_KEY = "AIzaSyCGmcrxJsMy5bVS9SgTGLMgrLui_tA6luY"; // Reemplazar si utilizas una API Key dedicada de Gemini
+    const GEMINI_API_KEY = "AIzaSyCGmcrxJsMy5bVS9SgTGLMgrLui_tA6luY";
     
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -283,9 +318,7 @@
       });
     }
 
-    // CARGA DE CATÁLOGOS DESDE LA RTDB
     function cargarCatalogos() {
-      // 1. Departamentos
       onValue(ref(db, 'catalogos/departamentos'), snap => {
         const sel = document.getElementById("reqDepartamento");
         sel.innerHTML = '<option value="">Selecciona Departamento...</option>';
@@ -296,7 +329,6 @@
         }
       });
 
-      // 2. Vacantes / Clientes (Búsqueda en catalogos/vacantes o catalogos/empresas)
       onValue(ref(db, 'catalogos/vacantes'), snap => {
         const sel = document.getElementById("reqVacante");
         sel.innerHTML = '<option value="">Selecciona Cliente / Vacante...</option>';
@@ -306,7 +338,6 @@
             sel.innerHTML += `<option value="${clienteVacante}">${clienteVacante}</option>`;
           });
         } else {
-          // Respaldo secundario si aún no pueblan el catálogo de vacantes
           onValue(ref(db, 'catalogos/empresas'), snapEmp => {
             if(snapEmp.exists()) {
               Object.values(snapEmp.val()).forEach(e => {
@@ -317,7 +348,6 @@
         }
       });
 
-      // 3. Categorías de Gasto
       onValue(ref(db, 'catalogos/categorias_gasto'), snap => {
         const sel = document.getElementById("reqCategoria");
         sel.innerHTML = '<option value="">Selecciona Concepto...</option>';
@@ -329,7 +359,6 @@
       });
     }
 
-    // LECTURA DE ARCHIVO LOCAL Y CONVERSIÓN A BASE64
     document.getElementById("archivoCotizacion").addEventListener("change", (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -342,7 +371,6 @@
       reader.readAsDataURL(file);
     });
 
-    // INTEGRACIÓN CON GEMINI API
     document.getElementById("btnProcesarIA").addEventListener("click", async () => {
       if (!base64Cotizacion) {
         alert("⚠️ Por favor selecciona primero un archivo PDF o imagen de la cotización.");
@@ -387,7 +415,6 @@
         const jsonText = resData.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim();
         const parsed = JSON.parse(jsonText);
 
-        // AUTO-LLENADO DE INPUTS
         if (parsed.nombreEmpresa) document.getElementById("reqEmpresaProveedor").value = parsed.nombreEmpresa;
         if (parsed.cantidad) document.getElementById("reqCantidad").value = parsed.cantidad;
         if (parsed.unidad) document.getElementById("reqUnidad").value = parsed.unidad;
@@ -407,7 +434,6 @@
       }
     });
 
-    // CÁLCULOS DINÁMICOS EN TIEMPO REAL
     const inpCant = document.getElementById("reqCantidad");
     const inpPrecio = document.getElementById("reqPrecioUnitario");
     const inpSub = document.getElementById("reqSubtotal");
@@ -431,7 +457,6 @@
     inpIva.addEventListener("input", recalcularOperacion);
     inpOtros.addEventListener("input", recalcularOperacion);
 
-    // REGISTRO DE REQUISICIÓN EN FIREBASE RTDB
     document.getElementById("formRequisicion").addEventListener("submit", async (e) => {
       e.preventDefault();
 
@@ -467,7 +492,6 @@
       base64Cotizacion = "";
     });
 
-    // CARGAR HISTORIAL Y BOTÓN DE IMPRESIÓN DE ACUSE
     function cargarRequisiciones() {
       onValue(ref(db, 'requisiciones'), snap => {
         const tbody = document.getElementById("tablaReqBody");
@@ -498,43 +522,57 @@
           tbody.appendChild(tr);
         });
 
-        // Exponer función de impresión globalmente
+        // GENERACIÓN DE ACUSE CON ANCHOS PORCENTUALES Y PROPIEDAD FIXED (EVITA SALIRSE DEL MARGEN)
         window.imprimirAcuse = (reqKey) => {
           const r = dataMap[reqKey];
           if (!r) return;
 
           const cont = document.getElementById("contenidoAcuse");
           cont.innerHTML = `
-            <p><strong>Folio Solicitud:</strong> #${reqKey.substr(-5)} | <strong>Fecha:</strong> ${new Date(r.createdAt).toLocaleString()}</p>
-            <p><strong>Solicitante:</strong> ${r.solicitanteNombre} (${r.solicitanteRol})</p>
-            <hr>
-            <p><strong>Departamento Solicitante:</strong> ${r.departamento}</p>
-            <p><strong>Cliente / Vacante Destino:</strong> ${r.vacanteCliente}</p>
-            <p><strong>Proveedor:</strong> ${r.empresaProveedor}</p>
-            <p><strong>Categoría de Gasto:</strong> ${r.conceptoCategoria}</p>
-            <hr>
-            <h4>Desglose Económico</h4>
-            <table style="width:100%; border-collapse:collapse; margin-bottom:15px;" border="1" cellpadding="6">
-              <thead><tr style="background:#f4f6f9;"><th>Cant.</th><th>Unidad</th><th>Marca/Modelo</th><th>P. Unitario</th><th>Subtotal</th></tr></thead>
+            <div style="margin-bottom:12px;">
+              <p style="margin:2px 0;"><strong>Folio Solicitud:</strong> #${reqKey.substr(-5)} &nbsp;|&nbsp; <strong>Fecha:</strong> ${new Date(r.createdAt).toLocaleString()}</p>
+              <p style="margin:2px 0;"><strong>Solicitante:</strong> ${r.solicitanteNombre} (${r.solicitanteRol})</p>
+            </div>
+            <hr style="border:0; border-top:1px solid #ccc; margin:10px 0;">
+            <div style="margin-bottom:12px;">
+              <p style="margin:2px 0;"><strong>Departamento Solicitante:</strong> ${r.departamento}</p>
+              <p style="margin:2px 0;"><strong>Cliente / Vacante Destino:</strong> ${r.vacanteCliente}</p>
+              <p style="margin:2px 0;"><strong>Proveedor:</strong> ${r.empresaProveedor}</p>
+              <p style="margin:2px 0;"><strong>Categoría de Gasto:</strong> ${r.conceptoCategoria}</p>
+            </div>
+            <hr style="border:0; border-top:1px solid #ccc; margin:10px 0;">
+            <h4 style="margin:10px 0 5px 0;">Desglose Económico</h4>
+            <table style="width:100%; border-collapse:collapse; margin-bottom:12px; table-layout:fixed; word-wrap:break-word;" border="1" cellpadding="5">
+              <thead>
+                <tr style="background:#f4f6f9;">
+                  <th style="width:10%; text-align:center;">Cant.</th>
+                  <th style="width:15%;">Unidad</th>
+                  <th style="width:35%;">Marca/Modelo</th>
+                  <th style="width:20%; text-align:right;">P. Unitario</th>
+                  <th style="width:20%; text-align:right;">Subtotal</th>
+                </tr>
+              </thead>
               <tbody>
                 <tr>
-                  <td>${r.cantidad}</td>
+                  <td style="text-align:center;">${r.cantidad}</td>
                   <td>${r.unidad}</td>
-                  <td>${r.marcaModelo || 'N/A'}</td>
-                  <td>$${(r.precioUnitario || 0).toFixed(2)}</td>
-                  <td>$${(r.subtotal || 0).toFixed(2)}</td>
+                  <td style="word-break:break-word;">${r.marcaModelo || 'N/A'}</td>
+                  <td style="text-align:right;">$${(r.precioUnitario || 0).toFixed(2)}</td>
+                  <td style="text-align:right;">$${(r.subtotal || 0).toFixed(2)}</td>
                 </tr>
               </tbody>
             </table>
-            <p style="text-align:right;"><strong>Subtotal:</strong> $${(r.subtotal || 0).toFixed(2)}</p>
-            <p style="text-align:right;"><strong>IVA:</strong> $${(r.iva || 0).toFixed(2)}</p>
-            <p style="text-align:right;"><strong>Otros Impuestos:</strong> $${(r.otrosImpuestos || 0).toFixed(2)}</p>
-            <h3 style="text-align:right; color:#001F3F;">Total: $${(r.totalGasto || 0).toFixed(2)}</h3>
-            <hr>
-            <p><strong>Datos Bancarios Registrados:</strong> ${r.datosBancarios || 'No especificados'}</p>
-            <p><strong>Notas Generales / Observaciones:</strong> ${r.notasGenerales || 'Sin observaciones'}</p>
+            <div style="text-align:right; margin-bottom:10px;">
+              <p style="margin:2px 0;"><strong>Subtotal:</strong> $${(r.subtotal || 0).toFixed(2)}</p>
+              <p style="margin:2px 0;"><strong>IVA:</strong> $${(r.iva || 0).toFixed(2)}</p>
+              <p style="margin:2px 0;"><strong>Otros Impuestos:</strong> $${(r.otrosImpuestos || 0).toFixed(2)}</p>
+              <h3 style="margin:5px 0; color:#001F3F;">Total: $${(r.totalGasto || 0).toFixed(2)}</h3>
+            </div>
+            <hr style="border:0; border-top:1px solid #ccc; margin:10px 0;">
+            <p style="margin:4px 0; word-break:break-word;"><strong>Datos Bancarios Registrados:</strong> ${r.datosBancarios || 'No especificados'}</p>
+            <p style="margin:4px 0; word-break:break-word;"><strong>Notas Generales / Observaciones:</strong> ${r.notasGenerales || 'Sin observaciones'}</p>
             <br><br>
-            <div style="display:flex; justify-content:space-between; margin-top:40px; text-align:center;">
+            <div style="display:flex; justify-content:space-between; margin-top:30px; text-align:center;">
               <div style="width:40%; border-top:1px solid #000; padding-top:5px;">Firma Solicitante</div>
               <div style="width:40%; border-top:1px solid #000; padding-top:5px;">Firma Autorización</div>
             </div>
