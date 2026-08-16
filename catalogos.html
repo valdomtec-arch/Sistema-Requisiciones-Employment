@@ -18,6 +18,25 @@
     body { font-family: 'Roboto', sans-serif; margin: 0; background: var(--gris-fondo); color: var(--azul-marino); }
     .container { max-width: 1200px; margin: 20px auto; padding: 15px; }
 
+    /* NAVEGACIÓN INSTITUCIONAL */
+    .nav-bar {
+      background: var(--azul-marino);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .nav-brand { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--amarillo); font-size: 1.2rem; text-decoration: none; }
+    .nav-links { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .nav-item { color: var(--blanco); text-decoration: none; font-size: 0.88rem; font-weight: 500; padding: 6px 12px; border-radius: 4px; transition: background 0.2s, color 0.2s; }
+    .nav-item:hover { background: rgba(255,255,255,0.15); color: var(--amarillo); }
+    .nav-item.active { background: var(--naranja); color: var(--blanco); font-weight: 700; }
+    .btn-logout-nav { background: transparent; border: 1px solid var(--amarillo); color: var(--amarillo); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+    .btn-logout-nav:hover { background: var(--amarillo); color: var(--azul-marino); }
+
     /* BANNER INSTITUCIONAL */
     .banner { 
       background: linear-gradient(135deg, var(--azul-marino) 70%, var(--naranja) 100%); 
@@ -30,11 +49,6 @@
     }
     .banner h1 { margin: 0; font-family: 'Montserrat', sans-serif; font-size: 2rem; color: var(--amarillo); }
     .banner p { margin: 5px 0 0 0; font-size: 0.95rem; color: var(--blanco); }
-
-    /* NAVEGACIÓN RÁPIDA */
-    .nav-bar { display: flex; gap: 10px; margin-top: 15px; }
-    .nav-bar a { text-decoration: none; padding: 8px 16px; background: var(--azul-marino); color: var(--amarillo); border-radius: 6px; font-weight: 700; font-size: 0.85rem; }
-    .nav-bar a:hover { background: #001226; }
 
     /* TARJETAS Y TABLAS */
     .card { background: var(--blanco); padding: 18px; border-radius: 8px; border: 1px solid var(--gris-borde); margin-top: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
@@ -62,16 +76,18 @@
 </head>
 <body>
 
+  <nav class="nav-bar">
+    <a href="dashboard.html" class="nav-brand">Employment Portal</a>
+    <div class="nav-links" id="navLinksContainer">
+      <a href="dashboard.html" class="nav-item">Panel Principal</a>
+    </div>
+    <button id="btnNavLogout" class="btn-logout-nav">Salir</button>
+  </nav>
+
   <div class="container">
     <div class="banner">
       <h1>Employment Catálogos Unificados</h1>
       <p>Administración de Vacantes, Departamentos de Insumo y Categorías de Gasto</p>
-    </div>
-
-    <div class="nav-bar">
-      <a href="requiadmin.html">← Usuarios y Roles</a>
-      <a href="requisiciones.html">Nueva Requisición</a>
-      <a href="aprobaciones.html">Panel de Aprobaciones</a>
     </div>
 
     <div class="grid-3">
@@ -144,7 +160,8 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getDatabase, ref, push, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCGmcrxJsMy5bVS9SgTGLMgrLui_tA6luY",
@@ -157,7 +174,59 @@
     };
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getDatabase(app);
+
+    // GESTIÓN DE AUTENTICACIÓN Y NAVEGACIÓN DINÁMICA
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      const userEmail = (user.email || "").toLowerCase();
+      let nivelUsuario = 2;
+
+      try {
+        const snapUsers = await get(ref(db, "usuarios"));
+        if (snapUsers.exists()) {
+          const usuariosData = snapUsers.val();
+          const userKey = Object.keys(usuariosData).find(
+            key => usuariosData[key].email && usuariosData[key].email.toLowerCase() === userEmail
+          );
+          if (userKey) {
+            nivelUsuario = parseInt(usuariosData[userKey].nivel) || 2;
+          }
+        }
+
+        if (userEmail === "jvalladares@hremploy.com.mx") {
+          nivelUsuario = 5;
+        }
+
+        configurarNavegacionSuperior(nivelUsuario);
+      } catch (err) {
+        console.error("Error al cargar sesión:", err);
+      }
+    });
+
+    function configurarNavegacionSuperior(nivel) {
+      const nav = document.getElementById("navLinksContainer");
+      let linksHTML = `<a href="dashboard.html" class="nav-item">Panel Principal</a>`;
+
+      if (nivel >= 2) {
+        linksHTML += `<a href="requisiciones.html" class="nav-item">Requisiciones</a>`;
+      }
+      if (nivel >= 4) {
+        linksHTML += `<a href="aprobaciones.html" class="nav-item">Aprobaciones</a>`;
+        linksHTML += `<a href="catalogos.html" class="nav-item active">Catálogos</a>`;
+        linksHTML += `<a href="auditoria.html" class="nav-item">Auditoría</a>`;
+      }
+      if (nivel >= 5) {
+        linksHTML += `<a href="requiadmin.html" class="nav-item">Administración</a>`;
+      }
+
+      nav.innerHTML = linksHTML;
+    }
 
     // REGISTROS
     document.getElementById("formVacante").addEventListener("submit", async (e) => {
@@ -238,6 +307,10 @@
       const campo = nodo === 'departamentos' ? 'activo' : 'activa';
       await update(ref(db, `catalogos/${nodo}/${key}`), { [campo]: nuevoEstado });
     };
+
+    document.getElementById("btnNavLogout").addEventListener("click", () => {
+      signOut(auth).then(() => window.location.href = "index.html");
+    });
 
     document.getElementById("fecha").textContent = new Date().getFullYear();
   </script>
