@@ -83,14 +83,10 @@
 
   <nav class="nav-bar">
     <a href="dashboard.html" class="nav-brand">Employment Portal</a>
-    <div class="nav-links">
+    <div class="nav-links" id="navLinksContainer">
       <a href="dashboard.html" class="nav-item">Panel Principal</a>
-      <a href="requisiciones.html" class="nav-item">Requisiciones</a>
-      <a href="aprobaciones.html" class="nav-item">Aprobaciones</a>
-      <a href="catalogos.html" class="nav-item">Catálogos</a>
-      <a href="requiadmin.html" class="nav-item active">Administración</a>
-      <button id="btnGlobalLogout" class="btn-logout-nav">Salir</button>
     </div>
+    <button id="btnGlobalLogout" class="btn-logout-nav">Salir</button>
   </nav>
 
   <div class="container">
@@ -223,7 +219,8 @@
     import {
       getAuth,
       createUserWithEmailAndPassword,
-      signOut
+      signOut,
+      onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import {
       getDatabase,
@@ -231,7 +228,8 @@
       set,
       push,
       remove,
-      onValue
+      onValue,
+      get
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     const firebaseConfig = {
@@ -244,16 +242,67 @@
       appId: "1:596189555034:web:abcdef1234567890"
     };
 
-    // INSTANCIA PRINCIPAL (Para la sesión del Administrador)
+    // INSTANCIA PRINCIPAL
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    // INSTANCIA SECUNDARIA (Para crear usuarios sin cerrar la sesión actual)
+    // INSTANCIA SECUNDARIA
     const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp");
     const secondaryAuth = getAuth(secondaryApp);
 
     document.getElementById("conexion").textContent = "✅ Servidor Conectado";
+
+    // CONTROL DE NAVEGACIÓN
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      const userEmail = (user.email || "").toLowerCase();
+      let nivelUsuario = 2;
+
+      try {
+        const snapUsers = await get(ref(db, "usuarios"));
+        if (snapUsers.exists()) {
+          const usuariosData = snapUsers.val();
+          const userKey = Object.keys(usuariosData).find(
+            key => usuariosData[key].email && usuariosData[key].email.toLowerCase() === userEmail
+          );
+          if (userKey) {
+            nivelUsuario = parseInt(usuariosData[userKey].nivel) || 2;
+          }
+        }
+
+        if (userEmail === "jvalladares@hremploy.com.mx") {
+          nivelUsuario = 5;
+        }
+
+        configurarNavegacionSuperior(nivelUsuario);
+      } catch (err) {
+        console.error("Error al cargar sesión:", err);
+      }
+    });
+
+    function configurarNavegacionSuperior(nivel) {
+      const nav = document.getElementById("navLinksContainer");
+      let linksHTML = `<a href="dashboard.html" class="nav-item">Panel Principal</a>`;
+
+      if (nivel >= 2) {
+        linksHTML += `<a href="requisiciones.html" class="nav-item">Requisiciones</a>`;
+      }
+      if (nivel >= 4) {
+        linksHTML += `<a href="aprobaciones.html" class="nav-item">Aprobaciones</a>`;
+        linksHTML += `<a href="catalogos.html" class="nav-item">Catálogos</a>`;
+        linksHTML += `<a href="auditoria.html" class="nav-item">Auditoría</a>`;
+      }
+      if (nivel >= 5) {
+        linksHTML += `<a href="requiadmin.html" class="nav-item active">Administración</a>`;
+      }
+
+      nav.innerHTML = linksHTML;
+    }
 
     function showError(title, err) {
       const el = document.getElementById("errorLog");
@@ -329,7 +378,7 @@
       });
     }
 
-    // CREACIÓN COMPLETA DE USUARIO (AUTH + BASE DE DATOS)
+    // CREACIÓN COMPLETA DE USUARIO
     document.getElementById("formStaff").addEventListener("submit", async (e) => {
       e.preventDefault();
       const btn = document.getElementById("btnSaveStaff");
@@ -347,11 +396,9 @@
       const nombreRol = rolSeleccionado ? rolSeleccionado.nombre : 'Solicitante';
 
       try {
-        // 1. Crear la cuenta real en Firebase Auth usando la instancia secundaria
         const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
         const newUid = userCredential.user.uid;
 
-        // 2. Guardar el perfil en Realtime Database usando el UID como llave
         await set(ref(db, `usuarios/${newUid}`), {
           nombre,
           telefono,
@@ -363,7 +410,6 @@
           createdAt: Date.now()
         });
 
-        // 3. Cerrar la sesión de la instancia secundaria para mantener limpia la app
         await signOut(secondaryAuth);
 
         alert(`✅ Usuario ${nombre} registrado exitosamente con Nivel ${nivel}.\nYa puede ingresar al sistema desde la pantalla principal.`);
