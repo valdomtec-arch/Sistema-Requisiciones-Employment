@@ -56,18 +56,24 @@
     input, select, textarea { font-size: 0.95rem; padding: 10px; margin: 4px 0 12px 0; width: 100%; box-sizing: border-box; border: 1px solid var(--gris-borde); border-radius: 6px; }
     input:focus, select:focus, textarea:focus { outline: none; border-color: var(--naranja); box-shadow: 0 0 5px rgba(255,102,0,0.3); }
 
+    .checkbox-container { display: flex; align-items: center; gap: 8px; margin: 10px 0 12px 0; background: #f8f9fa; padding: 8px 12px; border-radius: 6px; border: 1px dashed var(--gris-borde); }
+    .checkbox-container input[type="checkbox"] { width: auto; margin: 0; cursor: pointer; }
+
     button { cursor: pointer; border: none; background: var(--naranja); color: var(--blanco); font-weight: 700; padding: 10px 16px; border-radius: 6px; font-size: 0.95rem; transition: background 0.2s; }
     button:hover { background: #e05500; }
     .btn-secondary { background: var(--azul-marino); color: var(--amarillo); }
     .btn-secondary:hover { background: #001226; }
     .btn-danger { background: #CC0000; color: var(--blanco); }
     .btn-danger:hover { background: #990000; }
+    .btn-toggle { background: #17a2b8; color: #fff; padding: 4px 8px; font-size: 0.75rem; border-radius: 4px; border: none; cursor: pointer; }
 
     .table { width: 100%; border-collapse: collapse; margin-top: 12px; background: var(--blanco); border-radius: 6px; overflow: hidden; border: 1px solid var(--gris-borde); }
     .table th { background: var(--azul-marino); color: var(--amarillo); padding: 10px; text-align: left; font-family: 'Montserrat', sans-serif; font-size: 0.85rem; }
     .table td { padding: 10px; border-bottom: 1px solid #EEEEEE; font-size: 0.9rem; }
     .table tr:hover { background: #FFFDE6; }
     .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.8rem; background: var(--amarillo); color: var(--azul-marino); }
+    .badge-success { background: #28a745; color: #fff; }
+    .badge-secondary { background: #6c757d; color: #fff; }
 
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,31,63,0.7); align-items: center; justify-content: center; z-index: 9999; }
     .modal.show { display: flex; }
@@ -130,7 +136,7 @@
           </div>
           <div style="flex:1; min-width:220px;">
             <label>Teléfono (WhatsApp)</label>
-            <input id="staffTelefono" maxlength="10" pattern="[0-9]{10}" placeholder="10 dígitos" />
+            <input id="staffTelefono" maxlength="10" pattern="[0-9]{10}" placeholder="10 dígitos" required />
           </div>
           <div style="flex:1; min-width:220px;">
             <label>Rol Asignado</label>
@@ -149,6 +155,14 @@
           </div>
         </div>
 
+        <!-- Checkbox de Autorización para Aprobación -->
+        <div class="checkbox-container">
+          <input type="checkbox" id="staffPuedeAprobar" />
+          <label for="staffPuedeAprobar" style="margin:0; cursor:pointer;">
+            Autorizado para recibir y aprobar requisiciones vía WhatsApp (Nivel 5)
+          </label>
+        </div>
+
         <div class="right" style="margin-top:15px;">
           <button type="submit" id="btnSaveStaff">Crear Usuario e Iniciar Acceso</button>
         </div>
@@ -163,7 +177,7 @@
       </div>
       <table class="table">
         <thead>
-          <tr><th>Colaborador</th><th>Rol</th><th>Nivel</th><th>Contacto</th><th>Estatus</th><th>Acciones</th></tr>
+          <tr><th>Colaborador</th><th>Rol / Nivel</th><th>Contacto</th><th>Autorizado Aprobar</th><th>Estatus</th><th>Acciones</th></tr>
         </thead>
         <tbody id="tablaStaffBody">
           <tr><td colspan="6" style="text-align:center;">Cargando personal...</td></tr>
@@ -226,6 +240,7 @@
       getDatabase,
       ref,
       set,
+      update,
       push,
       remove,
       onValue,
@@ -346,6 +361,17 @@
       });
     }
 
+    // Evento para activar o sugerir el checkbox si el rol es Nivel 5
+    document.getElementById("staffRol").addEventListener("change", (e) => {
+      const rolKey = e.target.value;
+      const chk = document.getElementById("staffPuedeAprobar");
+      if (rolesCache[rolKey] && parseInt(rolesCache[rolKey].nivel) === 5) {
+        chk.checked = true;
+      } else {
+        chk.checked = false;
+      }
+    });
+
     function cargarStaff() {
       onValue(ref(db, 'usuarios'), (snap) => {
         const tbody = document.getElementById("tablaStaffBody");
@@ -361,12 +387,21 @@
         Object.keys(users).forEach(uid => {
           const u = users[uid];
           total++;
+
+          const esAprobador = u.puedeAprobar === true;
+          const badgeAprobador = esAprobador 
+            ? `<span class="badge badge-success">SI</span>` 
+            : `<span class="badge badge-secondary">NO</span>`;
+
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td><strong>${u.nombre}</strong><br><small>${u.email}</small></td>
-            <td>${u.nombreRol || 'Sin asignar'}</td>
-            <td>Nivel ${u.nivel || 2}</td>
+            <td>${u.nombreRol || 'Sin asignar'}<br><small>Nivel ${u.nivel || 2}</small></td>
             <td>${u.telefono || 'N/A'}</td>
+            <td>
+              ${badgeAprobador}
+              <button onclick="window.toggleAprobador('${uid}', ${!esAprobador})" class="btn-toggle" style="margin-left:4px;">Cambiar</button>
+            </td>
             <td><span class="badge">${u.estatus || 'Activo'}</span></td>
             <td>
               <button onclick="window.bajaStaff('${uid}')" class="btn-danger" style="padding:4px 8px; font-size:0.75rem;">Baja</button>
@@ -377,6 +412,15 @@
         document.getElementById("totalStaffBadge").textContent = `${total} Usuarios`;
       });
     }
+
+    // Cambiar estado de permiso de aprobación dinámicamente
+    window.toggleAprobador = async (uid, nuevoEstado) => {
+      try {
+        await update(ref(db, `usuarios/${uid}`), { puedeAprobar: nuevoEstado });
+      } catch (err) {
+        showError("Error al actualizar permiso de aprobación", err);
+      }
+    };
 
     // CREACIÓN COMPLETA DE USUARIO
     document.getElementById("formStaff").addEventListener("submit", async (e) => {
@@ -390,6 +434,7 @@
       const rolKey = document.getElementById("staffRol").value;
       const email = document.getElementById("staffEmail").value.trim().toLowerCase();
       const password = document.getElementById("staffPassword").value;
+      const puedeAprobar = document.getElementById("staffPuedeAprobar").checked;
 
       const rolSeleccionado = rolesCache[rolKey];
       const nivel = rolSeleccionado ? parseInt(rolSeleccionado.nivel) : 2;
@@ -406,13 +451,14 @@
           nombreRol,
           nivel,
           email,
+          puedeAprobar,
           estatus: 'Activo',
           createdAt: Date.now()
         });
 
         await signOut(secondaryAuth);
 
-        alert(`✅ Usuario ${nombre} registrado exitosamente con Nivel ${nivel}.\nYa puede ingresar al sistema desde la pantalla principal.`);
+        alert(`✅ Usuario ${nombre} registrado exitosamente.\nYa puede ingresar al sistema desde la pantalla principal.`);
         document.getElementById("formStaff").reset();
         document.getElementById("errorLog").style.display = "none";
       } catch (err) {
