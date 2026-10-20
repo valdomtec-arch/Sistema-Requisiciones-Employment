@@ -56,42 +56,23 @@
     input, select, textarea { font-size: 0.95rem; padding: 10px; margin: 4px 0 12px 0; width: 100%; box-sizing: border-box; border: 1px solid var(--gris-borde); border-radius: 6px; }
     input:focus, select:focus, textarea:focus { outline: none; border-color: var(--naranja); box-shadow: 0 0 5px rgba(255,102,0,0.3); }
 
+    .pass-container { position: relative; display: flex; align-items: center; }
+    .pass-container input { padding-right: 80px; }
+    .pass-actions { position: absolute; right: 8px; top: 8px; display: flex; gap: 4px; }
+    .btn-icon { background: #e2e8f0; border: none; border-radius: 4px; padding: 5px 8px; cursor: pointer; font-size: 0.85rem; }
+    .btn-icon:hover { background: #cbd5e1; }
+
     .checkbox-container { display: flex; align-items: center; gap: 8px; margin: 10px 0 12px 0; background: #f8f9fa; padding: 8px 12px; border-radius: 6px; border: 1px dashed var(--gris-borde); }
     .checkbox-container input[type="checkbox"] { width: auto; margin: 0; cursor: pointer; }
-
-    /* CONTENEDOR CON OJITO Y GENERADOR */
-    .password-input-group {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin: 4px 0 12px 0;
-    }
-    .password-input-group input {
-      margin: 0 !important;
-      flex: 1;
-    }
-    .btn-pwd-action {
-      background: var(--azul-marino);
-      color: var(--amarillo);
-      padding: 10px 12px;
-      font-size: 0.85rem;
-      border-radius: 6px;
-      cursor: pointer;
-      border: 1px solid var(--azul-marino);
-      white-space: nowrap;
-    }
-    .btn-pwd-action:hover {
-      background: #001226;
-    }
 
     button { cursor: pointer; border: none; background: var(--naranja); color: var(--blanco); font-weight: 700; padding: 10px 16px; border-radius: 6px; font-size: 0.95rem; transition: background 0.2s; }
     button:hover { background: #e05500; }
     .btn-secondary { background: var(--azul-marino); color: var(--amarillo); }
     .btn-secondary:hover { background: #001226; }
+    .btn-edit { background: #007bff; color: var(--blanco); padding: 4px 8px; font-size: 0.75rem; border-radius: 4px; border: none; cursor: pointer; margin-right: 4px; }
+    .btn-edit:hover { background: #0056b3; }
     .btn-danger { background: #CC0000; color: var(--blanco); }
     .btn-danger:hover { background: #990000; }
-    .btn-edit { background: #007bff; color: #fff; padding: 4px 8px; font-size: 0.75rem; border-radius: 4px; border: none; cursor: pointer; }
-    .btn-edit:hover { background: #0056b3; }
     .btn-toggle { background: #17a2b8; color: #fff; padding: 4px 8px; font-size: 0.75rem; border-radius: 4px; border: none; cursor: pointer; }
 
     .table { width: 100%; border-collapse: collapse; margin-top: 12px; background: var(--blanco); border-radius: 6px; overflow: hidden; border: 1px solid var(--gris-borde); }
@@ -104,7 +85,7 @@
 
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,31,63,0.7); align-items: center; justify-content: center; z-index: 9999; }
     .modal.show { display: flex; }
-    .modal-content { background: var(--blanco); padding: 24px; border-radius: 8px; width: 92%; max-width: 650px; border-top: 6px solid var(--naranja); box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+    .modal-content { background: var(--blanco); padding: 24px; border-radius: 8px; width: 92%; max-width: 650px; border-top: 6px solid var(--naranja); box-shadow: 0 10px 25px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
     
     .flex { display: flex; gap: 10px; align-items: center; }
     .right { text-align: right; }
@@ -148,7 +129,7 @@
       </table>
     </div>
 
-    <!-- FICHA DE PERSONAL -->
+    <!-- FICHA DE PERSONAL (ALTA) -->
     <div class="card">
       <div class="flex" style="justify-content:space-between;">
         <h3>Ficha de Personal y Cadena de Mando</h3>
@@ -176,12 +157,14 @@
             <label>Correo Electrónico (Acceso System)</label>
             <input id="staffEmail" type="email" placeholder="usuario@hremploy.com.mx" required />
           </div>
-          <div style="flex:1; min-width:280px;">
+          <div style="flex:1; min-width:220px;">
             <label>Contraseña Inicial de Acceso</label>
-            <div class="password-input-group">
+            <div class="pass-container">
               <input id="staffPassword" type="password" placeholder="Mínimo 6 caracteres" minlength="6" required />
-              <button type="button" class="btn-pwd-action" onclick="window.toggleEye('staffPassword', this)">👁️</button>
-              <button type="button" class="btn-pwd-action" onclick="window.generarClave('staffPassword')">⚡ Generar</button>
+              <div class="pass-actions">
+                <button type="button" class="btn-icon" title="Ver contraseña" onclick="window.toggleEye('staffPassword')">👁️</button>
+                <button type="button" class="btn-icon" title="Generar clave segura" onclick="window.generarClave('staffPassword')">⚡</button>
+              </div>
             </div>
           </div>
         </div>
@@ -218,6 +201,54 @@
 
   </div>
 
+  <!-- MODAL: EDITAR USUARIO -->
+  <div id="modalEditarUsuario" class="modal">
+    <div class="modal-content">
+      <h3>Modificar Datos y Credenciales de Usuario</h3>
+      <form id="formEditarUsuario">
+        <input type="hidden" id="editUid" />
+        
+        <label>Nombre Completo</label>
+        <input id="editNombre" required />
+
+        <div class="flex" style="flex-wrap:wrap;">
+          <div style="flex:1; min-width:200px;">
+            <label>Teléfono (WhatsApp)</label>
+            <input id="editTelefono" maxlength="10" pattern="[0-9]{10}" required />
+          </div>
+          <div style="flex:1; min-width:200px;">
+            <label>Rol Asignado</label>
+            <select id="editRol" required></select>
+          </div>
+        </div>
+
+        <label>Correo Electrónico</label>
+        <input id="editEmail" type="email" disabled style="background:#e9ecef; cursor:not-allowed;" />
+
+        <label>Cambiar Contraseña (Dejar en blanco para conservar la actual)</label>
+        <div class="pass-container">
+          <input id="editPassword" type="password" placeholder="Escribe nueva clave si deseas cambiarla..." minlength="6" />
+          <div class="pass-actions">
+            <button type="button" class="btn-icon" title="Ver contraseña" onclick="window.toggleEye('editPassword')">👁️</button>
+            <button type="button" class="btn-icon" title="Generar clave segura" onclick="window.generarClave('editPassword')">⚡</button>
+          </div>
+        </div>
+
+        <div class="checkbox-container">
+          <input type="checkbox" id="editPuedeAprobar" />
+          <label for="editPuedeAprobar" style="margin:0; cursor:pointer;">
+            Autorizado para recibir y aprobar requisiciones vía WhatsApp (Nivel 5)
+          </label>
+        </div>
+
+        <div class="right" style="margin-top:15px;">
+          <button type="button" id="btnCancelarEditar" class="btn-secondary">Cancelar</button>
+          <button type="submit" id="btnGuardarEditar">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- MODAL: CREAR ROL -->
   <div id="modalRol" class="modal">
     <div class="modal-content">
@@ -250,53 +281,6 @@
         <div class="right" style="margin-top:12px;">
           <button type="button" id="btnCloseModal" class="btn-secondary">Cancelar</button>
           <button type="submit">Guardar Rol</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL: EDITAR USUARIO -->
-  <div id="modalEditarUsuario" class="modal">
-    <div class="modal-content">
-      <h3>Editar Perfil de Colaborador</h3>
-      <form id="formEditarUsuario">
-        <input type="hidden" id="editUid" />
-        
-        <div class="flex" style="flex-wrap:wrap;">
-          <div style="flex:1; min-width:200px;">
-            <label>Nombre Completo</label>
-            <input id="editNombre" required />
-          </div>
-          <div style="flex:1; min-width:180px;">
-            <label>Teléfono (WhatsApp)</label>
-            <input id="editTelefono" maxlength="10" pattern="[0-9]{10}" required />
-          </div>
-        </div>
-
-        <div class="flex" style="flex-wrap:wrap;">
-          <div style="flex:1; min-width:200px;">
-            <label>Rol Asignado</label>
-            <select id="editRol" required><option value="">Selecciona rol...</option></select>
-          </div>
-          <div style="flex:1; min-width:180px;">
-            <label>Estatus</label>
-            <select id="editEstatus">
-              <option value="Activo">Activo</option>
-              <option value="Inactivo">Inactivo</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="checkbox-container">
-          <input type="checkbox" id="editPuedeAprobar" />
-          <label for="editPuedeAprobar" style="margin:0; cursor:pointer;">
-            Autorizado para recibir y aprobar requisiciones vía WhatsApp (Nivel 5)
-          </label>
-        </div>
-
-        <div class="right" style="margin-top:15px;">
-          <button type="button" id="btnCloseModalEdit" class="btn-secondary">Cancelar</button>
-          <button type="submit">Guardar Cambios</button>
         </div>
       </form>
     </div>
@@ -340,34 +324,27 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    // INSTANCIA SECUNDARIA
+    // INSTANCIA SECUNDARIA PARA ALTAS DE CUENTAS
     const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp");
     const secondaryAuth = getAuth(secondaryApp);
 
     document.getElementById("conexion").textContent = "✅ Servidor Conectado";
 
-    // UTILIDADES: OJITO Y GENERADOR DE CONTRASEÑA
-    window.toggleEye = (inputId, btn) => {
-      const input = document.getElementById(inputId);
-      if (input.type === "password") {
-        input.type = "text";
-        btn.textContent = "🙈";
-      } else {
-        input.type = "password";
-        btn.textContent = "👁️";
-      }
+    // UTILIDADES DE CLAVE (OJITO Y GENERADOR)
+    window.toggleEye = (inputId) => {
+      const inp = document.getElementById(inputId);
+      inp.type = inp.type === "password" ? "text" : "password";
     };
 
     window.generarClave = (inputId) => {
-      const chars = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%*";
-      let pwd = "";
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*";
+      let pass = "";
       for (let i = 0; i < 10; i++) {
-        pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+        pass += chars.charAt(Math.floor(Math.random() * chars.length));
       }
-      const input = document.getElementById(inputId);
-      input.value = pwd;
-      input.type = "text"; // La muestra al generar para que pueda ser anotada
-      alert(`🔑 Contraseña generada: ${pwd}\n(Se ha colocado en el campo visible para confirmación)`);
+      const inp = document.getElementById(inputId);
+      inp.value = pass;
+      inp.type = "text"; // La muestra para copiarla o anotarla
     };
 
     // CONTROL DE NAVEGACIÓN
@@ -435,6 +412,7 @@
         const tbody = document.getElementById("tablaRolesBody");
         const selectRol = document.getElementById("staffRol");
         const selectEditRol = document.getElementById("editRol");
+        
         tbody.innerHTML = '';
         selectRol.innerHTML = '<option value="">Selecciona un Rol...</option>';
         selectEditRol.innerHTML = '<option value="">Selecciona un Rol...</option>';
@@ -463,9 +441,7 @@
           opt.textContent = `${r.nombre} (Nivel ${r.nivel})`;
           selectRol.appendChild(opt);
 
-          const optEdit = document.createElement('option');
-          optEdit.value = key;
-          optEdit.textContent = `${r.nombre} (Nivel ${r.nivel})`;
+          const optEdit = opt.cloneNode(true);
           selectEditRol.appendChild(optEdit);
         });
       });
@@ -513,7 +489,7 @@
             </td>
             <td><span class="badge">${u.estatus || 'Activo'}</span></td>
             <td>
-              <button onclick="window.abrirModalEditar('${uid}')" class="btn-edit" style="padding:4px 8px; font-size:0.75rem; margin-right:4px;">✏️ Editar</button>
+              <button onclick="window.abrirModalEditar('${uid}')" class="btn-edit">✏️ Editar</button>
               <button onclick="window.bajaStaff('${uid}')" class="btn-danger" style="padding:4px 8px; font-size:0.75rem;">Baja</button>
             </td>
           `;
@@ -523,7 +499,7 @@
       });
     }
 
-    // ABRIR Y GUARDAR EDICIÓN DE USUARIO
+    // ABRIR MODAL EDICIÓN
     window.abrirModalEditar = (uid) => {
       const u = usersCache[uid];
       if (!u) return;
@@ -532,23 +508,29 @@
       document.getElementById("editNombre").value = u.nombre || "";
       document.getElementById("editTelefono").value = u.telefono || "";
       document.getElementById("editRol").value = u.rolKey || "";
-      document.getElementById("editEstatus").value = u.estatus || "Activo";
+      document.getElementById("editEmail").value = u.email || "";
+      document.getElementById("editPassword").value = "";
       document.getElementById("editPuedeAprobar").checked = u.puedeAprobar === true;
 
       document.getElementById("modalEditarUsuario").classList.add("show");
     };
 
-    document.getElementById("btnCloseModalEdit").addEventListener("click", () => {
+    document.getElementById("btnCancelarEditar").addEventListener("click", () => {
       document.getElementById("modalEditarUsuario").classList.remove("show");
     });
 
+    // GUARDAR CAMBIOS DE EDICIÓN Y ACTUALIZAR EN AUTH SERVER
     document.getElementById("formEditarUsuario").addEventListener("submit", async (e) => {
       e.preventDefault();
+      const btn = document.getElementById("btnGuardarEditar");
+      btn.disabled = true;
+      btn.textContent = "Actualizando servidor...";
+
       const uid = document.getElementById("editUid").value;
       const nombre = document.getElementById("editNombre").value.trim();
       const telefono = document.getElementById("editTelefono").value.trim();
       const rolKey = document.getElementById("editRol").value;
-      const estatus = document.getElementById("editEstatus").value;
+      const password = document.getElementById("editPassword").value.trim();
       const puedeAprobar = document.getElementById("editPuedeAprobar").checked;
 
       const rolSeleccionado = rolesCache[rolKey];
@@ -556,20 +538,48 @@
       const nombreRol = rolSeleccionado ? rolSeleccionado.nombre : 'Solicitante';
 
       try {
+        // 1. Si se ingresó una nueva contraseña, inyectar cambio a Firebase Auth
+        if (password) {
+          if (password.length < 6) {
+            throw new Error("La contraseña debe tener mínimo 6 caracteres.");
+          }
+
+          const responseAuth = await fetch(
+            `https://identitytoolkit.googleapis.com/v1/accounts:update?key=${firebaseConfig.apiKey}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                localId: uid,
+                password: password,
+                returnSecureToken: false
+              })
+            }
+          );
+
+          const resData = await responseAuth.json();
+          if (resData.error) {
+            throw new Error(resData.error.message || "Error al actualizar la contraseña en Firebase Auth.");
+          }
+        }
+
+        // 2. Actualizar datos en la Base de Datos RTDB
         await update(ref(db, `usuarios/${uid}`), {
           nombre,
           telefono,
           rolKey,
           nombreRol,
           nivel,
-          estatus,
           puedeAprobar
         });
 
-        alert("✅ Usuario actualizado correctamente.");
+        alert("✅ Usuario y credenciales actualizados exitosamente en Firebase Server.");
         document.getElementById("modalEditarUsuario").classList.remove("show");
       } catch (err) {
-        showError("Error al editar usuario", err);
+        showError("Error al actualizar usuario", err);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Guardar Cambios";
       }
     });
 
@@ -581,7 +591,7 @@
       }
     };
 
-    // ALTA DE USUARIO
+    // CREACIÓN COMPLETA DE USUARIO
     document.getElementById("formStaff").addEventListener("submit", async (e) => {
       e.preventDefault();
       const btn = document.getElementById("btnSaveStaff");
@@ -617,7 +627,7 @@
 
         await signOut(secondaryAuth);
 
-        alert(`✅ Usuario ${nombre} registrado exitosamente.\nYa puede ingresar al sistema.`);
+        alert(`✅ Usuario ${nombre} registrado exitosamente.\nYa puede ingresar al sistema desde la pantalla principal.`);
         document.getElementById("formStaff").reset();
         document.getElementById("errorLog").style.display = "none";
       } catch (err) {
