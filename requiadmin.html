@@ -59,12 +59,39 @@
     .checkbox-container { display: flex; align-items: center; gap: 8px; margin: 10px 0 12px 0; background: #f8f9fa; padding: 8px 12px; border-radius: 6px; border: 1px dashed var(--gris-borde); }
     .checkbox-container input[type="checkbox"] { width: auto; margin: 0; cursor: pointer; }
 
+    /* CONTENEDOR CON OJITO Y GENERADOR */
+    .password-input-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 4px 0 12px 0;
+    }
+    .password-input-group input {
+      margin: 0 !important;
+      flex: 1;
+    }
+    .btn-pwd-action {
+      background: var(--azul-marino);
+      color: var(--amarillo);
+      padding: 10px 12px;
+      font-size: 0.85rem;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid var(--azul-marino);
+      white-space: nowrap;
+    }
+    .btn-pwd-action:hover {
+      background: #001226;
+    }
+
     button { cursor: pointer; border: none; background: var(--naranja); color: var(--blanco); font-weight: 700; padding: 10px 16px; border-radius: 6px; font-size: 0.95rem; transition: background 0.2s; }
     button:hover { background: #e05500; }
     .btn-secondary { background: var(--azul-marino); color: var(--amarillo); }
     .btn-secondary:hover { background: #001226; }
     .btn-danger { background: #CC0000; color: var(--blanco); }
     .btn-danger:hover { background: #990000; }
+    .btn-edit { background: #007bff; color: #fff; padding: 4px 8px; font-size: 0.75rem; border-radius: 4px; border: none; cursor: pointer; }
+    .btn-edit:hover { background: #0056b3; }
     .btn-toggle { background: #17a2b8; color: #fff; padding: 4px 8px; font-size: 0.75rem; border-radius: 4px; border: none; cursor: pointer; }
 
     .table { width: 100%; border-collapse: collapse; margin-top: 12px; background: var(--blanco); border-radius: 6px; overflow: hidden; border: 1px solid var(--gris-borde); }
@@ -149,9 +176,13 @@
             <label>Correo Electrónico (Acceso System)</label>
             <input id="staffEmail" type="email" placeholder="usuario@hremploy.com.mx" required />
           </div>
-          <div style="flex:1; min-width:220px;">
+          <div style="flex:1; min-width:280px;">
             <label>Contraseña Inicial de Acceso</label>
-            <input id="staffPassword" type="password" placeholder="Mínimo 6 caracteres" minlength="6" required />
+            <div class="password-input-group">
+              <input id="staffPassword" type="password" placeholder="Mínimo 6 caracteres" minlength="6" required />
+              <button type="button" class="btn-pwd-action" onclick="window.toggleEye('staffPassword', this)">👁️</button>
+              <button type="button" class="btn-pwd-action" onclick="window.generarClave('staffPassword')">⚡ Generar</button>
+            </div>
           </div>
         </div>
 
@@ -224,6 +255,53 @@
     </div>
   </div>
 
+  <!-- MODAL: EDITAR USUARIO -->
+  <div id="modalEditarUsuario" class="modal">
+    <div class="modal-content">
+      <h3>Editar Perfil de Colaborador</h3>
+      <form id="formEditarUsuario">
+        <input type="hidden" id="editUid" />
+        
+        <div class="flex" style="flex-wrap:wrap;">
+          <div style="flex:1; min-width:200px;">
+            <label>Nombre Completo</label>
+            <input id="editNombre" required />
+          </div>
+          <div style="flex:1; min-width:180px;">
+            <label>Teléfono (WhatsApp)</label>
+            <input id="editTelefono" maxlength="10" pattern="[0-9]{10}" required />
+          </div>
+        </div>
+
+        <div class="flex" style="flex-wrap:wrap;">
+          <div style="flex:1; min-width:200px;">
+            <label>Rol Asignado</label>
+            <select id="editRol" required><option value="">Selecciona rol...</option></select>
+          </div>
+          <div style="flex:1; min-width:180px;">
+            <label>Estatus</label>
+            <select id="editEstatus">
+              <option value="Activo">Activo</option>
+              <option value="Inactivo">Inactivo</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="checkbox-container">
+          <input type="checkbox" id="editPuedeAprobar" />
+          <label for="editPuedeAprobar" style="margin:0; cursor:pointer;">
+            Autorizado para recibir y aprobar requisiciones vía WhatsApp (Nivel 5)
+          </label>
+        </div>
+
+        <div class="right" style="margin-top:15px;">
+          <button type="button" id="btnCloseModalEdit" class="btn-secondary">Cancelar</button>
+          <button type="submit">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <footer>
     Employment Requisiciones v2.0 | Todos los derechos reservados &copy; <span id="fecha"></span>
   </footer>
@@ -267,6 +345,30 @@
     const secondaryAuth = getAuth(secondaryApp);
 
     document.getElementById("conexion").textContent = "✅ Servidor Conectado";
+
+    // UTILIDADES: OJITO Y GENERADOR DE CONTRASEÑA
+    window.toggleEye = (inputId, btn) => {
+      const input = document.getElementById(inputId);
+      if (input.type === "password") {
+        input.type = "text";
+        btn.textContent = "🙈";
+      } else {
+        input.type = "password";
+        btn.textContent = "👁️";
+      }
+    };
+
+    window.generarClave = (inputId) => {
+      const chars = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%*";
+      let pwd = "";
+      for (let i = 0; i < 10; i++) {
+        pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      const input = document.getElementById(inputId);
+      input.value = pwd;
+      input.type = "text"; // La muestra al generar para que pueda ser anotada
+      alert(`🔑 Contraseña generada: ${pwd}\n(Se ha colocado en el campo visible para confirmación)`);
+    };
 
     // CONTROL DE NAVEGACIÓN
     onAuthStateChanged(auth, async (user) => {
@@ -326,13 +428,16 @@
     }
 
     let rolesCache = {};
+    let usersCache = {};
 
     function cargarRoles() {
       onValue(ref(db, 'roles'), (snap) => {
         const tbody = document.getElementById("tablaRolesBody");
         const selectRol = document.getElementById("staffRol");
+        const selectEditRol = document.getElementById("editRol");
         tbody.innerHTML = '';
         selectRol.innerHTML = '<option value="">Selecciona un Rol...</option>';
+        selectEditRol.innerHTML = '<option value="">Selecciona un Rol...</option>';
 
         if (!snap.exists()) {
           tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No hay roles registrados.</td></tr>';
@@ -357,11 +462,15 @@
           opt.value = key;
           opt.textContent = `${r.nombre} (Nivel ${r.nivel})`;
           selectRol.appendChild(opt);
+
+          const optEdit = document.createElement('option');
+          optEdit.value = key;
+          optEdit.textContent = `${r.nombre} (Nivel ${r.nivel})`;
+          selectEditRol.appendChild(optEdit);
         });
       });
     }
 
-    // Evento para activar o sugerir el checkbox si el rol es Nivel 5
     document.getElementById("staffRol").addEventListener("change", (e) => {
       const rolKey = e.target.value;
       const chk = document.getElementById("staffPuedeAprobar");
@@ -382,10 +491,10 @@
           return;
         }
 
-        const users = snap.val();
+        usersCache = snap.val();
         let total = 0;
-        Object.keys(users).forEach(uid => {
-          const u = users[uid];
+        Object.keys(usersCache).forEach(uid => {
+          const u = usersCache[uid];
           total++;
 
           const esAprobador = u.puedeAprobar === true;
@@ -404,6 +513,7 @@
             </td>
             <td><span class="badge">${u.estatus || 'Activo'}</span></td>
             <td>
+              <button onclick="window.abrirModalEditar('${uid}')" class="btn-edit" style="padding:4px 8px; font-size:0.75rem; margin-right:4px;">✏️ Editar</button>
               <button onclick="window.bajaStaff('${uid}')" class="btn-danger" style="padding:4px 8px; font-size:0.75rem;">Baja</button>
             </td>
           `;
@@ -413,7 +523,56 @@
       });
     }
 
-    // Cambiar estado de permiso de aprobación dinámicamente
+    // ABRIR Y GUARDAR EDICIÓN DE USUARIO
+    window.abrirModalEditar = (uid) => {
+      const u = usersCache[uid];
+      if (!u) return;
+
+      document.getElementById("editUid").value = uid;
+      document.getElementById("editNombre").value = u.nombre || "";
+      document.getElementById("editTelefono").value = u.telefono || "";
+      document.getElementById("editRol").value = u.rolKey || "";
+      document.getElementById("editEstatus").value = u.estatus || "Activo";
+      document.getElementById("editPuedeAprobar").checked = u.puedeAprobar === true;
+
+      document.getElementById("modalEditarUsuario").classList.add("show");
+    };
+
+    document.getElementById("btnCloseModalEdit").addEventListener("click", () => {
+      document.getElementById("modalEditarUsuario").classList.remove("show");
+    });
+
+    document.getElementById("formEditarUsuario").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const uid = document.getElementById("editUid").value;
+      const nombre = document.getElementById("editNombre").value.trim();
+      const telefono = document.getElementById("editTelefono").value.trim();
+      const rolKey = document.getElementById("editRol").value;
+      const estatus = document.getElementById("editEstatus").value;
+      const puedeAprobar = document.getElementById("editPuedeAprobar").checked;
+
+      const rolSeleccionado = rolesCache[rolKey];
+      const nivel = rolSeleccionado ? parseInt(rolSeleccionado.nivel) : 2;
+      const nombreRol = rolSeleccionado ? rolSeleccionado.nombre : 'Solicitante';
+
+      try {
+        await update(ref(db, `usuarios/${uid}`), {
+          nombre,
+          telefono,
+          rolKey,
+          nombreRol,
+          nivel,
+          estatus,
+          puedeAprobar
+        });
+
+        alert("✅ Usuario actualizado correctamente.");
+        document.getElementById("modalEditarUsuario").classList.remove("show");
+      } catch (err) {
+        showError("Error al editar usuario", err);
+      }
+    });
+
     window.toggleAprobador = async (uid, nuevoEstado) => {
       try {
         await update(ref(db, `usuarios/${uid}`), { puedeAprobar: nuevoEstado });
@@ -422,7 +581,7 @@
       }
     };
 
-    // CREACIÓN COMPLETA DE USUARIO
+    // ALTA DE USUARIO
     document.getElementById("formStaff").addEventListener("submit", async (e) => {
       e.preventDefault();
       const btn = document.getElementById("btnSaveStaff");
@@ -458,7 +617,7 @@
 
         await signOut(secondaryAuth);
 
-        alert(`✅ Usuario ${nombre} registrado exitosamente.\nYa puede ingresar al sistema desde la pantalla principal.`);
+        alert(`✅ Usuario ${nombre} registrado exitosamente.\nYa puede ingresar al sistema.`);
         document.getElementById("formStaff").reset();
         document.getElementById("errorLog").style.display = "none";
       } catch (err) {
