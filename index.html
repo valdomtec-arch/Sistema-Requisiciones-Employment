@@ -83,6 +83,42 @@
       box-shadow: 0 0 5px rgba(255,102,0,0.3);
     }
 
+    .pass-field-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .pass-field-wrapper input {
+      padding-right: 46px;
+    }
+
+    .btn-toggle-eye {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-35%);
+      background: transparent;
+      border: none;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      margin: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666666;
+      border-radius: 4px;
+      transition: color 0.2s, background-color 0.2s;
+    }
+
+    .btn-toggle-eye:hover {
+      background-color: #f0f2f5;
+      color: var(--azul-marino);
+    }
+
     .btn-group {
       display: flex;
       flex-direction: column;
@@ -160,7 +196,19 @@
         <input id="email" type="email" placeholder="usuario@hremploy.com.mx" required />
 
         <label for="password">Contraseña</label>
-        <input id="password" type="password" placeholder="••••••••" required />
+        <div class="pass-field-wrapper">
+          <input id="password" type="password" placeholder="••••••••" required />
+          <button type="button" id="btnTogglePassword" class="btn-toggle-eye" title="Mostrar u ocultar contraseña">
+            <svg id="eyeOpenIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            <svg id="eyeClosedIcon" style="display:none;" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+              <line x1="1" y1="1" x2="23" y2="23"></line>
+            </svg>
+          </button>
+        </div>
 
         <div class="btn-group">
           <button type="submit" id="btnLogin">Ingresar al Sistema</button>
@@ -197,6 +245,17 @@
     const auth = getAuth(app);
 
     const msgBox = document.getElementById("statusMsg");
+    const passwordInput = document.getElementById("password");
+    const btnTogglePassword = document.getElementById("btnTogglePassword");
+    const eyeOpenIcon = document.getElementById("eyeOpenIcon");
+    const eyeClosedIcon = document.getElementById("eyeClosedIcon");
+
+    btnTogglePassword.addEventListener("click", () => {
+      const isPassword = passwordInput.type === "password";
+      passwordInput.type = isPassword ? "text" : "password";
+      eyeOpenIcon.style.display = isPassword ? "none" : "block";
+      eyeClosedIcon.style.display = isPassword ? "block" : "none";
+    });
 
     function showMsg(text, type = "info") {
       msgBox.className = `status-msg ${type}`;
@@ -206,7 +265,7 @@
 
     async function ejecutarAutenticacion(destino) {
       const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
+      const password = passwordInput.value;
 
       if (!email || !password) {
         showMsg("Por favor, ingresa tu correo y contraseña.", "error");
