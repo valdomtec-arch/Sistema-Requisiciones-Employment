@@ -74,6 +74,8 @@
     .btn-danger { background: #CC0000; color: var(--blanco); }
     .btn-danger:hover { background: #990000; }
     .btn-toggle { background: #17a2b8; color: #fff; padding: 4px 8px; font-size: 0.75rem; border-radius: 4px; border: none; cursor: pointer; }
+    .btn-mail { background: #6f42c1; color: #fff; font-size: 0.85rem; padding: 8px 12px; border-radius: 6px; border: none; cursor: pointer; }
+    .btn-mail:hover { background: #5a32a3; }
 
     .table { width: 100%; border-collapse: collapse; margin-top: 12px; background: var(--blanco); border-radius: 6px; overflow: hidden; border: 1px solid var(--gris-borde); }
     .table th { background: var(--azul-marino); color: var(--amarillo); padding: 10px; text-align: left; font-family: 'Montserrat', sans-serif; font-size: 0.85rem; }
@@ -158,7 +160,7 @@
             <input id="staffEmail" type="email" placeholder="usuario@hremploy.com.mx" required />
           </div>
           <div style="flex:1; min-width:220px;">
-            <label>Contraseña Inicial de Acceso</label>
+            <label>Contraseña Provisional</label>
             <div class="pass-container">
               <input id="staffPassword" type="password" placeholder="Mínimo 6 caracteres" minlength="6" required />
               <div class="pass-actions">
@@ -225,13 +227,22 @@
         <label>Correo Electrónico</label>
         <input id="editEmail" type="email" disabled style="background:#e9ecef; cursor:not-allowed;" />
 
-        <label>Cambiar Contraseña (Dejar en blanco para conservar la actual)</label>
+        <label>Nueva Clave Provisional (Anotar o proporcionar al colaborador)</label>
         <div class="pass-container">
-          <input id="editPassword" type="password" placeholder="Escribe nueva clave si deseas cambiarla..." minlength="6" />
+          <input id="editPassword" type="password" placeholder="Generar o escribir clave provisional..." minlength="6" />
           <div class="pass-actions">
             <button type="button" class="btn-icon" title="Ver contraseña" onclick="window.toggleEye('editPassword')">👁️</button>
             <button type="button" class="btn-icon" title="Generar clave segura" onclick="window.generarClave('editPassword')">⚡</button>
           </div>
+        </div>
+
+        <div style="margin-top: 10px; margin-bottom: 12px;">
+          <button type="button" id="btnEnviarEnlaceCorreo" class="btn-mail">
+            📧 Enviar Enlace de Restablecimiento por Correo
+          </button>
+          <small style="display:block; color:#666; margin-top:4px;">
+            Envía el enlace oficial de Firebase para que el usuario defina su contraseña definitiva directamente.
+          </small>
         </div>
 
         <div class="checkbox-container">
@@ -296,7 +307,8 @@
       getAuth,
       createUserWithEmailAndPassword,
       signOut,
-      onAuthStateChanged
+      onAuthStateChanged,
+      sendPasswordResetEmail
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import {
       getDatabase,
@@ -344,7 +356,7 @@
       }
       const inp = document.getElementById(inputId);
       inp.value = pass;
-      inp.type = "text"; // La muestra para copiarla o anotarla
+      inp.type = "text";
     };
 
     // CONTROL DE NAVEGACIÓN
@@ -509,7 +521,7 @@
       document.getElementById("editTelefono").value = u.telefono || "";
       document.getElementById("editRol").value = u.rolKey || "";
       document.getElementById("editEmail").value = u.email || "";
-      document.getElementById("editPassword").value = "";
+      document.getElementById("editPassword").value = u.passwordTemp || "";
       document.getElementById("editPuedeAprobar").checked = u.puedeAprobar === true;
 
       document.getElementById("modalEditarUsuario").classList.add("show");
@@ -519,12 +531,35 @@
       document.getElementById("modalEditarUsuario").classList.remove("show");
     });
 
-    // GUARDAR CAMBIOS DE EDICIÓN Y ACTUALIZAR EN AUTH SERVER
+    // BOTÓN DE ENVÍO DE CORREO DE RESTABLECIMIENTO DIRECTO
+    document.getElementById("btnEnviarEnlaceCorreo").addEventListener("click", async () => {
+      const email = document.getElementById("editEmail").value.trim();
+      const btn = document.getElementById("btnEnviarEnlaceCorreo");
+      
+      if (!email) {
+        alert("No se encontró el correo del usuario.");
+        return;
+      }
+
+      try {
+        btn.disabled = true;
+        btn.textContent = "Enviando correo...";
+        await sendPasswordResetEmail(auth, email);
+        alert(`📧 Se ha enviado un correo oficial a ${email}.\nEl colaborador podrá crear su contraseña definitiva desde el enlace.`);
+      } catch (err) {
+        showError("Error al enviar correo de recuperación", err);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "📧 Enviar Enlace de Restablecimiento por Correo";
+      }
+    });
+
+    // GUARDAR CAMBIOS DE EDICIÓN
     document.getElementById("formEditarUsuario").addEventListener("submit", async (e) => {
       e.preventDefault();
       const btn = document.getElementById("btnGuardarEditar");
       btn.disabled = true;
-      btn.textContent = "Actualizando servidor...";
+      btn.textContent = "Guardando...";
 
       const uid = document.getElementById("editUid").value;
       const nombre = document.getElementById("editNombre").value.trim();
@@ -538,42 +573,25 @@
       const nombreRol = rolSeleccionado ? rolSeleccionado.nombre : 'Solicitante';
 
       try {
-        // 1. Si se ingresó una nueva contraseña, inyectar cambio a Firebase Auth
-        if (password) {
-          if (password.length < 6) {
-            throw new Error("La contraseña debe tener mínimo 6 caracteres.");
-          }
-
-          const responseAuth = await fetch(
-            `https://identitytoolkit.googleapis.com/v1/accounts:update?key=${firebaseConfig.apiKey}`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                localId: uid,
-                password: password,
-                returnSecureToken: false
-              })
-            }
-          );
-
-          const resData = await responseAuth.json();
-          if (resData.error) {
-            throw new Error(resData.error.message || "Error al actualizar la contraseña en Firebase Auth.");
-          }
-        }
-
-        // 2. Actualizar datos en la Base de Datos RTDB
-        await update(ref(db, `usuarios/${uid}`), {
+        const updateData = {
           nombre,
           telefono,
           rolKey,
           nombreRol,
           nivel,
           puedeAprobar
-        });
+        };
 
-        alert("✅ Usuario y credenciales actualizados exitosamente en Firebase Server.");
+        if (password) {
+          if (password.length < 6) {
+            throw new Error("La contraseña debe tener mínimo 6 caracteres.");
+          }
+          updateData.passwordTemp = password;
+        }
+
+        await update(ref(db, `usuarios/${uid}`), updateData);
+
+        alert("✅ Datos de usuario actualizados correctamente.");
         document.getElementById("modalEditarUsuario").classList.remove("show");
       } catch (err) {
         showError("Error al actualizar usuario", err);
@@ -591,7 +609,7 @@
       }
     };
 
-    // CREACIÓN COMPLETA DE USUARIO
+    // CREACIÓN COMPLETA DE USUARIO (ALTA)
     document.getElementById("formStaff").addEventListener("submit", async (e) => {
       e.preventDefault();
       const btn = document.getElementById("btnSaveStaff");
@@ -610,9 +628,11 @@
       const nombreRol = rolSeleccionado ? rolSeleccionado.nombre : 'Solicitante';
 
       try {
+        // 1. Alta de credenciales en Firebase Auth
         const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
         const newUid = userCredential.user.uid;
 
+        // 2. Registro en Realtime Database guardando también passwordTemp
         await set(ref(db, `usuarios/${newUid}`), {
           nombre,
           telefono,
@@ -620,6 +640,7 @@
           nombreRol,
           nivel,
           email,
+          passwordTemp: password,
           puedeAprobar,
           estatus: 'Activo',
           createdAt: Date.now()
@@ -627,7 +648,7 @@
 
         await signOut(secondaryAuth);
 
-        alert(`✅ Usuario ${nombre} registrado exitosamente.\nYa puede ingresar al sistema desde la pantalla principal.`);
+        alert(`✅ Usuario ${nombre} registrado exitosamente.\nClave provisional: ${password}\nSe puede enviar el correo de definición de clave desde el botón Editar.`);
         document.getElementById("formStaff").reset();
         document.getElementById("errorLog").style.display = "none";
       } catch (err) {
