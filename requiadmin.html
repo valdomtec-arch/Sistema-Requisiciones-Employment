@@ -359,7 +359,7 @@
       inp.type = "text";
     };
 
-    // CONTROL DE NAVEGACIÓN
+    // CONTROL DE NAVEGACIÓN Y ACCESO MASTER
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = "index.html";
@@ -381,7 +381,8 @@
           }
         }
 
-        if (userEmail === "jvalladares@hremploy.com.mx") {
+        // CONTROL OFICIAL DE MASTER ADMIN
+        if (userEmail === "valladarescid@gmail.com" || userEmail === "jvalladares@hremploy.com.mx") {
           nivelUsuario = 5;
         }
 
@@ -628,11 +629,9 @@
       const nombreRol = rolSeleccionado ? rolSeleccionado.nombre : 'Solicitante';
 
       try {
-        // 1. Alta de credenciales en Firebase Auth
         const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
         const newUid = userCredential.user.uid;
 
-        // 2. Registro en Realtime Database guardando también passwordTemp
         await set(ref(db, `usuarios/${newUid}`), {
           nombre,
           telefono,

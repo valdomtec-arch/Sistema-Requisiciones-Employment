@@ -128,7 +128,7 @@
       font-size: 0.9rem;
       text-decoration: none;
       box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-      display: none; /* Se activa mediante JS si tiene permisos */
+      display: none;
       align-items: center;
       gap: 8px;
       z-index: 1000;
@@ -225,7 +225,8 @@
           }
         }
 
-        if (userEmail === "jvalladares@hremploy.com.mx") {
+        // CONTROL OFICIAL DE MASTER ADMIN
+        if (userEmail === "valladarescid@gmail.com" || userEmail === "jvalladares@hremploy.com.mx") {
           nivelUsuario = 5;
           nombreRol = "Administrador Master";
         }
@@ -250,9 +251,8 @@
       if (nivel >= 4) {
         linksHTML += `<a href="aprobaciones.html" class="nav-item">Aprobaciones</a>`;
         linksHTML += `<a href="catalogos.html" class="nav-item">Catálogos</a>`;
-        linksHTML += `<a href="auditoria.html" class="nav-item">Auditoría</a>`; // BOTÓN AL LADO DE CATÁLOGOS
+        linksHTML += `<a href="auditoria.html" class="nav-item">Auditoría</a>`;
         
-        // MOSTRAR BOTÓN FLOTANTE
         document.getElementById("btnFlotanteAuditoria").style.display = "flex";
       }
       if (nivel >= 5) {

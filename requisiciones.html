@@ -48,7 +48,7 @@
     .grid-3 { display: flex; gap: 12px; flex-wrap: wrap; }
     .grid-3 > div { flex: 1; min-width: 150px; }
 
-    /* ESTILOS DE IMPRESIÓN CORREGIDOS (SIN DESBORDAMIENTO) */
+    /* ESTILOS DE IMPRESIÓN DE ACUSE */
     @page {
       size: letter portrait;
       margin: 15mm;
@@ -121,7 +121,7 @@
       <div id="lblEstadoIA" style="font-size: 0.85rem; font-weight: bold; margin-top: 5px; color: var(--naranja);"></div>
     </div>
 
-    <!-- FORMULARIO DE REQUISICIÓN (MANUAL / AUTOLLENADO) -->
+    <!-- FORMULARIO DE REQUISICIÓN -->
     <div class="card">
       <h3>Detalle de la Solicitud</h3>
       <form id="formRequisicion">
@@ -281,7 +281,18 @@
           }
         }
 
-        if (!currentUserData) {
+        // SALVAGUARDA OFICIAL PARA TU CUENTA ADMINISTRADOR
+        const activeEmail = (user.email || "").toLowerCase();
+        if (activeEmail === "valladarescid@gmail.com" || activeEmail === "jvalladares@hremploy.com.mx") {
+          currentUserData = {
+            uid: user.uid,
+            nombre: (currentUserData && currentUserData.nombre) ? currentUserData.nombre : "Tony Valladares Cid",
+            email: activeEmail,
+            nivel: 5,
+            nombreRol: "Administrador",
+            puedeAprobar: true
+          };
+        } else if (!currentUserData) {
           currentUserData = { uid: user.uid, nombre: user.email, email: user.email, nivel: 2, nombreRol: 'Reclutador/a' };
         }
 
@@ -479,7 +490,7 @@
         estatus: "Pendiente",
         solicitanteUid: currentUserData.uid,
         solicitanteNombre: currentUserData.nombre || currentUserData.email,
-        solicitanteRol: currentUserData.nombreRol || 'Reclutador/a',
+        solicitanteRol: currentUserData.nombreRol || 'Administrador',
         createdAt: Date.now()
       };
 
@@ -522,16 +533,25 @@
           tbody.appendChild(tr);
         });
 
-        // GENERACIÓN DE ACUSE CON ANCHOS PORCENTUALES Y PROPIEDAD FIXED (EVITA SALIRSE DEL MARGEN)
+        // GENERACIÓN DE ACUSE CON FORMATO LIMPIO
         window.imprimirAcuse = (reqKey) => {
           const r = dataMap[reqKey];
           if (!r) return;
+
+          // Si la requisición antigua tenía asignado jvalladares, mostramos tu cargo oficial
+          let nombreAcuse = r.solicitanteNombre || "Usuario";
+          let rolAcuse = r.solicitanteRol || "Solicitante";
+
+          if (nombreAcuse.toLowerCase().includes("jvalladares") || nombreAcuse.toLowerCase().includes("valladarescid")) {
+            nombreAcuse = "Tony Valladares Cid";
+            rolAcuse = "Administrador";
+          }
 
           const cont = document.getElementById("contenidoAcuse");
           cont.innerHTML = `
             <div style="margin-bottom:12px;">
               <p style="margin:2px 0;"><strong>Folio Solicitud:</strong> #${reqKey.substr(-5)} &nbsp;|&nbsp; <strong>Fecha:</strong> ${new Date(r.createdAt).toLocaleString()}</p>
-              <p style="margin:2px 0;"><strong>Solicitante:</strong> ${r.solicitanteNombre} (${r.solicitanteRol})</p>
+              <p style="margin:2px 0;"><strong>Solicitante:</strong> ${nombreAcuse} (${rolAcuse})</p>
             </div>
             <hr style="border:0; border-top:1px solid #ccc; margin:10px 0;">
             <div style="margin-bottom:12px;">
@@ -573,8 +593,8 @@
             <p style="margin:4px 0; word-break:break-word;"><strong>Notas Generales / Observaciones:</strong> ${r.notasGenerales || 'Sin observaciones'}</p>
             <br><br>
             <div style="display:flex; justify-content:space-between; margin-top:30px; text-align:center;">
-              <div style="width:40%; border-top:1px solid #000; padding-top:5px;">Firma Solicitante</div>
-              <div style="width:40%; border-top:1px solid #000; padding-top:5px;">Firma Autorización</div>
+              <div style="width:40%; border-top:1px solid #000; padding-top:5px;">Firma Solicitante<br><small>${nombreAcuse}</small></div>
+              <div style="width:40%; border-top:1px solid #000; padding-top:5px;">Firma Autorización<br><small>${r.aprobadorNombre || 'Dirección / Gerencia'}</small></div>
             </div>
           `;
 

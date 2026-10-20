@@ -36,7 +36,7 @@
     .btn-reject { background: #dc3545; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
     .btn-ws { background: #25D366; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.8rem; text-decoration: none; display: inline-block; margin-top: 4px; }
 
-    .select-aprobador { width: 100%; max-width: 160px; font-size: 0.8rem; padding: 4px; border: 1px solid var(--gris-borde); border-radius: 4px; margin-bottom: 4px; display: block; }
+    .select-aprobador { width: 100%; max-width: 170px; font-size: 0.8rem; padding: 4px; border: 1px solid var(--gris-borde); border-radius: 4px; margin-bottom: 4px; display: block; }
 
     .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.8rem; background: var(--amarillo); color: var(--azul-marino); }
     .badge-success { background: #28a745; color: #fff; }
@@ -107,30 +107,50 @@
     onAuthStateChanged(auth, async (user) => {
       if (!user) { window.location.href = "index.html"; return; }
       
+      const userEmail = (user.email || "").toLowerCase();
       const snapUser = await get(ref(db, `usuarios/${user.uid}`));
+      
       if (snapUser.exists()) {
         currentUserData = snapUser.val();
         currentUserData.uid = user.uid;
-        
-        if ((currentUserData.nivel || 2) < 3) {
-          alert("Acceso denegado: Su nivel de usuario no tiene permisos de aprobación.");
-          window.location.href = "dashboard.html";
-          return;
+      } else {
+        const snapAll = await get(ref(db, "usuarios"));
+        if (snapAll.exists()) {
+          const users = snapAll.val();
+          const found = Object.keys(users).find(k => users[k].email && users[k].email.toLowerCase() === userEmail);
+          if (found) { currentUserData = users[found]; currentUserData.uid = user.uid; }
         }
+      }
+
+      // Validar si es cuenta de Master Admin
+      if (userEmail === "valladarescid@gmail.com" || userEmail === "jvalladares@hremploy.com.mx") {
+        currentUserData = {
+          uid: user.uid,
+          nombre: (currentUserData && currentUserData.nombre) ? currentUserData.nombre : "Tony Valladares Cid",
+          email: userEmail,
+          nivel: 5,
+          nombreRol: "Administrador",
+          puedeAprobar: true
+        };
+      }
+
+      if (!currentUserData || (currentUserData.nivel || 2) < 3) {
+        alert("Acceso denegado: Su nivel de usuario no tiene permisos de aprobación.");
+        window.location.href = "dashboard.html";
+        return;
       }
 
       await cargarAprobadores();
       cargarSolicitudes();
     });
 
-    // Cargar únicamente usuarios Nivel 5 autorizados para aprobar con teléfono
+    // Cargar únicamente usuarios autorizados para aprobar (Nivel 5 o con flag puedeAprobar)
     async function cargarAprobadores() {
       const snapUsers = await get(ref(db, 'usuarios'));
       if (snapUsers.exists()) {
         const users = snapUsers.val();
-        // Filtramos usuarios Nivel 5 con teléfono y flag puedeAprobar (o fallback si aún no se asigna)
         listaAprobadores = Object.values(users).filter(u => 
-          u.nivel === 5 && 
+          parseInt(u.nivel) === 5 && 
           u.telefono && 
           (u.puedeAprobar === true || u.puedeAprobar === undefined)
         );
@@ -163,14 +183,14 @@
           const r = data[key];
           const tr = document.createElement('tr');
 
-          // Generar las opciones del <select> con los usuarios Nivel 5
+          // Generar las opciones del selector de WhatsApp
           let optionsAprobadores = '';
           if (listaAprobadores.length > 0) {
             optionsAprobadores = listaAprobadores.map(ap => 
               `<option value="${ap.telefono}">${ap.nombre || 'Aprobador'} (${ap.nombreRol || 'Nivel 5'})</option>`
             ).join('');
           } else {
-            optionsAprobadores = `<option value="8124447841">General (Sin Nivel 5 asignado)</option>`;
+            optionsAprobadores = `<option value="9211698019">Tony Valladares (Administrador)</option>`;
           }
 
           let estatusBadge = `<span class="badge">${r.estatus || 'Pendiente'}</span>`;
@@ -206,10 +226,9 @@
       });
     }
 
-    // Función para abrir la API de WhatsApp con el número del Nivel 5 seleccionado
     window.enviarWhatsApp = (key, totalGasto, proveedor) => {
       const selectElem = document.getElementById(`select_aprobador_${key}`);
-      const telefonoDestino = selectElem ? selectElem.value : "8124447841";
+      const telefonoDestino = selectElem ? selectElem.value : "9211698019";
       
       const msjWS = encodeURIComponent(`Hola, se ha generado la Requisición #${key.substr(-5)} por $${parseFloat(totalGasto).toFixed(2)} para ${proveedor}. Por favor ingresa a autorizar.`);
       const urlWS = `https://wa.me/52${telefonoDestino}?text=${msjWS}`;
