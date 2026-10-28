@@ -2,17 +2,19 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <title>Employment - Gestor de Requisiciones y Cotizaciones</title>
+  <title>Employment - Gestor de Requisiciones Operativas</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     :root { 
       --azul-marino: #001F3F; 
+      --azul-hover: #00152B;
       --amarillo: #FFCC00; 
       --naranja: #FF6600; 
       --blanco: #FFFFFF; 
       --gris-fondo: #F4F6F9; 
-      --gris-borde: #CCCCCC; 
+      --gris-borde: #D1D5DB; 
+      --sombra-premium: 0 10px 25px -5px rgba(0, 31, 63, 0.08), 0 8px 10px -6px rgba(0, 31, 63, 0.05);
     }
     body { font-family: 'Roboto', sans-serif; margin: 0; background: var(--gris-fondo); color: var(--azul-marino); }
     .container { max-width: 1100px; margin: 20px auto; padding: 15px; }
@@ -25,70 +27,56 @@
     .nav-item.active { background: var(--naranja); color: var(--blanco); font-weight: 700; }
     .btn-logout { background: transparent; border: 1px solid var(--amarillo); color: var(--amarillo); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
     
-    .card { background: var(--blanco); padding: 20px; border-radius: 8px; border: 1px solid var(--gris-borde); margin-top: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .card { background: var(--blanco); padding: 22px; border-radius: 12px; border: 1px solid var(--gris-borde); margin-top: 18px; box-shadow: var(--sombra-premium); }
     h2, h3, h4 { font-family: 'Montserrat', sans-serif; color: var(--azul-marino); margin-top: 0; }
-    label { font-weight: 600; font-size: 0.88rem; margin-top: 8px; display: block; }
-    input, select, textarea { font-size: 0.92rem; padding: 10px; margin: 4px 0 12px 0; width: 100%; box-sizing: border-box; border: 1px solid var(--gris-borde); border-radius: 6px; }
-    button { cursor: pointer; border: none; background: var(--naranja); color: var(--blanco); font-weight: 700; padding: 10px 16px; border-radius: 6px; font-size: 0.95rem; }
+    label { font-weight: 600; font-size: 0.86rem; margin-top: 8px; display: block; color: var(--azul-marino); }
+    input, select, textarea { font-size: 0.92rem; padding: 11px; margin: 4px 0 12px 0; width: 100%; box-sizing: border-box; border: 1px solid var(--gris-borde); border-radius: 8px; background: #FFF; transition: border-color 0.2s, box-shadow 0.2s; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--naranja); box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.15); }
+    
+    button { cursor: pointer; border: none; background: var(--naranja); color: var(--blanco); font-weight: 700; padding: 11px 18px; border-radius: 8px; font-size: 0.95rem; transition: background 0.2s, transform 0.1s; }
     button:hover { background: #e05500; }
+    button:active { transform: scale(0.98); }
     .btn-secondary { background: var(--azul-marino); color: var(--amarillo); }
-    .btn-secondary:hover { background: #001226; }
+    .btn-secondary:hover { background: var(--azul-hover); }
+    .btn-ws { background: #25D366; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-ws:hover { background: #1ebe5d; }
 
-    .ai-box { background: #eef6ff; border: 1px dashed #0056b3; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
-    .table { width: 100%; border-collapse: collapse; margin-top: 12px; background: var(--blanco); border-radius: 6px; overflow: hidden; border: 1px solid var(--gris-borde); }
-    .table th { background: var(--azul-marino); color: var(--amarillo); padding: 10px; text-align: left; font-size: 0.85rem; }
-    .table td { padding: 10px; border-bottom: 1px solid #EEEEEE; font-size: 0.9rem; }
+    /* SELECTOR DE MODALIDAD ERGONÓMICO */
+    .tabs-mode-container { display: flex; background: #E2E8F0; padding: 4px; border-radius: 10px; margin-bottom: 20px; gap: 4px; }
+    .tab-mode-btn { flex: 1; padding: 12px; font-family: 'Montserrat', sans-serif; font-size: 0.95rem; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; background: transparent; color: #4B5563; transition: all 0.25s ease; text-align: center; }
+    .tab-mode-btn.active { background: var(--azul-marino); color: var(--amarillo); box-shadow: 0 4px 10px rgba(0, 31, 63, 0.2); }
+    .tab-mode-btn.express.active { background: linear-gradient(135deg, var(--azul-marino) 0%, #0A2E5C 100%); color: var(--amarillo); border-left: 4px solid var(--naranja); }
+
+    .ai-box { background: #F0F7FF; border: 1px dashed #3B82F6; padding: 16px; border-radius: 10px; margin-bottom: 18px; }
+    .express-banner { background: #FFFBEB; border-left: 5px solid var(--naranja); padding: 14px 18px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9rem; color: #78350F; }
+
+    .table { width: 100%; border-collapse: collapse; margin-top: 12px; background: var(--blanco); border-radius: 8px; overflow: hidden; border: 1px solid var(--gris-borde); }
+    .table th { background: var(--azul-marino); color: var(--amarillo); padding: 11px; text-align: left; font-size: 0.85rem; font-family: 'Montserrat', sans-serif; }
+    .table td { padding: 11px; border-bottom: 1px solid #F3F4F6; font-size: 0.9rem; }
     
     .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.8rem; background: var(--amarillo); color: var(--azul-marino); }
     .badge-success { background: #28a745; color: #fff; }
     .badge-danger { background: #dc3545; color: #fff; }
+    .badge-express { background: #F59E0B; color: #FFF; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; margin-left: 4px; font-weight: bold; }
 
-    .grid-2 { display: flex; gap: 12px; flex-wrap: wrap; }
-    .grid-2 > div { flex: 1; min-width: 220px; }
-    .grid-3 { display: flex; gap: 12px; flex-wrap: wrap; }
-    .grid-3 > div { flex: 1; min-width: 150px; }
+    .grid-2 { display: flex; gap: 14px; flex-wrap: wrap; }
+    .grid-2 > div { flex: 1; min-width: 240px; }
+    .grid-3 { display: flex; gap: 14px; flex-wrap: wrap; }
+    .grid-3 > div { flex: 1; min-width: 160px; }
+
+    /* CARD POST-REGISTRO CON ENVÍO NATIVO DE WHATSAPP */
+    .alerta-post-creacion { display: none; background: #ECFDF5; border: 2px solid #10B981; border-radius: 10px; padding: 18px; margin-top: 20px; animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
     /* ESTILOS DE IMPRESIÓN DE ACUSE */
-    @page {
-      size: letter portrait;
-      margin: 15mm;
-    }
-
+    @page { size: letter portrait; margin: 15mm; }
     @media print {
-      body * { 
-        visibility: hidden; 
-      }
-      #seccionAcuse, #seccionAcuse * { 
-        visibility: visible; 
-      }
-      #seccionAcuse { 
-        position: absolute; 
-        left: 0; 
-        top: 0; 
-        width: 100% !important; 
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-        padding: 0 !important; 
-        margin: 0 !important;
-        font-size: 10pt;
-      }
-      
-      #seccionAcuse table {
-        width: 100% !important;
-        table-layout: fixed !important;
-        word-wrap: break-word !important;
-        word-break: break-all !important;
-      }
-
-      #seccionAcuse p, #seccionAcuse div, #seccionAcuse td, #seccionAcuse th {
-        overflow-wrap: break-word !important;
-        word-wrap: break-word !important;
-        white-space: normal !important;
-      }
-
-      .nav-bar, .card, h2, .ai-box { 
-        display: none !important; 
-      }
+      body * { visibility: hidden; }
+      #seccionAcuse, #seccionAcuse * { visibility: visible; }
+      #seccionAcuse { position: absolute; left: 0; top: 0; width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; padding: 0 !important; margin: 0 !important; font-size: 10pt; }
+      #seccionAcuse table { width: 100% !important; table-layout: fixed !important; word-wrap: break-word !important; }
+      #seccionAcuse p, #seccionAcuse div, #seccionAcuse td, #seccionAcuse th { overflow-wrap: break-word !important; word-wrap: break-word !important; white-space: normal !important; }
+      .nav-bar, .card, h2, .ai-box, .tabs-mode-container, .alerta-post-creacion { display: none !important; }
     }
   </style>
 </head>
@@ -104,123 +92,199 @@
   </nav>
 
   <div class="container">
-    <h2>Solicitud de Insumos y Gastos Operativos</h2>
+    <h2>Centro de Requisiciones Operativas</h2>
 
-    <!-- LECTURA AUTOMÁTICA CON GEMINI API (OPCIONAL) -->
-    <div class="ai-box">
-      <h4>🤖 Asistente de Lectura de Cotización (Opcional)</h4>
-      <p style="font-size:0.85rem; margin: 4px 0 10px 0;">Sube el PDF o imagen de la cotización para auto-completar los campos mediante IA. Si no tienes archivo, puedes llenar el formulario manualmente.</p>
-      <div class="grid-2">
-        <div>
-          <input type="file" id="archivoCotizacion" accept=".pdf, image/*" />
-        </div>
-        <div style="text-align: right;">
-          <button type="button" id="btnProcesarIA" class="btn-secondary">✨ Escanear Cotización con Gemini</button>
-        </div>
-      </div>
-      <div id="lblEstadoIA" style="font-size: 0.85rem; font-weight: bold; margin-top: 5px; color: var(--naranja);"></div>
+    <!-- CONMUTADOR DE MODALIDAD -->
+    <div class="tabs-mode-container">
+      <button type="button" class="tab-mode-btn express active" id="tabModoExpress" onclick="window.cambiarModo('EXPRESS')">
+        ⚡ Registro Exprés (Compras de Emergencia & Gastos Sin Factura Inmediata)
+      </button>
+      <button type="button" class="tab-mode-btn" id="tabModoGeneral" onclick="window.cambiarModo('GENERAL')">
+        📋 Solicitud Tradicional (Insumos Programados & Con Cotización)
+      </button>
     </div>
 
-    <!-- FORMULARIO DE REQUISICIÓN -->
-    <div class="card">
-      <h3>Detalle de la Solicitud</h3>
-      <form id="formRequisicion">
-        
+    <!-- BANNER DE DISPARO DIRECTO A WHATSAPP -->
+    <div id="alertaPostCreacion" class="alerta-post-creacion">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+          <h4 style="margin:0; color:#065F46; font-size:1.1rem;">✅ Requisición Registrada con Éxito (<span id="spanFolioGenerado">#00000</span>)</h4>
+          <p style="margin:4px 0 0 0; color:#047857; font-size:0.88rem;">Selecciona al Director / Aprobador para disparar la solicitud instantánea a su WhatsApp:</p>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <select id="selectAprobadorInmediato" style="width:230px; margin:0; padding:8px; border-radius:6px;">
+            <option value="">-- Seleccionar Aprobador Nivel 5 --</option>
+          </select>
+          <button type="button" id="btnDispararWSInmediato" class="btn-ws">📲 Enviar WS Directo</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1. FORMULARIO EXPRÉS UNIVERSAL -->
+    <div class="card" id="cardModoExpress">
+      <div class="express-banner">
+        <strong>⚡ Protocolo Exprés de Contingencia:</strong> Para compras de urgencia en sitio, refacciones inmediatas, pasajes, saldo de movilidad o insumos sin cotización previa. Permite autorizar el egreso de inmediato para no retrasar la operación.
+      </div>
+
+      <form id="formRequisicionExpress">
         <div class="grid-2">
           <div>
-            <label>Departamento Solicitante</label>
-            <select id="reqDepartamento" required>
-              <option value="">Cargando departamentos...</option>
+            <label>Monto Total Requerido ($ MXN)</label>
+            <input type="number" id="expTotalGasto" min="1" step="0.01" placeholder="Ej. 650.00" style="font-size:1.3rem; font-weight:800; color:#001F3F; background:#FFFDE6; border:2px solid var(--naranja);" required />
+          </div>
+          <div>
+            <label>Concepto / Rubro de Emergencia</label>
+            <select id="expConceptoRapido" required>
+              <option value="Compra Inmediata / Refacción Urgente">Compra Inmediata / Refacción Urgente</option>
+              <option value="Insumos de Operación en Sitio">Insumos de Operación en Sitio (Herramientas / Papelería)</option>
+              <option value="Transportación de Candidatos">Transportación de Candidatos (Pasajes / Autobús)</option>
+              <option value="Saldo DiDi">Saldo DiDi / Movilidad Express</option>
+              <option value="Combustible Autos">Combustible / Gasolina</option>
+              <option value="Alimentos / Viáticos Brigada">Alimentos / Viáticos Brigada</option>
+              <option value="Otro Gasto Operativo Inmediato">Otro Gasto Operativo Inmediato</option>
             </select>
-          </div>
-
-          <div>
-            <label>Empresa / Vacante / Cliente Destino</label>
-            <select id="reqVacante" required>
-              <option value="">Cargando vacantes / clientes...</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="grid-2">
-          <div>
-            <label>Nombre de la Empresa Proveedora</label>
-            <input type="text" id="reqEmpresaProveedor" placeholder="Ej. Papelería Comercial S.A." required />
-          </div>
-          <div>
-            <label>Concepto / Categoría del Gasto</label>
-            <select id="reqCategoria" required>
-              <option value="">Cargando categorías...</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- CAMPOS TÉCNICOS DETALLADOS -->
-        <div class="grid-3">
-          <div>
-            <label>Cantidad</label>
-            <input type="number" id="reqCantidad" min="1" value="1" required />
-          </div>
-          <div>
-            <label>Unidad de Medida</label>
-            <input type="text" id="reqUnidad" placeholder="Ej. Pieza, Servicio, Lote" value="Servicio" required />
-          </div>
-          <div>
-            <label>Marca / Modelo</label>
-            <input type="text" id="reqMarcaModelo" placeholder="Ej. N/A o Marca específica" />
-          </div>
-        </div>
-
-        <div class="grid-3">
-          <div>
-            <label>Precio Unitario ($)</label>
-            <input type="number" id="reqPrecioUnitario" min="0" step="0.01" placeholder="0.00" required />
-          </div>
-          <div>
-            <label>Subtotal ($)</label>
-            <input type="number" id="reqSubtotal" min="0" step="0.01" placeholder="0.00" required />
-          </div>
-          <div>
-            <label>Impuestos IVA ($)</label>
-            <input type="number" id="reqIva" min="0" step="0.01" placeholder="0.00" value="0.00" />
           </div>
         </div>
 
         <div class="grid-2">
           <div>
-            <label>Otros Impuestos / Retenciones ($)</label>
-            <input type="number" id="reqOtrosImpuestos" min="0" step="0.01" placeholder="0.00" value="0.00" />
+            <label>Comercio / Proveedor Inmediato</label>
+            <input type="text" id="expProveedor" placeholder="Ej. Ferretería El Tornillo, OXXO, DiDi, Local Comercial" required />
           </div>
           <div>
-            <label>Total de la Requisición ($)</label>
-            <input type="number" id="reqTotal" min="0" step="0.01" placeholder="0.00" style="font-weight:bold; background:#fffbe6;" required />
+            <label>Cliente / Vacante / Destino Operativo</label>
+            <select id="expVacante" required>
+              <option value="">Cargando catálogo...</option>
+            </select>
           </div>
         </div>
 
-        <label>Datos Bancarios para Pago</label>
-        <input type="text" id="reqDatosBancarios" placeholder="Ej. Banco: BBVA | Cuenta: 12345678 | CLABE: 012345678901234567" />
+        <div>
+          <label>Justificación / Beneficiario del Gasto</label>
+          <input type="text" id="expNotas" placeholder="Ej. Refacción para cuadrilla en planta / Apoyo urgente a 4 candidatos ruta Juárez" required />
+        </div>
 
-        <label>Notas Generales de la Cotización / Observaciones</label>
-        <textarea id="reqNotas" rows="3" placeholder="Todo lo que quede fuera de los campos anteriores (Tiempos de entrega, vigencia, condiciones o desborde de la cotización)..."></textarea>
-        
-        <div style="text-align:right; margin-top:15px;">
-          <button type="submit">Guardar y Generar Solicitud</button>
+        <div style="text-align:right; margin-top:10px;">
+          <button type="submit" style="padding:13px 26px; font-size:1rem; background:var(--azul-marino); color:var(--amarillo);">
+            ⚡ Generar Requisición Exprés & Notificar
+          </button>
         </div>
       </form>
     </div>
 
-    <!-- HISTORIAL Y ACCIÓN DE ACUSE -->
+    <!-- 2. FORMULARIO TRADICIONAL COMPLETO -->
+    <div id="cardModoGeneral" style="display:none;">
+      <div class="ai-box">
+        <h4>🤖 Asistente de Lectura de Cotización (Opcional)</h4>
+        <p style="font-size:0.85rem; margin: 4px 0 10px 0;">Sube el PDF o imagen de la cotización para auto-completar los campos mediante IA. Si no tienes archivo, puedes llenar el formulario manualmente.</p>
+        <div class="grid-2">
+          <div>
+            <input type="file" id="archivoCotizacion" accept=".pdf, image/*" />
+          </div>
+          <div style="text-align: right;">
+            <button type="button" id="btnProcesarIA" class="btn-secondary">✨ Escanear Cotización con Gemini</button>
+          </div>
+        </div>
+        <div id="lblEstadoIA" style="font-size: 0.85rem; font-weight: bold; margin-top: 5px; color: var(--naranja);"></div>
+      </div>
+
+      <div class="card">
+        <h3>Detalle Completo de la Solicitud Programada</h3>
+        <form id="formRequisicion">
+          <div class="grid-2">
+            <div>
+              <label>Departamento Solicitante</label>
+              <select id="reqDepartamento" required>
+                <option value="">Cargando departamentos...</option>
+              </select>
+            </div>
+            <div>
+              <label>Empresa / Vacante / Cliente Destino</label>
+              <select id="reqVacante" required>
+                <option value="">Cargando vacantes / clientes...</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <label>Nombre de la Empresa Proveedora</label>
+              <input type="text" id="reqEmpresaProveedor" placeholder="Ej. Papelería Comercial S.A." required />
+            </div>
+            <div>
+              <label>Concepto / Categoría del Gasto</label>
+              <select id="reqCategoria" required>
+                <option value="">Cargando categorías...</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid-3">
+            <div>
+              <label>Cantidad</label>
+              <input type="number" id="reqCantidad" min="1" value="1" required />
+            </div>
+            <div>
+              <label>Unidad de Medida</label>
+              <input type="text" id="reqUnidad" placeholder="Ej. Pieza, Servicio, Lote" value="Servicio" required />
+            </div>
+            <div>
+              <label>Marca / Modelo</label>
+              <input type="text" id="reqMarcaModelo" placeholder="Ej. N/A o Marca específica" />
+            </div>
+          </div>
+
+          <div class="grid-3">
+            <div>
+              <label>Precio Unitario ($)</label>
+              <input type="number" id="reqPrecioUnitario" min="0" step="0.01" placeholder="0.00" required />
+            </div>
+            <div>
+              <label>Subtotal ($)</label>
+              <input type="number" id="reqSubtotal" min="0" step="0.01" placeholder="0.00" required />
+            </div>
+            <div>
+              <label>Impuestos IVA ($)</label>
+              <input type="number" id="reqIva" min="0" step="0.01" placeholder="0.00" value="0.00" />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <label>Otros Impuestos / Retenciones ($)</label>
+              <input type="number" id="reqOtrosImpuestos" min="0" step="0.01" placeholder="0.00" value="0.00" />
+            </div>
+            <div>
+              <label>Total de la Requisición ($)</label>
+              <input type="number" id="reqTotal" min="0" step="0.01" placeholder="0.00" style="font-weight:bold; background:#fffbe6;" required />
+            </div>
+          </div>
+
+          <label>Datos Bancarios para Pago</label>
+          <input type="text" id="reqDatosBancarios" placeholder="Ej. Banco: BBVA | Cuenta: 12345678 | CLABE: 012345678901234567" />
+
+          <label>Notas Generales de la Cotización / Observaciones</label>
+          <textarea id="reqNotas" rows="3" placeholder="Todo lo que quede fuera de los campos anteriores..."></textarea>
+          
+          <div style="text-align:right; margin-top:15px;">
+            <button type="submit">Guardar y Generar Solicitud Tradicional</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- HISTORIAL GENERAL DE REQUISICIONES -->
     <div class="card">
       <h3>Historial de Solicitudes Registradas</h3>
       <table class="table">
         <thead>
           <tr>
             <th>ID / Fecha</th>
-            <th>Departamento / Cliente</th>
+            <th>Departamento / Destino</th>
             <th>Proveedor / Concepto</th>
             <th>Total Solicitado</th>
             <th>Estatus</th>
-            <th>Acción</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody id="tablaReqBody">
@@ -262,6 +326,27 @@
     let currentUserData = null;
     let base64Cotizacion = "";
     let mimeTypeCotizacion = "";
+    let listaAprobadores = [];
+
+    // CONTROL DEL CONMUTADOR DE VISTAS
+    window.cambiarModo = (modo) => {
+      const btnExp = document.getElementById("tabModoExpress");
+      const btnGen = document.getElementById("tabModoGeneral");
+      const cardExp = document.getElementById("cardModoExpress");
+      const cardGen = document.getElementById("cardModoGeneral");
+
+      if (modo === 'EXPRESS') {
+        btnExp.classList.add("active");
+        btnGen.classList.remove("active");
+        cardExp.style.display = "block";
+        cardGen.style.display = "none";
+      } else {
+        btnGen.classList.add("active");
+        btnExp.classList.remove("active");
+        cardGen.style.display = "block";
+        cardExp.style.display = "none";
+      }
+    };
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) { window.location.href = "index.html"; return; }
@@ -281,7 +366,6 @@
           }
         }
 
-        // SALVAGUARDA OFICIAL PARA TU CUENTA ADMINISTRADOR
         const activeEmail = (user.email || "").toLowerCase();
         if (activeEmail === "valladarescid@gmail.com" || activeEmail === "jvalladares@hremploy.com.mx") {
           currentUserData = {
@@ -297,6 +381,7 @@
         }
 
         configurarNavegacion(parseInt(currentUserData.nivel) || 2);
+        cargarAprobadores();
         cargarCatalogos();
         cargarRequisiciones();
       } catch (err) {
@@ -315,6 +400,32 @@
       }
       if (nivel >= 5) html += `<a href="requiadmin.html" class="nav-item">Administración</a>`;
       navContainer.innerHTML = html;
+    }
+
+    async function cargarAprobadores() {
+      const snapUsers = await get(ref(db, 'usuarios'));
+      if (snapUsers.exists()) {
+        const users = snapUsers.val();
+        listaAprobadores = Object.values(users).filter(u => 
+          parseInt(u.nivel) === 5 && 
+          u.telefono && 
+          (u.puedeAprobar === true || u.puedeAprobar === undefined)
+        );
+        poblarSelectoresAprobador();
+      }
+    }
+
+    function poblarSelectoresAprobador() {
+      const selInmediato = document.getElementById("selectAprobadorInmediato");
+      let optionsHTML = `<option value="">-- Seleccionar Aprobador Nivel 5 --</option>`;
+      if (listaAprobadores.length > 0) {
+        listaAprobadores.forEach(ap => {
+          optionsHTML += `<option value="${ap.telefono}">${ap.nombre || 'Aprobador'} (${ap.nombreRol || 'Nivel 5'})</option>`;
+        });
+      } else {
+        optionsHTML += `<option value="9211698019">Tony Valladares (Administrador)</option>`;
+      }
+      selInmediato.innerHTML = optionsHTML;
     }
 
     async function registrarTraza(accion, detalle) {
@@ -341,20 +452,16 @@
       });
 
       onValue(ref(db, 'catalogos/vacantes'), snap => {
-        const sel = document.getElementById("reqVacante");
-        sel.innerHTML = '<option value="">Selecciona Cliente / Vacante...</option>';
+        const selGen = document.getElementById("reqVacante");
+        const selExp = document.getElementById("expVacante");
+        selGen.innerHTML = '<option value="">Selecciona Cliente / Vacante...</option>';
+        selExp.innerHTML = '<option value="">Selecciona Cliente / Vacante...</option>';
         if (snap.exists()) {
           Object.values(snap.val()).forEach(v => {
             const clienteVacante = v.cliente ? `${v.cliente} (${v.puesto || 'General'})` : (v.nombre || 'Vacante General');
-            sel.innerHTML += `<option value="${clienteVacante}">${clienteVacante}</option>`;
-          });
-        } else {
-          onValue(ref(db, 'catalogos/empresas'), snapEmp => {
-            if(snapEmp.exists()) {
-              Object.values(snapEmp.val()).forEach(e => {
-                sel.innerHTML += `<option value="${e.nombre}">${e.nombre}</option>`;
-              });
-            }
+            const opt = `<option value="${clienteVacante}">${clienteVacante}</option>`;
+            selGen.innerHTML += opt;
+            selExp.innerHTML += opt;
           });
         }
       });
@@ -370,81 +477,92 @@
       });
     }
 
-    document.getElementById("archivoCotizacion").addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      mimeTypeCotizacion = file.type;
-      const reader = new FileReader();
-      reader.onload = () => {
-        base64Cotizacion = reader.result.split(',')[1];
-        document.getElementById("lblEstadoIA").textContent = "📄 Archivo listo para escanear.";
+    // REGISTRO EXPRÉS UNIVERSAL
+    document.getElementById("formRequisicionExpress").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const total = parseFloat(document.getElementById("expTotalGasto").value) || 0;
+      const concepto = document.getElementById("expConceptoRapido").value;
+      const proveedor = document.getElementById("expProveedor").value.trim();
+      const vacante = document.getElementById("expVacante").value;
+      const justificacion = document.getElementById("expNotas").value.trim();
+
+      const nuevaReqRef = push(ref(db, 'requisiciones'));
+      const data = {
+        departamento: "Operaciones y Contingencias",
+        vacanteCliente: vacante,
+        empresaProveedor: proveedor,
+        conceptoCategoria: concepto,
+        cantidad: 1,
+        unidad: "Servicio/Lote",
+        marcaModelo: "Gasto Operativo Inmediato",
+        precioUnitario: total,
+        subtotal: total,
+        iva: 0.00,
+        otrosImpuestos: 0.00,
+        totalGasto: total,
+        datosBancarios: "Caja Chica / Dispersión Exprés",
+        notasGenerales: `[COMPRA URGENTE / GASTO EXPRÉS SIN FACTURA INICIAL] ${justificacion}`,
+        estatus: "Pendiente",
+        solicitanteUid: currentUserData.uid,
+        solicitanteNombre: currentUserData.nombre || currentUserData.email,
+        solicitanteRol: currentUserData.nombreRol || 'Administrador',
+        createdAt: Date.now(),
+        tipoRequisicion: "EXPRESS"
       };
-      reader.readAsDataURL(file);
+
+      await set(nuevaReqRef, data);
+      await registrarTraza("ALTA_REQUISICION_EXPRESS", `Solicitud Exprés $${total.toFixed(2)} (${concepto} / ${proveedor}) para ${vacante}`);
+
+      activarAlertaPostCreacion(nuevaReqRef.key, total, proveedor, concepto, vacante, justificacion);
+      document.getElementById("formRequisicionExpress").reset();
     });
 
-    document.getElementById("btnProcesarIA").addEventListener("click", async () => {
-      if (!base64Cotizacion) {
-        alert("⚠️ Por favor selecciona primero un archivo PDF o imagen de la cotización.");
-        return;
-      }
+    // ACTIVACIÓN DE BANNER CON DISPARO NATIVO A WHATSAPP
+    function activarAlertaPostCreacion(key, total, proveedor, concepto, vacante, justificacion) {
+      const panel = document.getElementById("alertaPostCreacion");
+      document.getElementById("spanFolioGenerado").textContent = `#${key.substr(-5)}`;
+      panel.style.display = "block";
+      panel.scrollIntoView({ behavior: 'smooth' });
 
-      const lblStatus = document.getElementById("lblEstadoIA");
-      lblStatus.textContent = "⏳ Analizando cotización con Gemini AI...";
+      document.getElementById("btnDispararWSInmediato").onclick = () => {
+        const select = document.getElementById("selectAprobadorInmediato");
+        const tel = select.value.trim();
+        if (!tel) {
+          alert("⚠️ Por favor selecciona primero a un Aprobador Nivel 5 de la lista.");
+          select.focus();
+          return;
+        }
 
-      const promptText = `Analiza la cotización adjunta y extrae la información en un objeto JSON estricto.
-      Debes mapear los siguientes campos exactos:
-      - nombreEmpresa: Nombre de la empresa proveedora.
-      - cantidad: Número de elementos (numérico).
-      - unidad: Unidad de medida (Pieza, Servicio, etc.).
-      - concepto: Breve descripción principal.
-      - marcaModelo: Marca o modelo si existe.
-      - precioUnitario: Precio unitario (numérico).
-      - subtotal: Subtotal (numérico).
-      - iva: IVA (numérico).
-      - otrosImpuestos: Otros impuestos (numérico).
-      - total: Total (numérico).
-      - datosBancarios: Banco, CLABE o cuenta.
-      - notasGenerales: Coloca AQUÍ todo lo que quede fuera de los campos anteriores (vigencia, tiempos de entrega, cláusulas o texto sin estructurar).
+        const msj = `*EMPLOYMENT | REQUISICIÓN EXPRÉS (COMPRA URGENTE)* ⚡\n\n` +
+          `Hola. Se requiere tu autorización inmediata para la *Requisición Exprés #${key.substr(-5)}*.\n` +
+          `• *Monto Solicitado:* $${total.toLocaleString('es-MX', {minimumFractionDigits:2})} MXN\n` +
+          `• *Rubro / Concepto:* ${concepto}\n` +
+          `• *Comercio / Proveedor:* ${proveedor}\n` +
+          `• *Destino / Cliente:* ${vacante}\n` +
+          `• *Motivo de Urgencia:* ${justificacion}\n` +
+          `• *Solicitante:* ${currentUserData.nombre} (${currentUserData.nombreRol})\n\n` +
+          `Esta compra urgente se encuentra en campo en espera de liberación. Por favor ingresa al sistema para autorizar.`;
 
-      Responde ÚNICAMENTE con la estructura JSON, sin markdown ni bloques de código adicionales.`;
+        window.lanzarWhatsAppNativo(tel, msj);
+      };
+    }
 
-      try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{
-              parts: [
-                { text: promptText },
-                { inline_data: { mime_type: mimeTypeCotizacion, data: base64Cotizacion } }
-              ]
-            }]
-          })
-        });
+    // DISPARO NATIVO A LA APP WHATSAPP SIN PÁGINA INTERMEDIA
+    window.lanzarWhatsAppNativo = (telefono, mensaje) => {
+      const textoCodificado = encodeURIComponent(mensaje);
+      const enlaceNativo = `whatsapp://send?phone=52${telefono}&text=${textoCodificado}`;
+      const enlaceWeb = `https://wa.me/52${telefono}?text=${textoCodificado}`;
 
-        const resData = await response.json();
-        const jsonText = resData.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim();
-        const parsed = JSON.parse(jsonText);
+      window.location.href = enlaceNativo;
 
-        if (parsed.nombreEmpresa) document.getElementById("reqEmpresaProveedor").value = parsed.nombreEmpresa;
-        if (parsed.cantidad) document.getElementById("reqCantidad").value = parsed.cantidad;
-        if (parsed.unidad) document.getElementById("reqUnidad").value = parsed.unidad;
-        if (parsed.marcaModelo) document.getElementById("reqMarcaModelo").value = parsed.marcaModelo;
-        if (parsed.precioUnitario) document.getElementById("reqPrecioUnitario").value = parsed.precioUnitario;
-        if (parsed.subtotal) document.getElementById("reqSubtotal").value = parsed.subtotal;
-        if (parsed.iva) document.getElementById("reqIva").value = parsed.iva;
-        if (parsed.otrosImpuestos) document.getElementById("reqOtrosImpuestos").value = parsed.otrosImpuestos;
-        if (parsed.total) document.getElementById("reqTotal").value = parsed.total;
-        if (parsed.datosBancarios) document.getElementById("reqDatosBancarios").value = parsed.datosBancarios;
-        if (parsed.notasGenerales) document.getElementById("reqNotas").value = parsed.notasGenerales;
+      setTimeout(() => {
+        if (!document.hidden) {
+          window.open(enlaceWeb, '_blank');
+        }
+      }, 1500);
+    };
 
-        lblStatus.textContent = "✅ ¡Datos extraídos y cargados en el formulario! Revisa y ajusta si es necesario.";
-      } catch (err) {
-        console.error("Error en lectura IA:", err);
-        lblStatus.textContent = "❌ No se pudo analizar automáticamente. Puedes llenar el formulario de forma manual.";
-      }
-    });
-
+    // FORMULARIO TRADICIONAL
     const inpCant = document.getElementById("reqCantidad");
     const inpPrecio = document.getElementById("reqPrecioUnitario");
     const inpSub = document.getElementById("reqSubtotal");
@@ -457,7 +575,6 @@
       const pu = parseFloat(inpPrecio.value) || 0;
       const sub = cant * pu;
       inpSub.value = sub.toFixed(2);
-
       const iva = parseFloat(inpIva.value) || 0;
       const otros = parseFloat(inpOtros.value) || 0;
       inpTotal.value = (sub + iva + otros).toFixed(2);
@@ -491,18 +608,74 @@
         solicitanteUid: currentUserData.uid,
         solicitanteNombre: currentUserData.nombre || currentUserData.email,
         solicitanteRol: currentUserData.nombreRol || 'Administrador',
-        createdAt: Date.now()
+        createdAt: Date.now(),
+        tipoRequisicion: "GENERAL"
       };
 
       await set(nuevaReqRef, data);
-      await registrarTraza("ALTA_REQUISICION", `Solicitud $${data.totalGasto.toFixed(2)} a ${data.empresaProveedor} para ${data.vacanteCliente}`);
+      await registrarTraza("ALTA_REQUISICION", `Solicitud $${data.totalGasto.toFixed(2)} a ${data.empresaProveedor}`);
 
-      alert("✅ Solicitud registrada con éxito.");
+      activarAlertaPostCreacion(nuevaReqRef.key, data.totalGasto, data.empresaProveedor, data.conceptoCategoria, data.vacanteCliente, data.notasGenerales || "Solicitud de Insumos Programados");
+
       document.getElementById("formRequisicion").reset();
       document.getElementById("lblEstadoIA").textContent = "";
       base64Cotizacion = "";
     });
 
+    // LECTURA CON GEMINI AI
+    document.getElementById("archivoCotizacion").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      mimeTypeCotizacion = file.type;
+      const reader = new FileReader();
+      reader.onload = () => {
+        base64Cotizacion = reader.result.split(',')[1];
+        document.getElementById("lblEstadoIA").textContent = "📄 Archivo listo para escanear.";
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById("btnProcesarIA").addEventListener("click", async () => {
+      if (!base64Cotizacion) {
+        alert("⚠️ Por favor selecciona primero un archivo PDF o imagen.");
+        return;
+      }
+      const lblStatus = document.getElementById("lblEstadoIA");
+      lblStatus.textContent = "⏳ Analizando cotización con Gemini AI...";
+
+      const promptText = `Analiza la cotización y extrae JSON estricto con: nombreEmpresa, cantidad, unidad, concepto, marcaModelo, precioUnitario, subtotal, iva, otrosImpuestos, total, datosBancarios, notasGenerales. Sin markdown.`;
+
+      try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: promptText }, { inline_data: { mime_type: mimeTypeCotizacion, data: base64Cotizacion } }] }]
+          })
+        });
+        const resData = await response.json();
+        const jsonText = resData.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim();
+        const parsed = JSON.parse(jsonText);
+
+        if (parsed.nombreEmpresa) document.getElementById("reqEmpresaProveedor").value = parsed.nombreEmpresa;
+        if (parsed.cantidad) document.getElementById("reqCantidad").value = parsed.cantidad;
+        if (parsed.unidad) document.getElementById("reqUnidad").value = parsed.unidad;
+        if (parsed.marcaModelo) document.getElementById("reqMarcaModelo").value = parsed.marcaModelo;
+        if (parsed.precioUnitario) document.getElementById("reqPrecioUnitario").value = parsed.precioUnitario;
+        if (parsed.subtotal) document.getElementById("reqSubtotal").value = parsed.subtotal;
+        if (parsed.iva) document.getElementById("reqIva").value = parsed.iva;
+        if (parsed.otrosImpuestos) document.getElementById("reqOtrosImpuestos").value = parsed.otrosImpuestos;
+        if (parsed.total) document.getElementById("reqTotal").value = parsed.total;
+        if (parsed.datosBancarios) document.getElementById("reqDatosBancarios").value = parsed.datosBancarios;
+        if (parsed.notasGenerales) document.getElementById("reqNotas").value = parsed.notasGenerales;
+
+        lblStatus.textContent = "✅ ¡Datos cargados con éxito!";
+      } catch (err) {
+        lblStatus.textContent = "❌ No se pudo extraer automáticamente.";
+      }
+    });
+
+    // HISTORIAL Y GENERACIÓN DE ACUSE
     function cargarRequisiciones() {
       onValue(ref(db, 'requisiciones'), snap => {
         const tbody = document.getElementById("tablaReqBody");
@@ -519,26 +692,26 @@
           if (r.estatus === 'Aprobada') badgeClass = 'badge badge-success';
           if (r.estatus === 'Rechazada') badgeClass = 'badge badge-danger';
 
+          const esExpress = r.tipoRequisicion === 'EXPRESS' ? '<span class="badge-express">⚡ EXPRÉS</span>' : '';
+
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td><strong>#${key.substr(-5)}</strong><br><small>${new Date(r.createdAt).toLocaleDateString()}</small></td>
+            <td><strong>#${key.substr(-5)}</strong> ${esExpress}<br><small>${new Date(r.createdAt).toLocaleDateString()}</small></td>
             <td><strong>${r.departamento || 'N/A'}</strong><br><small>${r.vacanteCliente || 'General'}</small></td>
             <td><strong>${r.empresaProveedor || 'Proveedor'}</strong><br><small>${r.conceptoCategoria || ''}</small></td>
             <td><strong>$${(r.totalGasto || 0).toLocaleString('es-MX', {minimumFractionDigits:2})}</strong></td>
             <td><span class="${badgeClass}">${r.estatus || 'Pendiente'}</span></td>
             <td>
-              <button type="button" style="padding:4px 8px; font-size:0.75rem;" onclick="window.imprimirAcuse('${key}')">🖨️ Acuse</button>
+              <button type="button" style="padding:5px 9px; font-size:0.75rem;" onclick="window.imprimirAcuse('${key}')">🖨️ Acuse</button>
             </td>
           `;
           tbody.appendChild(tr);
         });
 
-        // GENERACIÓN DE ACUSE CON FORMATO LIMPIO
         window.imprimirAcuse = (reqKey) => {
           const r = dataMap[reqKey];
           if (!r) return;
 
-          // Si la requisición antigua tenía asignado jvalladares, mostramos tu cargo oficial
           let nombreAcuse = r.solicitanteNombre || "Usuario";
           let rolAcuse = r.solicitanteRol || "Solicitante";
 
@@ -552,22 +725,23 @@
             <div style="margin-bottom:12px;">
               <p style="margin:2px 0;"><strong>Folio Solicitud:</strong> #${reqKey.substr(-5)} &nbsp;|&nbsp; <strong>Fecha:</strong> ${new Date(r.createdAt).toLocaleString()}</p>
               <p style="margin:2px 0;"><strong>Solicitante:</strong> ${nombreAcuse} (${rolAcuse})</p>
+              ${r.tipoRequisicion === 'EXPRESS' ? '<p style="margin:2px 0; color:#B45309; font-weight:bold;"><strong>Modalidad:</strong> Registro Exprés / Compra de Emergencia Operativa</p>' : ''}
             </div>
             <hr style="border:0; border-top:1px solid #ccc; margin:10px 0;">
             <div style="margin-bottom:12px;">
-              <p style="margin:2px 0;"><strong>Departamento Solicitante:</strong> ${r.departamento}</p>
-              <p style="margin:2px 0;"><strong>Cliente / Vacante Destino:</strong> ${r.vacanteCliente}</p>
-              <p style="margin:2px 0;"><strong>Proveedor:</strong> ${r.empresaProveedor}</p>
-              <p style="margin:2px 0;"><strong>Categoría de Gasto:</strong> ${r.conceptoCategoria}</p>
+              <p style="margin:2px 0;"><strong>Departamento / Área:</strong> ${r.departamento}</p>
+              <p style="margin:2px 0;"><strong>Cliente / Vacante / Destino:</strong> ${r.vacanteCliente}</p>
+              <p style="margin:2px 0;"><strong>Comercio / Proveedor:</strong> ${r.empresaProveedor}</p>
+              <p style="margin:2px 0;"><strong>Concepto del Gasto:</strong> ${r.conceptoCategoria}</p>
             </div>
             <hr style="border:0; border-top:1px solid #ccc; margin:10px 0;">
-            <h4 style="margin:10px 0 5px 0;">Desglose Económico</h4>
-            <table style="width:100%; border-collapse:collapse; margin-bottom:12px; table-layout:fixed; word-wrap:break-word;" border="1" cellpadding="5">
+            <h4 style="margin:10px 0 5px 0;">Desglose del Gasto</h4>
+            <table style="width:100%; border-collapse:collapse; margin-bottom:12px;" border="1" cellpadding="5">
               <thead>
                 <tr style="background:#f4f6f9;">
                   <th style="width:10%; text-align:center;">Cant.</th>
                   <th style="width:15%;">Unidad</th>
-                  <th style="width:35%;">Marca/Modelo</th>
+                  <th style="width:35%;">Detalle / Concepto</th>
                   <th style="width:20%; text-align:right;">P. Unitario</th>
                   <th style="width:20%; text-align:right;">Subtotal</th>
                 </tr>
@@ -576,21 +750,17 @@
                 <tr>
                   <td style="text-align:center;">${r.cantidad}</td>
                   <td>${r.unidad}</td>
-                  <td style="word-break:break-word;">${r.marcaModelo || 'N/A'}</td>
+                  <td>${r.marcaModelo || 'N/A'}</td>
                   <td style="text-align:right;">$${(r.precioUnitario || 0).toFixed(2)}</td>
                   <td style="text-align:right;">$${(r.subtotal || 0).toFixed(2)}</td>
                 </tr>
               </tbody>
             </table>
             <div style="text-align:right; margin-bottom:10px;">
-              <p style="margin:2px 0;"><strong>Subtotal:</strong> $${(r.subtotal || 0).toFixed(2)}</p>
-              <p style="margin:2px 0;"><strong>IVA:</strong> $${(r.iva || 0).toFixed(2)}</p>
-              <p style="margin:2px 0;"><strong>Otros Impuestos:</strong> $${(r.otrosImpuestos || 0).toFixed(2)}</p>
-              <h3 style="margin:5px 0; color:#001F3F;">Total: $${(r.totalGasto || 0).toFixed(2)}</h3>
+              <h3 style="margin:5px 0; color:#001F3F;">Total Autorizado: $${(r.totalGasto || 0).toFixed(2)}</h3>
             </div>
             <hr style="border:0; border-top:1px solid #ccc; margin:10px 0;">
-            <p style="margin:4px 0; word-break:break-word;"><strong>Datos Bancarios Registrados:</strong> ${r.datosBancarios || 'No especificados'}</p>
-            <p style="margin:4px 0; word-break:break-word;"><strong>Notas Generales / Observaciones:</strong> ${r.notasGenerales || 'Sin observaciones'}</p>
+            <p style="margin:4px 0;"><strong>Justificación / Notas:</strong> ${r.notasGenerales || 'Sin observaciones'}</p>
             <br><br>
             <div style="display:flex; justify-content:space-between; margin-top:30px; text-align:center;">
               <div style="width:40%; border-top:1px solid #000; padding-top:5px;">Firma Solicitante<br><small>${nombreAcuse}</small></div>
