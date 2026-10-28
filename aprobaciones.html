@@ -35,8 +35,9 @@
     .btn-approve { background: #28a745; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.8rem; margin-right: 4px; }
     .btn-reject { background: #dc3545; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
     .btn-ws { background: #25D366; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.8rem; text-decoration: none; display: inline-block; margin-top: 4px; }
+    .btn-ws:hover { background: #1ebe5d; }
 
-    .select-aprobador { width: 100%; max-width: 170px; font-size: 0.8rem; padding: 4px; border: 1px solid var(--gris-borde); border-radius: 4px; margin-bottom: 4px; display: block; }
+    .select-aprobador { width: 100%; max-width: 185px; font-size: 0.8rem; padding: 4px; border: 1px solid var(--gris-borde); border-radius: 4px; margin-bottom: 4px; display: block; }
 
     .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.8rem; background: var(--amarillo); color: var(--azul-marino); }
     .badge-success { background: #28a745; color: #fff; }
@@ -103,6 +104,8 @@
     const db = getDatabase(app);
     let currentUserData = null;
     let listaAprobadores = [];
+    let mapaUsuarios = {};
+    let cacheRequisiciones = {};
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) { window.location.href = "index.html"; return; }
@@ -122,7 +125,7 @@
         }
       }
 
-      // Validar si es cuenta de Master Admin
+      // Validar acceso Master Admin
       if (userEmail === "valladarescid@gmail.com" || userEmail === "jvalladares@hremploy.com.mx") {
         currentUserData = {
           uid: user.uid,
@@ -140,16 +143,15 @@
         return;
       }
 
-      await cargarAprobadores();
+      await cargarUsuariosYDirectorio();
       cargarSolicitudes();
     });
 
-    // Cargar únicamente usuarios autorizados para aprobar (Nivel 5 o con flag puedeAprobar)
-    async function cargarAprobadores() {
+    async function cargarUsuariosYDirectorio() {
       const snapUsers = await get(ref(db, 'usuarios'));
       if (snapUsers.exists()) {
-        const users = snapUsers.val();
-        listaAprobadores = Object.values(users).filter(u => 
+        mapaUsuarios = snapUsers.val();
+        listaAprobadores = Object.values(mapaUsuarios).filter(u => 
           parseInt(u.nivel) === 5 && 
           u.telefono && 
           (u.puedeAprobar === true || u.puedeAprobar === undefined)
@@ -178,19 +180,30 @@
           return;
         }
 
-        const data = snap.val();
-        Object.keys(data).forEach(key => {
-          const r = data[key];
+        cacheRequisiciones = snap.val();
+        Object.keys(cacheRequisiciones).forEach(key => {
+          const r = cacheRequisiciones[key];
           const tr = document.createElement('tr');
 
-          // Generar las opciones del selector de WhatsApp
-          let optionsAprobadores = '';
+          // 1. SELECT CON OPCIÓN EN BLANCO INICIAL
+          let optionsAprobadores = `<option value="">-- Seleccionar Persona --</option>`;
+
+          // Si ya está resuelta (Aprobada/Rechazada), agregar al Solicitante como opción para notificarlo
+          if (r.estatus === 'Aprobada' || r.estatus === 'Rechazada') {
+            let telSolicitante = "";
+            if (r.solicitanteUid && mapaUsuarios[r.solicitanteUid] && mapaUsuarios[r.solicitanteUid].telefono) {
+              telSolicitante = mapaUsuarios[r.solicitanteUid].telefono;
+            }
+            if (telSolicitante) {
+              optionsAprobadores += `<option value="${telSolicitante}">${r.solicitanteNombre || 'Solicitante'} (Solicitante)</option>`;
+            }
+          }
+
+          // Agregar a los Aprobadores / Directores Nivel 5
           if (listaAprobadores.length > 0) {
-            optionsAprobadores = listaAprobadores.map(ap => 
-              `<option value="${ap.telefono}">${ap.nombre || 'Aprobador'} (${ap.nombreRol || 'Nivel 5'})</option>`
-            ).join('');
-          } else {
-            optionsAprobadores = `<option value="9211698019">Tony Valladares (Administrador)</option>`;
+            listaAprobadores.forEach(ap => {
+              optionsAprobadores += `<option value="${ap.telefono}">${ap.nombre || 'Aprobador'} (${ap.nombreRol || 'Nivel 5'})</option>`;
+            });
           }
 
           let estatusBadge = `<span class="badge">${r.estatus || 'Pendiente'}</span>`;
@@ -202,7 +215,7 @@
             accionesHTML = `
               <button onclick="window.resolver('${key}', 'Aprobada')" class="btn-approve">✓ Aprobar</button>
               <button onclick="window.resolver('${key}', 'Rechazada')" class="btn-reject">✕ Rechazar</button>
-              <input type="text" id="motivo_${key}" class="input-motivo" placeholder="Motivo de rechazo (opcional)">
+              <input type="text" id="motivo_${key}" class="input-motivo" placeholder="Motivo de rechazo (obligatorio si rechaza)">
             `;
           } else {
             accionesHTML = `${estatusBadge} <br><small>${r.motivoRechazo ? 'Nota: ' + r.motivoRechazo : ''}</small>`;
@@ -217,7 +230,7 @@
               <select id="select_aprobador_${key}" class="select-aprobador">
                 ${optionsAprobadores}
               </select>
-              <button onclick="window.enviarWhatsApp('${key}', '${r.totalGasto || 0}', '${r.empresaProveedor || 'Proveedor'}')" class="btn-ws">📲 Enviar WS</button>
+              <button onclick="window.enviarWhatsApp('${key}')" class="btn-ws">📲 Enviar WS</button>
             </td>
             <td>${accionesHTML}</td>
           `;
@@ -226,19 +239,76 @@
       });
     }
 
-    window.enviarWhatsApp = (key, totalGasto, proveedor) => {
+    // ENVÍO DE WHATSAPP NATIVO Y MENSAJES COHERENTES
+    window.enviarWhatsApp = (key) => {
       const selectElem = document.getElementById(`select_aprobador_${key}`);
-      const telefonoDestino = selectElem ? selectElem.value : "9211698019";
-      
-      const msjWS = encodeURIComponent(`Hola, se ha generado la Requisición #${key.substr(-5)} por $${parseFloat(totalGasto).toFixed(2)} para ${proveedor}. Por favor ingresa a autorizar.`);
-      const urlWS = `https://wa.me/52${telefonoDestino}?text=${msjWS}`;
-      
-      window.open(urlWS, '_blank');
+      const telefonoDestino = selectElem ? selectElem.value.trim() : "";
+
+      if (!telefonoDestino) {
+        alert("⚠️ Por favor, selecciona primero a la persona en la lista para enviar el WhatsApp.");
+        if (selectElem) selectElem.focus();
+        return;
+      }
+
+      const r = cacheRequisiciones[key];
+      if (!r) return;
+
+      const folio = key.substr(-5);
+      const totalFormateado = (r.totalGasto || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 });
+      const proveedor = r.empresaProveedor || "Proveedor no especificado";
+      const solicitante = r.solicitanteNombre || "Personal";
+      const resolutor = r.aprobadorNombre || currentUserData.nombre || "Dirección";
+      const estatus = r.estatus || "Pendiente";
+
+      let textoMensaje = "";
+
+      if (estatus === "Pendiente") {
+        textoMensaje = `*EMPLOYMENT PORTAL | REQUISICIÓN PENDIENTE*\n\n` +
+          `Hola. Se requiere tu revisión y autorización para la *Requisición #${folio}*.\n` +
+          `• *Solicitante:* ${solicitante}\n` +
+          `• *Proveedor:* ${proveedor}\n` +
+          `• *Monto:* $${totalFormateado} MXN\n` +
+          `• *Destino:* ${r.vacanteCliente || 'General'}\n\n` +
+          `Por favor, ingresa al portal de Employment para su evaluación.`;
+      } else if (estatus === "Aprobada") {
+        textoMensaje = `*EMPLOYMENT PORTAL | REQUISICIÓN APROBADA* ✅\n\n` +
+          `Hola. Se notifica que la *Requisición #${folio}* por *$${totalFormateado} MXN* (${proveedor}) ha sido *APROBADA* por *${resolutor}*.\n\n` +
+          `Ya puedes ingresar al sistema para generar el acuse oficial y darle el seguimiento y tratamiento de compra adecuado.`;
+      } else if (estatus === "Rechazada") {
+        const motivo = r.motivoRechazo ? `\n• *Motivo de rechazo:* ${r.motivoRechazo}` : "";
+        textoMensaje = `*EMPLOYMENT PORTAL | REQUISICIÓN RECHAZADA* ❌\n\n` +
+          `Hola. Se informa que la *Requisición #${folio}* por *$${totalFormateado} MXN* (${proveedor}) fue *RECHAZADA* por *${resolutor}*.${motivo}\n\n` +
+          `Por favor, ingresa al portal de Employment para revisar las observaciones y solventar la solicitud.`;
+      }
+
+      const textoCodificado = encodeURIComponent(textoMensaje);
+
+      // LLAMADO NATIVO DIRECTO A LA APLICACIÓN DE WHATSAPP
+      const enlaceNativo = `whatsapp://send?phone=52${telefonoDestino}&text=${textoCodificado}`;
+
+      // Enlace de respaldo por si el navegador o entorno no tiene WhatsApp nativo configurado
+      const enlaceWeb = `https://wa.me/52${telefonoDestino}?text=${textoCodificado}`;
+
+      // Disparo inmediato hacia el protocolo nativo de la app
+      window.location.href = enlaceNativo;
+
+      // Respaldo de seguridad diferido si la app nativa no responde
+      setTimeout(() => {
+        if (!document.hidden) {
+          window.open(enlaceWeb, '_blank');
+        }
+      }, 1500);
     };
 
     window.resolver = async (key, nuevoEstatus) => {
       const inpMotivo = document.getElementById(`motivo_${key}`);
       const motivoText = inpMotivo ? inpMotivo.value.trim() : "";
+
+      if (nuevoEstatus === 'Rechazada' && !motivoText) {
+        alert("⚠️ Por favor escribe el motivo del rechazo en el campo de texto antes de continuar.");
+        if (inpMotivo) inpMotivo.focus();
+        return;
+      }
 
       const updateData = {
         estatus: nuevoEstatus,
@@ -254,7 +324,7 @@
       await update(ref(db, `requisiciones/${key}`), updateData);
       await registrarTraza(`REQUISICION_${nuevoEstatus.toUpperCase()}`, `Solicitud #${key.substr(-5)} ${nuevoEstatus.toLowerCase()}${motivoText ? ' Motivo: ' + motivoText : ''}`);
       
-      alert(`Requisición ${nuevoEstatus.toLowerCase()} correctamente.`);
+      alert(`✅ Requisición #${key.substr(-5)} marcada como ${nuevoEstatus}.\nAhora puedes seleccionar al destinatario en la lista y presionar "📲 Enviar WS" para notificarle de inmediato.`);
     };
 
     document.getElementById("btnGlobalLogout").addEventListener("click", () => signOut(auth).then(() => window.location.href = "index.html"));
