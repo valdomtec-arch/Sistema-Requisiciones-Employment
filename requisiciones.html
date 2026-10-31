@@ -14,6 +14,10 @@
       --blanco: #FFFFFF; 
       --gris-fondo: #F4F6F9; 
       --gris-borde: #D1D5DB; 
+      --verde: #10B981;
+      --verde-hover: #059669;
+      --rojo: #EF4444;
+      --rojo-hover: #DC2626;
       --sombra-premium: 0 10px 25px -5px rgba(0, 31, 63, 0.08), 0 8px 10px -6px rgba(0, 31, 63, 0.05);
     }
     body { font-family: 'Roboto', sans-serif; margin: 0; background: var(--gris-fondo); color: var(--azul-marino); }
@@ -41,7 +45,18 @@
     .btn-ws { background: #25D366; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; }
     .btn-ws:hover { background: #1ebe5d; }
 
-    /* SELECTOR DE MODALIDAD ERGONÓMICO */
+    /* BOTONES DE ACCIÓN COMPACTOS EN TABLA */
+    .btn-action { padding: 5px 9px; font-size: 0.75rem; border-radius: 5px; font-weight: 600; margin: 2px; display: inline-flex; align-items: center; gap: 4px; }
+    .btn-action-edit { background: #2563EB; color: #fff; }
+    .btn-action-edit:hover { background: #1D4ED8; }
+    .btn-action-del { background: var(--rojo); color: #fff; }
+    .btn-action-del:hover { background: var(--rojo-hover); }
+    .btn-action-contable { background: #059669; color: #fff; }
+    .btn-action-contable:hover { background: #047857; }
+    .btn-action-acuse { background: var(--azul-marino); color: var(--amarillo); }
+    .btn-action-acuse:hover { background: var(--azul-hover); }
+
+    /* SELECTOR DE MODALIDAD */
     .tabs-mode-container { display: flex; background: #E2E8F0; padding: 4px; border-radius: 10px; margin-bottom: 20px; gap: 4px; }
     .tab-mode-btn { flex: 1; padding: 12px; font-family: 'Montserrat', sans-serif; font-size: 0.95rem; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; background: transparent; color: #4B5563; transition: all 0.25s ease; text-align: center; }
     .tab-mode-btn.active { background: var(--azul-marino); color: var(--amarillo); box-shadow: 0 4px 10px rgba(0, 31, 63, 0.2); }
@@ -52,21 +67,27 @@
 
     .table { width: 100%; border-collapse: collapse; margin-top: 12px; background: var(--blanco); border-radius: 8px; overflow: hidden; border: 1px solid var(--gris-borde); }
     .table th { background: var(--azul-marino); color: var(--amarillo); padding: 11px; text-align: left; font-size: 0.85rem; font-family: 'Montserrat', sans-serif; }
-    .table td { padding: 11px; border-bottom: 1px solid #F3F4F6; font-size: 0.9rem; }
+    .table td { padding: 11px; border-bottom: 1px solid #F3F4F6; font-size: 0.88rem; vertical-align: middle; }
     
-    .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.8rem; background: var(--amarillo); color: var(--azul-marino); }
-    .badge-success { background: #28a745; color: #fff; }
-    .badge-danger { background: #dc3545; color: #fff; }
-    .badge-express { background: #F59E0B; color: #FFF; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; margin-left: 4px; font-weight: bold; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.78rem; background: var(--amarillo); color: var(--azul-marino); }
+    .badge-success { background: #10B981; color: #fff; }
+    .badge-danger { background: #EF4444; color: #fff; }
+    .badge-express { background: #F59E0B; color: #FFF; font-size: 0.72rem; padding: 2px 7px; border-radius: 4px; margin-left: 4px; font-weight: bold; }
 
     .grid-2 { display: flex; gap: 14px; flex-wrap: wrap; }
     .grid-2 > div { flex: 1; min-width: 240px; }
     .grid-3 { display: flex; gap: 14px; flex-wrap: wrap; }
     .grid-3 > div { flex: 1; min-width: 160px; }
 
-    /* CARD POST-REGISTRO CON ENVÍO NATIVO DE WHATSAPP */
+    /* CARD POST-REGISTRO WHATSAPP */
     .alerta-post-creacion { display: none; background: #ECFDF5; border: 2px solid #10B981; border-radius: 10px; padding: 18px; margin-top: 20px; animation: fadeIn 0.3s ease-in-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* MODAL DE EDICIÓN FLOTANTE */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 31, 63, 0.65); z-index: 9999; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box; }
+    .modal-content { background: #fff; width: 100%; max-width: 750px; max-height: 90vh; overflow-y: auto; border-radius: 12px; padding: 25px; box-shadow: 0 20px 30px rgba(0,0,0,0.3); border: 2px solid var(--azul-marino); position: relative; }
+    .modal-close { position: absolute; top: 15px; right: 20px; font-size: 1.6rem; cursor: pointer; color: #64748B; font-weight: bold; }
+    .modal-close:hover { color: var(--rojo); }
 
     /* ESTILOS DE IMPRESIÓN DE ACUSE */
     @page { size: letter portrait; margin: 15mm; }
@@ -76,7 +97,7 @@
       #seccionAcuse { position: absolute; left: 0; top: 0; width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; padding: 0 !important; margin: 0 !important; font-size: 10pt; }
       #seccionAcuse table { width: 100% !important; table-layout: fixed !important; word-wrap: break-word !important; }
       #seccionAcuse p, #seccionAcuse div, #seccionAcuse td, #seccionAcuse th { overflow-wrap: break-word !important; word-wrap: break-word !important; white-space: normal !important; }
-      .nav-bar, .card, h2, .ai-box, .tabs-mode-container, .alerta-post-creacion { display: none !important; }
+      .nav-bar, .card, h2, .ai-box, .tabs-mode-container, .alerta-post-creacion, .modal-overlay { display: none !important; }
     }
   </style>
 </head>
@@ -275,7 +296,10 @@
 
     <!-- HISTORIAL GENERAL DE REQUISICIONES -->
     <div class="card">
-      <h3>Historial de Solicitudes Registradas</h3>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <h3 style="margin:0;">Historial de Solicitudes Registradas</h3>
+        <span style="font-size:0.82rem; color:#6B7280;">* Las requisiciones aprobadas pueden depurarse una vez registradas en contabilidad.</span>
+      </div>
       <table class="table">
         <thead>
           <tr>
@@ -284,13 +308,101 @@
             <th>Proveedor / Concepto</th>
             <th>Total Solicitado</th>
             <th>Estatus</th>
-            <th>Acciones</th>
+            <th style="min-width: 170px;">Acciones</th>
           </tr>
         </thead>
         <tbody id="tablaReqBody">
           <tr><td colspan="6" style="text-align:center;">Cargando requisiciones...</td></tr>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- MODAL DE EDICIÓN FLOTANTE -->
+  <div id="modalEdicion" class="modal-overlay">
+    <div class="modal-content">
+      <span class="modal-close" onclick="window.cerrarModalEdicion()">&times;</span>
+      <h3 style="margin-bottom:6px;">✏️ Editar Requisición (<span id="modalEditFolio">#00000</span>)</h3>
+      <p style="font-size:0.85rem; color:#64748B; margin-top:0; margin-bottom:15px;">Modifica los campos necesarios y confirma la actualización en tiempo real.</p>
+      
+      <form id="formEdicionRequisicion">
+        <input type="hidden" id="editKey" />
+        <input type="hidden" id="editTipoRequisicion" />
+
+        <div class="grid-2">
+          <div>
+            <label>Departamento</label>
+            <select id="editDepartamento" required></select>
+          </div>
+          <div>
+            <label>Cliente / Vacante</label>
+            <select id="editVacante" required></select>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <label>Proveedor / Comercio</label>
+            <input type="text" id="editEmpresaProveedor" required />
+          </div>
+          <div>
+            <label>Concepto / Categoría</label>
+            <select id="editCategoria" required></select>
+          </div>
+        </div>
+
+        <div class="grid-3" id="editGrupoGeneral">
+          <div>
+            <label>Cantidad</label>
+            <input type="number" id="editCantidad" min="1" required />
+          </div>
+          <div>
+            <label>Unidad de Medida</label>
+            <input type="text" id="editUnidad" required />
+          </div>
+          <div>
+            <label>Marca / Modelo</label>
+            <input type="text" id="editMarcaModelo" />
+          </div>
+        </div>
+
+        <div class="grid-3" id="editGrupoPrecios">
+          <div>
+            <label>P. Unitario ($)</label>
+            <input type="number" id="editPrecioUnitario" min="0" step="0.01" required />
+          </div>
+          <div>
+            <label>Subtotal ($)</label>
+            <input type="number" id="editSubtotal" min="0" step="0.01" required />
+          </div>
+          <div>
+            <label>IVA ($)</label>
+            <input type="number" id="editIva" min="0" step="0.01" />
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <label>Otros Impuestos ($)</label>
+            <input type="number" id="editOtrosImpuestos" min="0" step="0.01" />
+          </div>
+          <div>
+            <label>Total Requisición ($ MXN)</label>
+            <input type="number" id="editTotalGasto" min="0" step="0.01" style="font-weight:bold; background:#FFFDE6; border:2px solid var(--naranja);" required />
+          </div>
+        </div>
+
+        <label>Datos Bancarios</label>
+        <input type="text" id="editDatosBancarios" />
+
+        <label>Justificación / Observaciones</label>
+        <textarea id="editNotas" rows="3" required></textarea>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px;">
+          <button type="button" class="btn-secondary" onclick="window.cerrarModalEdicion()">Cancelar</button>
+          <button type="submit" style="background:#2563EB;">💾 Guardar Cambios</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -306,7 +418,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getDatabase, ref, push, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getDatabase, ref, push, set, onValue, get, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCGmcrxJsMy5bVS9SgTGLMgrLui_tA6luY",
@@ -327,6 +439,7 @@
     let base64Cotizacion = "";
     let mimeTypeCotizacion = "";
     let listaAprobadores = [];
+    let requisicionesCache = {};
 
     // CONTROL DEL CONMUTADOR DE VISTAS
     window.cambiarModo = (modo) => {
@@ -443,10 +556,16 @@
     function cargarCatalogos() {
       onValue(ref(db, 'catalogos/departamentos'), snap => {
         const sel = document.getElementById("reqDepartamento");
+        const selEdit = document.getElementById("editDepartamento");
         sel.innerHTML = '<option value="">Selecciona Departamento...</option>';
+        selEdit.innerHTML = '<option value="">Selecciona Departamento...</option>';
         if (snap.exists()) {
           Object.values(snap.val()).forEach(d => {
-            if (d.activo !== false) sel.innerHTML += `<option value="${d.nombre}">${d.nombre}</option>`;
+            if (d.activo !== false) {
+              const opt = `<option value="${d.nombre}">${d.nombre}</option>`;
+              sel.innerHTML += opt;
+              selEdit.innerHTML += opt;
+            }
           });
         }
       });
@@ -454,24 +573,33 @@
       onValue(ref(db, 'catalogos/vacantes'), snap => {
         const selGen = document.getElementById("reqVacante");
         const selExp = document.getElementById("expVacante");
+        const selEdit = document.getElementById("editVacante");
         selGen.innerHTML = '<option value="">Selecciona Cliente / Vacante...</option>';
         selExp.innerHTML = '<option value="">Selecciona Cliente / Vacante...</option>';
+        selEdit.innerHTML = '<option value="">Selecciona Cliente / Vacante...</option>';
         if (snap.exists()) {
           Object.values(snap.val()).forEach(v => {
             const clienteVacante = v.cliente ? `${v.cliente} (${v.puesto || 'General'})` : (v.nombre || 'Vacante General');
             const opt = `<option value="${clienteVacante}">${clienteVacante}</option>`;
             selGen.innerHTML += opt;
             selExp.innerHTML += opt;
+            selEdit.innerHTML += opt;
           });
         }
       });
 
       onValue(ref(db, 'catalogos/categorias_gasto'), snap => {
         const sel = document.getElementById("reqCategoria");
+        const selEdit = document.getElementById("editCategoria");
         sel.innerHTML = '<option value="">Selecciona Concepto...</option>';
+        selEdit.innerHTML = '<option value="">Selecciona Concepto...</option>';
         if (snap.exists()) {
           Object.values(snap.val()).forEach(c => {
-            if (c.activa !== false) sel.innerHTML += `<option value="${c.nombre}">${c.nombre}</option>`;
+            if (c.activa !== false) {
+              const opt = `<option value="${c.nombre}">${c.nombre}</option>`;
+              sel.innerHTML += opt;
+              selEdit.innerHTML += opt;
+            }
           });
         }
       });
@@ -533,14 +661,24 @@
           return;
         }
 
-        const msj = `*EMPLOYMENT | REQUISICIÓN EXPRÉS (COMPRA URGENTE)* ⚡\n\n` +
-          `Hola. Se requiere tu autorización inmediata para la *Requisición Exprés #${key.substr(-5)}*.\n` +
-          `• *Monto Solicitado:* $${total.toLocaleString('es-MX', {minimumFractionDigits:2})} MXN\n` +
-          `• *Rubro / Concepto:* ${concepto}\n` +
-          `• *Comercio / Proveedor:* ${proveedor}\n` +
-          `• *Destino / Cliente:* ${vacante}\n` +
-          `• *Motivo de Urgencia:* ${justificacion}\n` +
-          `• *Solicitante:* ${currentUserData.nombre} (${currentUserData.nombreRol})\n\n` +
+        const msj = `*EMPLOYMENT | REQUISICIÓN EXPRÉS (COMPRA URGENTE)* ⚡
+
+` +
+          `Hola. Se requiere tu autorización inmediata para la *Requisición Exprés #${key.substr(-5)}*.
+` +
+          `• *Monto Solicitado:* $${total.toLocaleString('es-MX', {minimumFractionDigits:2})} MXN
+` +
+          `• *Rubro / Concepto:* ${concepto}
+` +
+          `• *Comercio / Proveedor:* ${proveedor}
+` +
+          `• *Destino / Cliente:* ${vacante}
+` +
+          `• *Motivo de Urgencia:* ${justificacion}
+` +
+          `• *Solicitante:* ${currentUserData.nombre} (${currentUserData.nombreRol})
+
+` +
           `Esta compra urgente se encuentra en campo en espera de liberación. Por favor ingresa al sistema para autorizar.`;
 
         window.lanzarWhatsAppNativo(tel, msj);
@@ -675,24 +813,209 @@
       }
     });
 
-    // HISTORIAL Y GENERACIÓN DE ACUSE
+    // DINÁMICA DE RECALCULO DENTRO DEL MODAL DE EDICIÓN
+    const editCant = document.getElementById("editCantidad");
+    const editPrecio = document.getElementById("editPrecioUnitario");
+    const editSub = document.getElementById("editSubtotal");
+    const editIva = document.getElementById("editIva");
+    const editOtros = document.getElementById("editOtrosImpuestos");
+    const editTotal = document.getElementById("editTotalGasto");
+
+    function recalcularEdicion() {
+      const tipo = document.getElementById("editTipoRequisicion").value;
+      if (tipo === "EXPRESS") return; // En express el total se edita directamente
+      const c = parseFloat(editCant.value) || 0;
+      const pu = parseFloat(editPrecio.value) || 0;
+      const sub = c * pu;
+      editSub.value = sub.toFixed(2);
+      const iva = parseFloat(editIva.value) || 0;
+      const otros = parseFloat(editOtros.value) || 0;
+      editTotal.value = (sub + iva + otros).toFixed(2);
+    }
+
+    editCant.addEventListener("input", recalcularEdicion);
+    editPrecio.addEventListener("input", recalcularEdicion);
+    editIva.addEventListener("input", recalcularEdicion);
+    editOtros.addEventListener("input", recalcularEdicion);
+
+    // APERTURA Y CIERRE DE MODAL DE EDICIÓN
+    window.abrirModalEdicion = (reqKey) => {
+      const r = requisicionesCache[reqKey];
+      if (!r) return;
+
+      document.getElementById("editKey").value = reqKey;
+      document.getElementById("modalEditFolio").textContent = `#${reqKey.substr(-5)}`;
+      document.getElementById("editTipoRequisicion").value = r.tipoRequisicion || "GENERAL";
+
+      // Llenar campos
+      document.getElementById("editDepartamento").value = r.departamento || "";
+      document.getElementById("editVacante").value = r.vacanteCliente || "";
+      document.getElementById("editEmpresaProveedor").value = r.empresaProveedor || "";
+      document.getElementById("editCategoria").value = r.conceptoCategoria || "";
+      document.getElementById("editCantidad").value = r.cantidad || 1;
+      document.getElementById("editUnidad").value = r.unidad || "Pieza";
+      document.getElementById("editMarcaModelo").value = r.marcaModelo || "";
+      document.getElementById("editPrecioUnitario").value = r.precioUnitario || 0;
+      document.getElementById("editSubtotal").value = r.subtotal || 0;
+      document.getElementById("editIva").value = r.iva || 0;
+      document.getElementById("editOtrosImpuestos").value = r.otrosImpuestos || 0;
+      document.getElementById("editTotalGasto").value = r.totalGasto || 0;
+      document.getElementById("editDatosBancarios").value = r.datosBancarios || "";
+      document.getElementById("editNotas").value = r.notasGenerales || "";
+
+      // Adaptar interfaz si es Exprés
+      const esExp = (r.tipoRequisicion === 'EXPRESS');
+      document.getElementById("editGrupoGeneral").style.display = esExp ? "none" : "flex";
+      document.getElementById("editGrupoPrecios").style.display = esExp ? "none" : "flex";
+
+      document.getElementById("modalEdicion").style.display = "flex";
+    };
+
+    window.cerrarModalEdicion = () => {
+      document.getElementById("modalEdicion").style.display = "none";
+    };
+
+    // PROCESAR GUARDADO DE EDICIÓN
+    document.getElementById("formEdicionRequisicion").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const reqKey = document.getElementById("editKey").value;
+      const tipo = document.getElementById("editTipoRequisicion").value;
+      const total = parseFloat(document.getElementById("editTotalGasto").value) || 0;
+
+      const updates = {
+        departamento: document.getElementById("editDepartamento").value,
+        vacanteCliente: document.getElementById("editVacante").value,
+        empresaProveedor: document.getElementById("editEmpresaProveedor").value.trim(),
+        conceptoCategoria: document.getElementById("editCategoria").value,
+        totalGasto: total,
+        datosBancarios: document.getElementById("editDatosBancarios").value.trim(),
+        notasGenerales: document.getElementById("editNotas").value.trim(),
+        updatedAt: Date.now(),
+        updatedBy: currentUserData.nombre || currentUserData.email
+      };
+
+      if (tipo === "EXPRESS") {
+        updates.precioUnitario = total;
+        updates.subtotal = total;
+      } else {
+        updates.cantidad = parseInt(document.getElementById("editCantidad").value) || 1;
+        updates.unidad = document.getElementById("editUnidad").value.trim();
+        updates.marcaModelo = document.getElementById("editMarcaModelo").value.trim();
+        updates.precioUnitario = parseFloat(document.getElementById("editPrecioUnitario").value) || 0;
+        updates.subtotal = parseFloat(document.getElementById("editSubtotal").value) || 0;
+        updates.iva = parseFloat(document.getElementById("editIva").value) || 0;
+        updates.otrosImpuestos = parseFloat(document.getElementById("editOtrosImpuestos").value) || 0;
+      }
+
+      try {
+        await update(ref(db, `requisiciones/${reqKey}`), updates);
+        await registrarTraza("EDICION_REQUISICION", `Modificación en Requisición #${reqKey.substr(-5)} por $${total.toFixed(2)}`);
+        alert("✅ Requisición modificada exitosamente.");
+        window.cerrarModalEdicion();
+      } catch (err) {
+        console.error(err);
+        alert("❌ Error al guardar las modificaciones.");
+      }
+    });
+
+    // ELIMINACIÓN DE REQUISICIÓN PENDIENTE O RECHAZADA
+    window.eliminarRequisicion = async (reqKey) => {
+      const r = requisicionesCache[reqKey];
+      if (!r) return;
+
+      const confirmacion = confirm(`¿Estás seguro de eliminar permanentemente la requisición #${reqKey.substr(-5)} (${r.conceptoCategoria})?
+Esta acción no se puede deshacer.`);
+      if (!confirmacion) return;
+
+      try {
+        await remove(ref(db, `requisiciones/${reqKey}`));
+        await registrarTraza("ELIMINACION_REQUISICION", `Eliminada Requisición #${reqKey.substr(-5)} (${r.estatus}) de $${(r.totalGasto || 0).toFixed(2)} [Proveedor: ${r.empresaProveedor}]`);
+        alert("🗑️ Requisición eliminada de la base de datos.");
+      } catch (err) {
+        console.error(err);
+        alert("❌ Error al intentar eliminar la requisición.");
+      }
+    };
+
+    // DEPURAR / CERRAR REQUISICIÓN CONTABILIZADA
+    window.marcarContabilizadoYDepurar = async (reqKey) => {
+      const r = requisicionesCache[reqKey];
+      if (!r) return;
+
+      const confirmacion = confirm(
+        `📌 ¿Confirmas que el gasto #${reqKey.substr(-5)} por $${(r.totalGasto || 0).toLocaleString('es-MX', {minimumFractionDigits:2})} ya fue PAGADO e ingresado al SISTEMA CONTABLE?
+
+` +
+        `Al confirmar, se registrará el cierre en auditoría y se retirará de esta vista para mantener la base de datos despejada.`
+      );
+      if (!confirmacion) return;
+
+      try {
+        // Dejar respaldo completo en trazas para auditoría antes de borrar el nodo activo
+        await registrarTraza("CIERRE_CONTABILIZADO_DEPURACION", `Gasto #${reqKey.substr(-5)} ($${(r.totalGasto||0).toFixed(2)} / ${r.empresaProveedor}) confirmado en contabilidad y depurado del gestor.`);
+        await remove(ref(db, `requisiciones/${reqKey}`));
+        alert(`✅ Requisición #${reqKey.substr(-5)} cerrada contablemente y depurada con éxito.`);
+      } catch (err) {
+        console.error(err);
+        alert("❌ Error al depurar la requisición.");
+      }
+    };
+
+    // HISTORIAL Y ACCIONES DINÁMICAS
     function cargarRequisiciones() {
       onValue(ref(db, 'requisiciones'), snap => {
         const tbody = document.getElementById("tablaReqBody");
         tbody.innerHTML = '';
+        requisicionesCache = {};
+
         if (!snap.exists()) {
-          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No hay solicitudes registradas.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No hay solicitudes registradas en este momento.</td></tr>';
           return;
         }
 
-        const dataMap = snap.val();
-        Object.keys(dataMap).forEach(key => {
-          const r = dataMap[key];
+        requisicionesCache = snap.val();
+        const userNivel = parseInt(currentUserData.nivel) || 2;
+        const userUid = currentUserData.uid;
+
+        // Orden descendente por fecha de creación
+        const keys = Object.keys(requisicionesCache).sort((a,b) => (requisicionesCache[b].createdAt || 0) - (requisicionesCache[a].createdAt || 0));
+
+        keys.forEach(key => {
+          const r = requisicionesCache[key];
           let badgeClass = 'badge';
           if (r.estatus === 'Aprobada') badgeClass = 'badge badge-success';
           if (r.estatus === 'Rechazada') badgeClass = 'badge badge-danger';
 
           const esExpress = r.tipoRequisicion === 'EXPRESS' ? '<span class="badge-express">⚡ EXPRÉS</span>' : '';
+
+          // Lógica de permisos de botones
+          const esPropia = (r.solicitanteUid === userUid);
+          const puedeModificar = (userNivel >= 5 || esPropia);
+
+          let botonesAccion = `
+            <button type="button" class="btn-action btn-action-acuse" onclick="window.imprimirAcuse('${key}')" title="Imprimir Acuse">🖨️ Acuse</button>
+          `;
+
+          if (r.estatus === 'Pendiente') {
+            if (puedeModificar) {
+              botonesAccion += `
+                <button type="button" class="btn-action btn-action-edit" onclick="window.abrirModalEdicion('${key}')" title="Modificar datos">✏️ Editar</button>
+                <button type="button" class="btn-action btn-action-del" onclick="window.eliminarRequisicion('${key}')" title="Eliminar requisición">🗑️ Borrar</button>
+              `;
+            }
+          } else if (r.estatus === 'Rechazada') {
+            if (puedeModificar) {
+              botonesAccion += `
+                <button type="button" class="btn-action btn-action-del" onclick="window.eliminarRequisicion('${key}')" title="Descartar del historial">🗑️ Descartar</button>
+              `;
+            }
+          } else if (r.estatus === 'Aprobada') {
+            if (userNivel >= 4) {
+              botonesAccion += `
+                <button type="button" class="btn-action btn-action-contable" onclick="window.marcarContabilizadoYDepurar('${key}')" title="Marcar como ingresado en contabilidad y limpiar">📑 Contabilizado</button>
+              `;
+            }
+          }
 
           const tr = document.createElement('tr');
           tr.innerHTML = `
@@ -701,15 +1024,14 @@
             <td><strong>${r.empresaProveedor || 'Proveedor'}</strong><br><small>${r.conceptoCategoria || ''}</small></td>
             <td><strong>$${(r.totalGasto || 0).toLocaleString('es-MX', {minimumFractionDigits:2})}</strong></td>
             <td><span class="${badgeClass}">${r.estatus || 'Pendiente'}</span></td>
-            <td>
-              <button type="button" style="padding:5px 9px; font-size:0.75rem;" onclick="window.imprimirAcuse('${key}')">🖨️ Acuse</button>
-            </td>
+            <td>${botonesAccion}</td>
           `;
           tbody.appendChild(tr);
         });
 
+        // GENERACIÓN DE ACUSE PARA IMPRESIÓN
         window.imprimirAcuse = (reqKey) => {
-          const r = dataMap[reqKey];
+          const r = requisicionesCache[reqKey];
           if (!r) return;
 
           let nombreAcuse = r.solicitanteNombre || "Usuario";
@@ -748,8 +1070,8 @@
               </thead>
               <tbody>
                 <tr>
-                  <td style="text-align:center;">${r.cantidad}</td>
-                  <td>${r.unidad}</td>
+                  <td style="text-align:center;">${r.cantidad || 1}</td>
+                  <td>${r.unidad || 'Lote'}</td>
                   <td>${r.marcaModelo || 'N/A'}</td>
                   <td style="text-align:right;">$${(r.precioUnitario || 0).toFixed(2)}</td>
                   <td style="text-align:right;">$${(r.subtotal || 0).toFixed(2)}</td>
